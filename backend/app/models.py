@@ -1,5 +1,3 @@
-from typing import Literal
-
 from pydantic import BaseModel, Field, field_validator
 
 from .config import get_settings
@@ -20,9 +18,9 @@ class ReflectionRequest(BaseModel):
 
 
 class Source(BaseModel):
-    source_id: str
     reference: str
     quotation: str
+    explanation: str
     translation: str = "World English Bible (WEB)"
     context_note: str | None = None
     relevance: str
@@ -33,41 +31,7 @@ class Source(BaseModel):
 class ReflectionResponse(BaseModel):
     summary: str
     suggested_actions: list[str] = Field(min_length=1, max_length=3)
-    sources: list[Source] = Field(min_length=1, max_length=5)
-    safety_message: str | None = None
-    limitations: str
-    generated_with: str
-
-
-class ConversationTurn(BaseModel):
-    role: Literal["user", "assistant"]
-    content: str = Field(min_length=1, max_length=3000)
-
-    @field_validator("content")
-    @classmethod
-    def clean_content(cls, value: str) -> str:
-        return " ".join(value.split())
-
-
-class ChatRequest(BaseModel):
-    situation: str = Field(min_length=20)
-    question: str = Field(min_length=2, max_length=1000)
-    history: list[ConversationTurn] = Field(default_factory=list, max_length=12)
-    source_ids: list[str] = Field(default_factory=list, max_length=8)
-    language: Language = "pl"
-
-    @field_validator("situation", "question")
-    @classmethod
-    def clean_text(cls, value: str) -> str:
-        cleaned = " ".join(value.split())
-        if len(cleaned) > get_settings().max_situation_length:
-            raise ValueError("Text is too long")
-        return cleaned
-
-
-class ChatResponse(BaseModel):
-    answer: str
-    sources: list[Source] = Field(min_length=1, max_length=4)
+    sources: list[Source] = Field(min_length=1, max_length=3)
     safety_message: str | None = None
     limitations: str
     generated_with: str

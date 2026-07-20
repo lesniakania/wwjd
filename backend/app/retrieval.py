@@ -204,9 +204,6 @@ class Retriever:
         rows = json.loads(verses_path.read_text(encoding="utf-8"))
         self.verses = [Verse(**row) for row in rows]
         self.passages = [Passage(v.book, v.chapter, v.verse, v.verse, v.text) for v in self.verses]
-        self._passage_by_id = {
-            self.source_id(passage): passage for passage in self.passages
-        }
         self.encoder = encoder
         self._tokens = [Counter(tokenize(verse.text)) for verse in self.verses]
         self._document_frequency: Counter[str] = Counter()
@@ -335,7 +332,7 @@ class Retriever:
             selected.append(
                 SearchResult(
                     passage,
-                    self.context_for(passage, radius=2),
+                    self.context_for(passage, radius=5),
                     score,
                     confidence,
                     matched_themes,
@@ -366,23 +363,6 @@ class Retriever:
     @staticmethod
     def source_id(passage: Passage) -> str:
         return f"{passage.book}:{passage.chapter}:{passage.verse_start}-{passage.verse_end}"
-
-    def results_for_source_ids(self, source_ids: list[str]) -> list[SearchResult]:
-        results: list[SearchResult] = []
-        for source_id in source_ids:
-            passage = self._passage_by_id.get(source_id)
-            if passage is None:
-                continue
-            results.append(
-                SearchResult(
-                    passage=passage,
-                    context=self.context_for(passage, radius=2),
-                    score=1.0,
-                    confidence=1.0,
-                    themes=(),
-                )
-            )
-        return results
 
     @staticmethod
     def _is_anchor(passage: Passage, themes: set[str]) -> bool:

@@ -1,13 +1,13 @@
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import get_settings
-from .generation import ChatModelUnavailable, LIMITATIONS_EN, LIMITATIONS_PL, ReflectionGenerator
+from .generation import LIMITATIONS_EN, LIMITATIONS_PL, ReflectionGenerator
 from .localization import reference, relevance_note, translation_name
-from .models import ChatRequest, ChatResponse, HealthResponse, ReflectionRequest, ReflectionResponse, Source
+from .models import HealthResponse, ReflectionRequest, ReflectionResponse, Source
 from .retrieval import Retriever, SemanticEncoder
 from .safety import check_safety
 
@@ -65,15 +65,21 @@ async def create_reflection(payload: ReflectionRequest, request: Request) -> Ref
     retriever: Retriever = request.app.state.retrievers[payload.language]
     generator: ReflectionGenerator = request.app.state.generator
     safety = check_safety(payload.situation, payload.language)
-    results = retriever.search(payload.situation, limit=4)
+    results = retriever.search(payload.situation, limit=6)
     if not results:
         fallback = (
             "mądrość miłość prawda współczucie" if payload.language == "pl"
             else "wisdom love truth compassion"
         )
-        results = retriever.search(fallback, limit=4)
+        results = retriever.search(fallback, limit=3)
     generated = await generator.generate(payload.situation, results, payload.language)
-    sources = _sources_from_results(results, payload.language)
+    result_by_id = {Retriever.source_id(result.passage): result for result in results}
+    selected_results = [
+        result_by_id[source_id]
+        for source_id in generated.source_ids
+        if source_id in result_by_id
+    ]
+    sources = _sources_from_results(selected_results, payload.language, generated.explanations)
     return ReflectionResponse(
         summary=generated.summary,
         suggested_actions=generated.actions,
@@ -84,10 +90,9 @@ async def create_reflection(payload: ReflectionRequest, request: Request) -> Ref
     )
 
 
-def _sources_from_results(results, language):
+def _sources_from_results(results, language, explanations):
     return [
         Source(
-            source_id=Retriever.source_id(result.passage),
             reference=reference(
                 result.passage.book,
                 result.passage.chapter,
@@ -96,6 +101,7 @@ def _sources_from_results(results, language):
             language,
             ),
             quotation=result.passage.text,
+            explanation=explanations[Retriever.source_id(result.passage)],
             translation=translation_name(language),
             context_note=(
                 ("Fragment jednej z czterech Ewangelii" if language == "pl" else "From one of the four Gospels")
@@ -114,50 +120,3 @@ def _sources_from_results(results, language):
         )
         for result in results
     ]
-
-
-@app.post("/api/chat", response_model=ChatResponse)
-async def continue_conversation(payload: ChatRequest, request: Request) -> ChatResponse:
-    retriever: Retriever = request.app.state.retrievers[payload.language]
-    generator: ReflectionGenerator = request.app.state.generator
-    safety = check_safety(f"{payload.situation} {payload.question}", payload.language)
-    results = retriever.search(f"{payload.situation} {payload.question}", limit=4)
-    current_results = retriever.results_for_source_ids(payload.source_ids)
-    if not results:
-        fallback = "mądrość miłość prawda współczucie" if payload.language == "pl" else "wisdom love truth compassion"
-        results = retriever.search(fallback, limit=4)
-    try:
-        generated = await generator.answer_followup(
-            payload.situation,
-            payload.question,
-            [turn.model_dump() for turn in payload.history],
-            results,
-            current_results,
-            payload.language,
-        )
-    except ChatModelUnavailable as error:
-        detail = (
-            "Rozmowa wymaga skonfigurowanego modelu językowego. Ustaw HF_TOKEN i spróbuj ponownie."
-            if payload.language == "pl"
-            else "Conversation requires a configured language model. Set HF_TOKEN and try again."
-        )
-        raise HTTPException(status_code=503, detail=detail) from error
-    all_results = current_results + [
-        result
-        for result in results
-        if Retriever.source_id(result.passage)
-        not in {Retriever.source_id(current.passage) for current in current_results}
-    ]
-    cited_results = [
-        result
-        for result in all_results
-        if Retriever.source_id(result.passage) in generated.source_ids
-    ]
-    response_results = cited_results or all_results[:4]
-    return ChatResponse(
-        answer=generated.answer,
-        sources=_sources_from_results(response_results[:4], payload.language),
-        safety_message=safety.message,
-        limitations=LIMITATIONS_PL if payload.language == "pl" else LIMITATIONS_EN,
-        generated_with=generated.mode,
-    )

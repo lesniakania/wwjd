@@ -4,8 +4,8 @@ from dataclasses import dataclass
 import httpx
 
 from .config import Settings
-from .localization import Language, reference
-from .retrieval import SearchResult
+from .localization import Language, reference, relevance_note
+from .retrieval import Retriever, SearchResult
 
 
 LIMITATIONS_EN = (
@@ -23,17 +23,8 @@ class GeneratedReflection:
     summary: str
     actions: list[str]
     mode: str
-
-
-@dataclass(frozen=True)
-class GeneratedAnswer:
-    answer: str
-    mode: str
-    source_ids: tuple[str, ...] = ()
-
-
-class ChatModelUnavailable(RuntimeError):
-    """Raised when a genuine generative conversation cannot be provided."""
+    source_ids: tuple[str, ...]
+    explanations: dict[str, str]
 
 
 SYSTEM_PROMPT = """You write a cautious, compassionate Bible-grounded reflection.
@@ -41,18 +32,15 @@ Use only the supplied passages as scriptural evidence. Do not add Bible referenc
 Never claim certainty about what Jesus would do. Distinguish an application from the passage itself.
 Do not advise secrecy, retaliation, or remaining in danger. Professional and emergency help take priority.
 Explain the connection between the situation and the supplied passages; do not merely summarize them.
-Return strict JSON with keys summary (2-4 sentences) and suggested_actions (1-3 short strings)."""
-
-CHAT_SYSTEM_PROMPT = """You continue a conversation that helps a user understand Bible passages.
-Use only the supplied passages as scriptural evidence. Never invent a quotation or Bible reference.
-Directly answer the latest question in 2-5 concise paragraphs. Explain separately what the passage
-says in context and how it may apply; explicitly say when an application goes beyond the text.
-Correct readings that blame an entire group for one person's actions or use a descriptive hostile-nation
-passage as a command about modern ethnic groups. Do not claim certainty about what Jesus would do.
-Do not advise secrecy, retaliation, or remaining in danger. The passages under CURRENTLY DISCUSSED
-are the referent of phrases such as "this passage". CANDIDATE PASSAGES are alternatives retrieved for
-the original situation. Never discuss a Bible reference absent from both supplied groups, even if it
-appeared in earlier conversation. Return JSON with keys answer and source_ids (the IDs actually used)."""
+Select only 1-3 of the supplied candidate passages. Prefer fewer passages when another candidate adds
+little, is only indirectly related, or requires a strained application. For every selected passage, write
+a clear explanation of exactly four substantive sentences in this order: (1) who is speaking or writing and
+to whom, (2) the immediate narrative or argumentative situation, (3) the passage's original main point, and
+(4) why that point is relevant here and the limit of that application. If the supplied context does not
+establish one of those facts, say so briefly rather than inventing it. Explicitly distinguish original meaning from modern
+application. Return strict JSON with keys: summary (2-4 sentences), suggested_actions (1-3 short strings),
+and selected_sources (an array of 1-3 objects). Every selected source object must contain exactly these
+string fields: id, speaker_and_audience, immediate_context, original_meaning, and situation_application."""
 
 
 class ReflectionGenerator:
@@ -67,19 +55,25 @@ class ReflectionGenerator:
         self, situation: str, results: list[SearchResult], language: Language
     ) -> GeneratedReflection:
         if self.settings.hf_token:
-            try:
-                return await self._generate_remote(situation, results, language)
-            except (httpx.HTTPError, KeyError, TypeError, ValueError, json.JSONDecodeError):
-                pass
+            for _ in range(2):
+                try:
+                    return await self._generate_remote(situation, results, language)
+                except (httpx.HTTPError, KeyError, TypeError, ValueError, json.JSONDecodeError):
+                    pass
+            # A configured remote model is an enhancement, not a hard
+            # dependency. Keep the endpoint available when the provider is
+            # down or returns JSON that does not match the requested schema.
+            return self._generate_local(results, language)
         return self._generate_local(results, language)
 
     async def _generate_remote(
         self, situation: str, results: list[SearchResult], language: Language
     ) -> GeneratedReflection:
         passages = "\n".join(
-            f"[{index}] Selected verse: {result.passage.reference}: {result.passage.text}\n"
+            f"[ID {result.passage.book}:{result.passage.chapter}:{result.passage.verse_start}-{result.passage.verse_end}] "
+            f"Selected verse: {result.passage.reference}: {result.passage.text}\n"
             f"Context: {result.context.reference}: {result.context.text}"
-            for index, result in enumerate(results, start=1)
+            for result in results
         )
         language_instruction = "Write in Polish." if language == "pl" else "Write in English."
         user_prompt = (
@@ -91,8 +85,8 @@ class ReflectionGenerator:
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": user_prompt},
             ],
-            "temperature": 0.2,
-            "max_tokens": 500,
+            "temperature": 0.0,
+            "max_tokens": 1200,
             "response_format": {"type": "json_object"},
         }
         headers = {"Authorization": f"Bearer {self.settings.hf_token}"}
@@ -103,92 +97,71 @@ class ReflectionGenerator:
                 json=payload,
             )
             response.raise_for_status()
-        content = response.json()["choices"][0]["message"]["content"]
-        data = json.loads(content)
+        content = str(response.json()["choices"][0]["message"]["content"])
+        data = self._parse_json_content(content)
         summary = str(data["summary"]).strip()
         actions = [str(action).strip() for action in data["suggested_actions"]][:3]
-        if not summary or not actions:
-            raise ValueError("Empty model response")
-        return GeneratedReflection(summary, actions, f"hugging-face:{self.settings.hf_model}")
-
-    async def answer_followup(
-        self,
-        situation: str,
-        question: str,
-        history: list[dict[str, str]],
-        results: list[SearchResult],
-        current_results: list[SearchResult],
-        language: Language,
-    ) -> GeneratedAnswer:
-        if not self.settings.hf_token:
-            raise ChatModelUnavailable("HF_TOKEN is not configured")
-        try:
-            return await self._answer_followup_remote(
-                situation, question, history, results, current_results, language
-            )
-        except (httpx.HTTPError, KeyError, TypeError, ValueError, json.JSONDecodeError) as error:
-            raise ChatModelUnavailable("The conversation model is unavailable") from error
-
-    async def _answer_followup_remote(
-        self,
-        situation: str,
-        question: str,
-        history: list[dict[str, str]],
-        results: list[SearchResult],
-        current_results: list[SearchResult],
-        language: Language,
-    ) -> GeneratedAnswer:
-        def format_passages(passages_to_format: list[SearchResult]) -> str:
-            return "\n".join(
-                f"[ID {result.passage.book}:{result.passage.chapter}:{result.passage.verse_start}-{result.passage.verse_end}] "
-                f"Selected verse: {result.passage.reference}: {result.passage.text}\n"
-                f"Context: {result.context.reference}: {result.context.text}"
-                for result in passages_to_format
-            ) or "(none)"
-        current_passages = format_passages(current_results)
-        candidate_passages = format_passages(results)
-        language_instruction = "Write in Polish." if language == "pl" else "Write in English."
-        messages = [{"role": "system", "content": CHAT_SYSTEM_PROMPT}]
-        messages.extend(history[-8:])
-        messages.append(
-            {
-                "role": "user",
-                "content": (
-                    f"{language_instruction}\nOriginal situation:\n{situation}\n\n"
-                    f"Latest question:\n{question}\n\nCURRENTLY DISCUSSED PASSAGES:\n{current_passages}\n\n"
-                    f"CANDIDATE PASSAGES:\n{candidate_passages}"
-                ),
-            }
-        )
-        payload = {
-            "model": self.settings.hf_model,
-            "messages": messages,
-            "temperature": 0.2,
-            "max_tokens": 650,
-            "response_format": {"type": "json_object"},
+        valid_ids = {
+            Retriever.source_id(result.passage)
+            for result in results
         }
-        headers = {"Authorization": f"Bearer {self.settings.hf_token}"}
-        async with httpx.AsyncClient(timeout=45) as client:
-            response = await client.post(
-                f"{self.settings.hf_base_url.rstrip('/')}/chat/completions",
-                headers=headers,
-                json=payload,
+        selected_sources = data.get("selected_sources", [])
+        source_ids: tuple[str, ...] = ()
+        explanations: dict[str, str] = {}
+        if isinstance(selected_sources, list):
+            pairs = []
+            for item in selected_sources[:3]:
+                if not isinstance(item, dict):
+                    continue
+                source_id = self._canonical_source_id(str(item.get("id", "")), valid_ids)
+                parts = [
+                    str(item.get(field, "")).strip()
+                    for field in (
+                        "speaker_and_audience",
+                        "immediate_context",
+                        "original_meaning",
+                        "situation_application",
+                    )
+                ]
+                explanation = " ".join(part for part in parts if part)
+                # Accept the earlier single-field shape from providers that
+                # continue to imitate it despite the updated schema.
+                if not explanation:
+                    explanation = str(item.get("explanation", "")).strip()
+                pairs.append((source_id, explanation))
+            source_ids = tuple(source_id for source_id, explanation in pairs if source_id in valid_ids and explanation)
+            explanations = {
+                source_id: explanation
+                for source_id, explanation in pairs
+                if source_id in valid_ids and explanation
+            }
+        # Accept the previous shape during rolling deployments and from models
+        # that imitate an earlier response found in their context.
+        if not source_ids:
+            source_ids = tuple(
+                self._canonical_source_id(str(source_id), valid_ids)
+                for source_id in data.get("selected_source_ids", [])[:3]
+                if self._canonical_source_id(str(source_id), valid_ids)
             )
-            response.raise_for_status()
-        content = str(response.json()["choices"][0]["message"]["content"]).strip()
-        data = self._parse_chat_content(content)
-        answer = data["answer"]
-        if not answer:
+            raw_explanations = data.get("source_explanations", {})
+            if isinstance(raw_explanations, dict):
+                explanations = {
+                    source_id: str(raw_explanations.get(source_id, "")).strip()
+                    for source_id in source_ids
+                    if str(raw_explanations.get(source_id, "")).strip()
+                }
+        if not summary or not actions or not source_ids or len(explanations) != len(source_ids):
             raise ValueError("Empty model response")
-        return GeneratedAnswer(
-            answer,
+        return GeneratedReflection(
+            summary,
+            actions,
             f"hugging-face:{self.settings.hf_model}",
-            tuple(data["source_ids"]),
+            source_ids,
+            explanations,
         )
 
     @staticmethod
-    def _parse_chat_content(content: str) -> dict[str, object]:
-        """Accept strict JSON, fenced JSON, or useful plain prose from chat providers."""
+    def _parse_json_content(content: str) -> dict:
         stripped = content.strip()
         if stripped.startswith("```"):
             stripped = stripped.removeprefix("```json").removeprefix("```")
@@ -197,28 +170,29 @@ class ReflectionGenerator:
             parsed = json.loads(stripped)
         except json.JSONDecodeError:
             start, end = stripped.find("{"), stripped.rfind("}")
-            if start >= 0 and end > start:
-                try:
-                    parsed = json.loads(stripped[start : end + 1])
-                except json.JSONDecodeError:
-                    parsed = {"answer": content, "source_ids": []}
-            else:
-                parsed = {"answer": content, "source_ids": []}
+            if start < 0 or end <= start:
+                raise
+            parsed = json.loads(stripped[start : end + 1])
         if not isinstance(parsed, dict):
-            return {"answer": content, "source_ids": []}
-        answer = str(parsed.get("answer", "")).strip()
-        source_ids = parsed.get("source_ids", [])
-        if not isinstance(source_ids, list):
-            source_ids = []
-        return {
-            "answer": answer or content,
-            "source_ids": [str(source_id) for source_id in source_ids[:4]],
-        }
+            raise ValueError("Model response is not a JSON object")
+        return parsed
+
+    @staticmethod
+    def _canonical_source_id(source_id: str, valid_ids: set[str]) -> str:
+        if source_id in valid_ids:
+            return source_id
+        for valid_id in valid_ids:
+            final_range = valid_id.rsplit(":", 1)[1]
+            start, _, end = final_range.partition("-")
+            if start == end and source_id == valid_id.removesuffix(f"-{end}"):
+                return valid_id
+        return ""
 
     @staticmethod
     def _generate_local(results: list[SearchResult], language: Language) -> GeneratedReflection:
-        primary = results[0].passage
-        secondary = results[1].passage if len(results) > 1 else None
+        selected_results = results[:2]
+        primary = selected_results[0].passage
+        secondary = selected_results[1].passage if len(selected_results) > 1 else None
         primary_reference = reference(
             primary.book, primary.chapter, primary.verse_start, primary.verse_end, language
         )
@@ -241,7 +215,13 @@ class ReflectionGenerator:
             ]
             if secondary_reference:
                 actions.append(f"Porównaj to zastosowanie z perspektywą w {secondary_reference}.")
-            return GeneratedReflection(summary, actions[:3], "local-extractive")
+            explanations = {
+                Retriever.source_id(result.passage): relevance_note(result.themes, language)
+                for result in selected_results
+            }
+            return GeneratedReflection(
+                summary, actions[:3], "local-extractive", tuple(explanations), explanations
+            )
         summary = (
             f"A Bible-grounded approach begins with the principle expressed in {primary_reference}. "
             "Consider the situation honestly, with compassion for everyone affected, and choose an "
@@ -253,4 +233,10 @@ class ReflectionGenerator:
         ]
         if secondary:
             actions.append(f"Compare that application with the perspective in {secondary_reference}.")
-        return GeneratedReflection(summary, actions[:3], "local-extractive")
+        explanations = {
+            Retriever.source_id(result.passage): relevance_note(result.themes, language)
+            for result in selected_results
+        }
+        return GeneratedReflection(
+            summary, actions[:3], "local-extractive", tuple(explanations), explanations
+        )

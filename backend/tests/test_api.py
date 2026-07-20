@@ -1,7 +1,8 @@
 from fastapi.testclient import TestClient
 
-from app.generation import GeneratedAnswer, ReflectionGenerator
+from app.generation import GeneratedReflection, ReflectionGenerator
 from app.main import app
+from app.retrieval import Retriever
 
 
 def test_health_reports_loaded_corpus():
@@ -23,6 +24,8 @@ def test_reflection_returns_server_owned_sources():
     assert response.status_code == 200
     body = response.json()
     assert body["sources"]
+    assert 1 <= len(body["sources"]) <= 3
+    assert all(source["explanation"] for source in body["sources"])
     assert all(source["translation"] == "World English Bible (WEB)" for source in body["sources"])
     assert body["generated_with"] == "local-extractive"
 
@@ -59,64 +62,26 @@ def test_polish_is_default_and_returns_polish_scripture():
     assert any(character in body["sources"][0]["quotation"] for character in "ąćęłńóśźż")
 
 
-def test_chat_answers_followup_with_server_owned_sources(monkeypatch):
-    captured = {}
-
-    async def generated_answer(*args, **kwargs):
-        captured["current_results"] = args[5]
-        return GeneratedAnswer(
-            "Model explains the selected passages in response to this particular question.",
-            "hugging-face:test-model",
-            ("Luke:10:27-27",),
+def test_model_can_reduce_candidates_to_one_explained_source(monkeypatch):
+    async def select_one(self, situation, results, language):
+        source_id = Retriever.source_id(results[0].passage)
+        return GeneratedReflection(
+            summary="One passage is enough here.",
+            actions=["Consider its application carefully."],
+            mode="hugging-face:test-model",
+            source_ids=(source_id,),
+            explanations={source_id: "This explains the passage in context and its limited application."},
         )
 
-    monkeypatch.setattr(ReflectionGenerator, "answer_followup", generated_answer)
+    monkeypatch.setattr(ReflectionGenerator, "generate", select_one)
     with TestClient(app) as client:
         response = client.post(
-            "/api/chat",
+            "/api/reflections",
             json={
-                "situation": "Mam dość Ukraińców po nagraniu, które zobaczyłam w mediach społecznościowych.",
-                "question": "Dlaczego ten fragment pasuje i czego nie powinnam z niego wywnioskować?",
-                "history": [
-                    {"role": "assistant", "content": "Najpierw oddzielmy fakty od przypuszczeń."}
-                ],
-                "source_ids": ["Luke:10:27-27"],
-                "language": "pl",
-            },
-        )
-    assert response.status_code == 200
-    body = response.json()
-    assert body["answer"]
-    assert body["sources"]
-    assert all("translation" in source for source in body["sources"])
-    assert body["sources"][0]["source_id"] == "Luke:10:27-27"
-    assert captured["current_results"][0].passage.reference == "Luke 10:27"
-    assert body["generated_with"] == "hugging-face:test-model"
-
-
-def test_chat_rejects_unbounded_history():
-    with TestClient(app) as client:
-        response = client.post(
-            "/api/chat",
-            json={
-                "situation": "I need help understanding a difficult passage and applying it carefully.",
-                "question": "What does it mean?",
-                "history": [{"role": "user", "content": "Another question"}] * 13,
+                "situation": "Someone treated me badly and I want to respond without seeking revenge.",
                 "language": "en",
             },
         )
-    assert response.status_code == 422
-
-
-def test_chat_reports_when_no_conversation_model_is_configured():
-    with TestClient(app) as client:
-        response = client.post(
-            "/api/chat",
-            json={
-                "situation": "Rozważam słowa z Mateusza 18:17 w kontekście konfliktu i Ukraińców w Polsce.",
-                "question": "Co znaczy: niech będzie dla ciebie jak poganin i celnik? Czy mogę ich nienawidzić?",
-                "language": "pl",
-            },
-        )
-    assert response.status_code == 503
-    assert "HF_TOKEN" in response.json()["detail"]
+    assert response.status_code == 200
+    assert len(response.json()["sources"]) == 1
+    assert "limited application" in response.json()["sources"][0]["explanation"]

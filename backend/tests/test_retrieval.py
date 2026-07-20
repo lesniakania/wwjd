@@ -58,3 +58,15 @@ def test_group_blame_query_returns_ethical_teaching_not_matching_place_names():
         reference.startswith(("Exodus 23:", "Proverbs 18:", "1 Thessalonians 5:"))
         for reference in references
     )
+
+
+def test_displayed_context_is_wide_enough_to_show_the_surrounding_situation():
+    retriever = Retriever(DATA)
+    passage = next(
+        passage
+        for passage in retriever.passages
+        if passage.book == "Matthew" and passage.chapter == 18 and passage.verse_start == 17
+    )
+    context = retriever.context_for(passage, radius=5)
+    assert context.verse_start == 12
+    assert context.verse_end == 22

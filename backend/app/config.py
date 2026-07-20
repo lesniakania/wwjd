@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     hf_base_url: str = "https://router.huggingface.co/v1"
     allowed_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
     max_situation_length: int = 3000
+    embedding_model: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 
     @property
     def origins(self) -> list[str]:
@@ -20,4 +21,3 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
-

@@ -6,3 +6,5 @@ __pycache__/
 .env
 frontend/node_modules/
 frontend/dist/
+backend/app/data/*.npy
+backend/app/data/models/

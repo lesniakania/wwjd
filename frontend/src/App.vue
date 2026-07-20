@@ -20,6 +20,7 @@ const copy = {
     fallbackError: 'Coś poszło nie tak.', back: 'Zadaj inne pytanie', resultEyebrow: 'Refleksja oparta na źródłach',
     result1: 'Droga', result2: 'naprzód.', safetyTitle: 'Zatrzymaj się i poszukaj natychmiastowego wsparcia', actions: 'Rozważ te kolejne kroki',
     read: 'Przeczytaj samodzielnie', sources: 'Pismo stojące za refleksją', footerBible: 'Cytaty: Uwspółcześniona Biblia Gdańska, © 2018 Fundacja Wrota Nadziei, CC BY-ND 4.0.',
+    selectedVerse: 'Wybrany werset', passageContext: 'Kontekst fragmentu',
     footerPrivacy: 'Ta aplikacja nie zapisuje opisu Twojej sytuacji.',
   },
   en: {
@@ -31,6 +32,7 @@ const copy = {
     fallbackError: 'Something went wrong.', back: 'Ask another question', resultEyebrow: 'A grounded reflection',
     result1: 'A way', result2: 'forward.', safetyTitle: 'Pause and seek immediate support', actions: 'Consider these next steps',
     read: 'Read it for yourself', sources: 'Scripture behind the reflection', footerBible: 'Scripture quotations from the public-domain World English Bible.',
+    selectedVerse: 'Selected verse', passageContext: 'Passage context',
     footerPrivacy: 'Your situation is not stored by this application.',
   },
 } as const
@@ -148,9 +150,15 @@ function reset() {
           </div>
           <div class="source-grid">
             <figure v-for="source in reflection.sources" :key="source.reference" class="source-card">
-              <blockquote>“{{ source.quotation }}”</blockquote>
+              <span class="quote-label">{{ t.selectedVerse }}</span>
+              <blockquote class="focus-quote">“{{ source.quotation }}”</blockquote>
               <figcaption>
                 <strong>{{ source.reference }}</strong>
+                <p class="relevance">{{ source.relevance }}</p>
+                <details class="context-block" open>
+                  <summary>{{ t.passageContext }} · {{ source.context_reference }}</summary>
+                  <p>{{ source.context_quotation }}</p>
+                </details>
                 <span>{{ source.translation }}</span>
                 <small v-if="source.context_note">{{ source.context_note }}</small>
               </figcaption>

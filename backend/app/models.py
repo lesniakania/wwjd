@@ -22,6 +22,9 @@ class Source(BaseModel):
     quotation: str
     translation: str = "World English Bible (WEB)"
     context_note: str | None = None
+    relevance: str
+    context_reference: str
+    context_quotation: str
 
 
 class ReflectionResponse(BaseModel):

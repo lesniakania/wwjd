@@ -6,9 +6,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .config import get_settings
 from .generation import LIMITATIONS_EN, LIMITATIONS_PL, ReflectionGenerator
-from .localization import reference, translation_name
+from .localization import reference, relevance_note, translation_name
 from .models import HealthResponse, ReflectionRequest, ReflectionResponse, Source
-from .retrieval import Retriever
+from .retrieval import Retriever, SemanticEncoder
 from .safety import check_safety
 
 
@@ -19,7 +19,19 @@ DATA_PATH_PL = Path(__file__).parent / "data" / "polubg_verses.json"
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     settings = get_settings()
-    app.state.retrievers = {"en": Retriever(DATA_PATH), "pl": Retriever(DATA_PATH_PL)}
+    encoder = SemanticEncoder(settings.embedding_model) if settings.embedding_model else None
+    app.state.retrievers = {
+        "en": Retriever(
+            DATA_PATH,
+            encoder,
+            Retriever.cache_name(DATA_PATH, settings.embedding_model) if encoder else None,
+        ),
+        "pl": Retriever(
+            DATA_PATH_PL,
+            encoder,
+            Retriever.cache_name(DATA_PATH_PL, settings.embedding_model) if encoder else None,
+        ),
+    }
     app.state.generator = ReflectionGenerator(settings)
     yield
 
@@ -53,9 +65,13 @@ async def create_reflection(payload: ReflectionRequest, request: Request) -> Ref
     retriever: Retriever = request.app.state.retrievers[payload.language]
     generator: ReflectionGenerator = request.app.state.generator
     safety = check_safety(payload.situation, payload.language)
-    results = retriever.search(payload.situation, limit=5)
+    results = retriever.search(payload.situation, limit=4)
     if not results:
-        results = retriever.search("wisdom love truth compassion", limit=5)
+        fallback = (
+            "mądrość miłość prawda współczucie" if payload.language == "pl"
+            else "wisdom love truth compassion"
+        )
+        results = retriever.search(fallback, limit=4)
     generated = await generator.generate(payload.situation, results, payload.language)
     sources = [
         Source(
@@ -73,8 +89,17 @@ async def create_reflection(payload: ReflectionRequest, request: Request) -> Ref
                 if result.passage.book in {"Matthew", "Mark", "Luke", "John"}
                 else ("Fragment wspierający z innej części Pisma" if payload.language == "pl" else "Supporting passage from elsewhere in Scripture")
             ),
+            relevance=relevance_note(result.themes, payload.language),
+            context_reference=reference(
+                result.context.book,
+                result.context.chapter,
+                result.context.verse_start,
+                result.context.verse_end,
+                payload.language,
+            ),
+            context_quotation=result.context.text,
         )
-        for result in results[:4]
+        for result in results
     ]
     return ReflectionResponse(
         summary=generated.summary,

@@ -58,7 +58,12 @@ The committed English and Polish corpora were generated from eBible.org's offici
 python backend/scripts/import_usfx.py path/to/engwebp_usfx.xml backend/app/data/web_verses.json
 ```
 
-At startup, passages are grouped into small contextual chunks. Retrieval combines lexical overlap with a dependency-free hashed vector similarity and gives a modest boost to Gospel passages. The interface can therefore run immediately. For a larger multilingual deployment, replace `HashingEmbedder` with BGE-M3 while preserving the `Retriever` interface.
+Retrieval uses multilingual Sentence Transformers embeddings together with BM25 lexical ranking. It ranks individual verses, filters low-confidence results, and avoids automatically quoting unrelated neighboring verses. The default model is `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`; set `EMBEDDING_MODEL=BAAI/bge-m3` for a GPU-backed deployment. Build or refresh the local semantic indexes with:
+
+```bash
+cd backend
+uv run python scripts/build_indexes.py
+```
 
 ## Verification
 

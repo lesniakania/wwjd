@@ -29,6 +29,7 @@ SYSTEM_PROMPT = """You write a cautious, compassionate Bible-grounded reflection
 Use only the supplied passages as scriptural evidence. Do not add Bible references or quotations.
 Never claim certainty about what Jesus would do. Distinguish an application from the passage itself.
 Do not advise secrecy, retaliation, or remaining in danger. Professional and emergency help take priority.
+Explain the connection between the situation and the supplied passages; do not merely summarize them.
 Return strict JSON with keys summary (2-4 sentences) and suggested_actions (1-3 short strings)."""
 
 
@@ -54,7 +55,8 @@ class ReflectionGenerator:
         self, situation: str, results: list[SearchResult], language: Language
     ) -> GeneratedReflection:
         passages = "\n".join(
-            f"[{index}] {result.passage.reference}: {result.passage.text}"
+            f"[{index}] Selected verse: {result.passage.reference}: {result.passage.text}\n"
+            f"Context: {result.context.reference}: {result.context.text}"
             for index, result in enumerate(results, start=1)
         )
         language_instruction = "Write in Polish." if language == "pl" else "Write in English."

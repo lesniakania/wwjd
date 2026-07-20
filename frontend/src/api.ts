@@ -3,6 +3,9 @@ export interface Source {
   quotation: string
   translation: string
   context_note: string | null
+  relevance: string
+  context_reference: string
+  context_quotation: string
 }
 
 export interface Reflection {

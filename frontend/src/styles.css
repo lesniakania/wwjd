@@ -84,7 +84,13 @@ textarea::placeholder { color: #9a9b91; }
 .source-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
 .source-card { margin: 0; padding: 30px; background: rgba(255, 253, 247, .64); border: 1px solid rgba(32, 54, 47, .14); }
 .source-card blockquote { margin: 0 0 24px; color: #3b5149; font-family: 'Libre Caslon Display', Georgia, serif; font-size: 20px; line-height: 1.5; }
+.quote-label { display: block; margin-bottom: 9px; color: #9c5138; font-size: 9px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
+.focus-quote { padding-left: 17px; border-left: 2px solid #b1684d; }
 .source-card figcaption { display: flex; flex-direction: column; gap: 3px; }
+.source-card .relevance { margin: 4px 0 10px; color: #425c53; font-family: 'DM Sans', sans-serif; font-size: 12px; line-height: 1.55; }
+.context-block { margin: 5px 0 15px; padding: 13px 15px; background: rgba(40, 76, 64, .055); }
+.context-block summary { color: #52685f; cursor: pointer; font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.context-block p { margin: 11px 0 0; color: #586b64; font-family: 'Libre Caslon Display', Georgia, serif; font-size: 15px; line-height: 1.6; white-space: pre-wrap; }
 .source-card strong { color: #9c5138; font-size: 13px; }
 .source-card span, .source-card small { color: #7c847d; font-size: 10px; }
 .limitations { max-width: 760px; margin: 46px auto 0; color: #7c847d; text-align: center; font-size: 11px; line-height: 1.7; }

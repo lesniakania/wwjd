@@ -2,6 +2,8 @@
 
 A privacy-conscious, source-grounded Bible reflection app. Users describe a situation, the backend retrieves relevant passages from the public-domain World English Bible, and an optional language model turns those passages into a short, cautious reflection. Scripture quotations always come from the local corpus, never from the language model.
 
+The interface is bilingual. Polish is the default and users can switch to English at any time. Polish quotations use the Updated Gdansk Bible under CC BY-ND 4.0; English quotations use the public-domain World English Bible.
+
 ## Stack
 
 - Vue 3 + TypeScript + Vite
@@ -50,7 +52,7 @@ The application does not persist user situations. Avoid enabling request-body lo
 
 ## Bible data and retrieval
 
-The committed `backend/app/data/web_verses.json` was generated from eBible.org's official `engwebp_usfx.zip` archive. Regenerate it with:
+The committed English and Polish corpora were generated from eBible.org's official `engwebp_usfx.zip` and `polubg_usfx.zip` archives. Regenerate either with:
 
 ```bash
 python backend/scripts/import_usfx.py path/to/engwebp_usfx.xml backend/app/data/web_verses.json
@@ -68,4 +70,3 @@ cd frontend && npm run test && npm run build
 ## Product boundary
 
 The result is described as an AI-generated, Bible-grounded reflection—not a certain declaration of what Jesus would do. Emergency, self-harm, and abuse-related language receives an immediate safety message, and the app explicitly does not replace emergency, medical, legal, mental-health, or pastoral help.
-

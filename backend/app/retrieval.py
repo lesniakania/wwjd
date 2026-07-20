@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 
-TOKEN_RE = re.compile(r"[a-zA-Z']+")
+TOKEN_RE = re.compile(r"[^\W\d_]+", re.UNICODE)
 GOSPELS = {"Matthew", "Mark", "Luke", "John"}
 STOPWORDS = {
     "a", "an", "and", "are", "as", "at", "be", "been", "but", "by", "for", "from",
@@ -40,6 +40,30 @@ THEME_EXPANSIONS = {
         {"money", "poor", "give", "generous", "greed", "possessions"},
         "give poor generous treasure neighbor need",
     ),
+    "anger_pl": (
+        {"złość", "zły", "wściekły", "gniew", "zemsta", "upokorzyć", "ośmieszyć"},
+        "gniew łagodność pokój cierpliwość pojednanie wróg przebaczenie",
+    ),
+    "honesty_pl": (
+        {"kłamstwo", "kłamać", "skłamał", "uczciwość", "uczciwy", "prawda", "oszukać"},
+        "prawda prawdomówny uczciwy kłamstwo fałszywe świadectwo",
+    ),
+    "forgiveness_pl": (
+        {"przebaczyć", "wybaczyć", "przebaczenie", "skrzywdził", "zdradził", "uraza"},
+        "przebaczyć miłosierdzie pojednanie brat przewinienie",
+    ),
+    "conflict_pl": (
+        {"konflikt", "kłótnia", "skonfrontować", "kolega", "przyjaciel", "współpracownik"},
+        "brat prywatnie pojednanie pokój łagodność słuchać",
+    ),
+    "fear_pl": (
+        {"strach", "boję", "lęk", "zmartwiony", "martwię", "niepokój"},
+        "strach lęk troska zaufanie odwaga pokój",
+    ),
+    "generosity_pl": (
+        {"pieniądze", "biedny", "dać", "hojny", "chciwość", "majątek"},
+        "dawać ubogi hojny skarb bliźni potrzeba",
+    ),
 }
 THEME_ANCHORS = {
     "anger": (("Matthew", 5, 21, 26), ("Luke", 6, 27, 36), ("James", 1, 19, 20)),
@@ -49,6 +73,8 @@ THEME_ANCHORS = {
     "fear": (("Matthew", 6, 25, 34), ("John", 14, 25, 27), ("Philippians", 4, 6, 7)),
     "generosity": (("Matthew", 6, 19, 24), ("Luke", 10, 30, 37), ("1 John", 3, 16, 18)),
 }
+for _theme in tuple(THEME_ANCHORS):
+    THEME_ANCHORS[f"{_theme}_pl"] = THEME_ANCHORS[_theme]
 
 
 def tokenize(text: str) -> list[str]:

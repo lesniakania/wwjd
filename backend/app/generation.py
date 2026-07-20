@@ -4,12 +4,17 @@ from dataclasses import dataclass
 import httpx
 
 from .config import Settings
+from .localization import Language, reference
 from .retrieval import SearchResult
 
 
-LIMITATIONS = (
+LIMITATIONS_EN = (
     "This is an AI-generated, Bible-grounded reflection—not a certain declaration of what Jesus "
     "would do, and not a substitute for pastoral, medical, legal, or mental-health advice."
+)
+LIMITATIONS_PL = (
+    "To wygenerowana przez AI refleksja oparta na Biblii, a nie pewne stwierdzenie, co zrobiłby "
+    "Jezus. Nie zastępuje porady duszpasterskiej, medycznej, prawnej ani psychologicznej."
 )
 
 
@@ -35,22 +40,27 @@ class ReflectionGenerator:
     def mode(self) -> str:
         return "hugging-face" if self.settings.hf_token else "local-extractive"
 
-    async def generate(self, situation: str, results: list[SearchResult]) -> GeneratedReflection:
+    async def generate(
+        self, situation: str, results: list[SearchResult], language: Language
+    ) -> GeneratedReflection:
         if self.settings.hf_token:
             try:
-                return await self._generate_remote(situation, results)
+                return await self._generate_remote(situation, results, language)
             except (httpx.HTTPError, KeyError, TypeError, ValueError, json.JSONDecodeError):
                 pass
-        return self._generate_local(results)
+        return self._generate_local(results, language)
 
     async def _generate_remote(
-        self, situation: str, results: list[SearchResult]
+        self, situation: str, results: list[SearchResult], language: Language
     ) -> GeneratedReflection:
         passages = "\n".join(
             f"[{index}] {result.passage.reference}: {result.passage.text}"
             for index, result in enumerate(results, start=1)
         )
-        user_prompt = f"Situation:\n{situation}\n\nSupplied passages:\n{passages}"
+        language_instruction = "Write in Polish." if language == "pl" else "Write in English."
+        user_prompt = (
+            f"{language_instruction}\nSituation:\n{situation}\n\nSupplied passages:\n{passages}"
+        )
         payload = {
             "model": self.settings.hf_model,
             "messages": [
@@ -78,19 +88,41 @@ class ReflectionGenerator:
         return GeneratedReflection(summary, actions, f"hugging-face:{self.settings.hf_model}")
 
     @staticmethod
-    def _generate_local(results: list[SearchResult]) -> GeneratedReflection:
+    def _generate_local(results: list[SearchResult], language: Language) -> GeneratedReflection:
         primary = results[0].passage
         secondary = results[1].passage if len(results) > 1 else None
+        primary_reference = reference(
+            primary.book, primary.chapter, primary.verse_start, primary.verse_end, language
+        )
+        secondary_reference = (
+            reference(
+                secondary.book, secondary.chapter, secondary.verse_start, secondary.verse_end, language
+            )
+            if secondary
+            else None
+        )
+        if language == "pl":
+            summary = (
+                f"Biblijna droga zaczyna się od zasady wyrażonej w {primary_reference}. Spójrz na "
+                "sytuację uczciwie i ze współczuciem dla każdej osoby, a następnie wybierz działanie "
+                "zgodne z odnalezionym nauczaniem — nie traktując tej refleksji jako pewnej odpowiedzi."
+            )
+            actions = [
+                f"Przeczytaj {primary_reference} w kontekście całego rozdziału przed podjęciem decyzji.",
+                "Oddziel znane fakty od przypuszczeń i wybierz najbardziej prawdomówny oraz pełen miłości następny krok.",
+            ]
+            if secondary_reference:
+                actions.append(f"Porównaj to zastosowanie z perspektywą w {secondary_reference}.")
+            return GeneratedReflection(summary, actions[:3], "local-extractive")
         summary = (
-            f"A Bible-grounded approach begins with the principle expressed in {primary.reference}. "
+            f"A Bible-grounded approach begins with the principle expressed in {primary_reference}. "
             "Consider the situation honestly, with compassion for everyone affected, and choose an "
             "action consistent with the retrieved teaching rather than treating this as a certain answer."
         )
         actions = [
-            f"Read {primary.reference} in its full chapter before deciding.",
+            f"Read {primary_reference} in its full chapter before deciding.",
             "Separate the known facts from assumptions, then choose the most truthful and loving next step.",
         ]
         if secondary:
-            actions.append(f"Compare that application with the perspective in {secondary.reference}.")
+            actions.append(f"Compare that application with the perspective in {secondary_reference}.")
         return GeneratedReflection(summary, actions[:3], "local-extractive")
-

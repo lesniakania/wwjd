@@ -1,10 +1,12 @@
 from pydantic import BaseModel, Field, field_validator
 
 from .config import get_settings
+from .localization import Language
 
 
 class ReflectionRequest(BaseModel):
     situation: str = Field(min_length=20)
+    language: Language = "pl"
 
     @field_validator("situation")
     @classmethod
@@ -35,4 +37,3 @@ class HealthResponse(BaseModel):
     status: str
     verses: int
     generation_mode: str
-

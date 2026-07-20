@@ -14,19 +14,18 @@ export interface Reflection {
   generated_with: string
 }
 
-export async function requestReflection(situation: string): Promise<Reflection> {
+export async function requestReflection(situation: string, language: 'pl' | 'en'): Promise<Reflection> {
   const response = await fetch('/api/reflections', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ situation }),
+    body: JSON.stringify({ situation, language }),
   })
 
   if (!response.ok) {
     if (response.status === 422) {
-      throw new Error('Please describe the situation in a little more detail.')
+      throw new Error(language === 'pl' ? 'Opisz sytuację trochę dokładniej.' : 'Please describe the situation in a little more detail.')
     }
-    throw new Error('The reflection could not be prepared. Please try again.')
+    throw new Error(language === 'pl' ? 'Nie udało się przygotować refleksji. Spróbuj ponownie.' : 'The reflection could not be prepared. Please try again.')
   }
   return response.json() as Promise<Reflection>
 }
-

@@ -29,6 +29,7 @@ class GeneratedReflection:
 class GeneratedAnswer:
     answer: str
     mode: str
+    source_ids: tuple[str, ...] = ()
 
 
 class ChatModelUnavailable(RuntimeError):
@@ -48,7 +49,10 @@ Directly answer the latest question in 2-5 concise paragraphs. Explain separatel
 says in context and how it may apply; explicitly say when an application goes beyond the text.
 Correct readings that blame an entire group for one person's actions or use a descriptive hostile-nation
 passage as a command about modern ethnic groups. Do not claim certainty about what Jesus would do.
-Do not advise secrecy, retaliation, or remaining in danger. Return strict JSON with key answer."""
+Do not advise secrecy, retaliation, or remaining in danger. The passages under CURRENTLY DISCUSSED
+are the referent of phrases such as "this passage". CANDIDATE PASSAGES are alternatives retrieved for
+the original situation. Never discuss a Bible reference absent from both supplied groups, even if it
+appeared in earlier conversation. Return JSON with keys answer and source_ids (the IDs actually used)."""
 
 
 class ReflectionGenerator:
@@ -113,13 +117,14 @@ class ReflectionGenerator:
         question: str,
         history: list[dict[str, str]],
         results: list[SearchResult],
+        current_results: list[SearchResult],
         language: Language,
     ) -> GeneratedAnswer:
         if not self.settings.hf_token:
             raise ChatModelUnavailable("HF_TOKEN is not configured")
         try:
             return await self._answer_followup_remote(
-                situation, question, history, results, language
+                situation, question, history, results, current_results, language
             )
         except (httpx.HTTPError, KeyError, TypeError, ValueError, json.JSONDecodeError) as error:
             raise ChatModelUnavailable("The conversation model is unavailable") from error
@@ -130,13 +135,18 @@ class ReflectionGenerator:
         question: str,
         history: list[dict[str, str]],
         results: list[SearchResult],
+        current_results: list[SearchResult],
         language: Language,
     ) -> GeneratedAnswer:
-        passages = "\n".join(
-            f"[{index}] Selected verse: {result.passage.reference}: {result.passage.text}\n"
-            f"Context: {result.context.reference}: {result.context.text}"
-            for index, result in enumerate(results, start=1)
-        )
+        def format_passages(passages_to_format: list[SearchResult]) -> str:
+            return "\n".join(
+                f"[ID {result.passage.book}:{result.passage.chapter}:{result.passage.verse_start}-{result.passage.verse_end}] "
+                f"Selected verse: {result.passage.reference}: {result.passage.text}\n"
+                f"Context: {result.context.reference}: {result.context.text}"
+                for result in passages_to_format
+            ) or "(none)"
+        current_passages = format_passages(current_results)
+        candidate_passages = format_passages(results)
         language_instruction = "Write in Polish." if language == "pl" else "Write in English."
         messages = [{"role": "system", "content": CHAT_SYSTEM_PROMPT}]
         messages.extend(history[-8:])
@@ -145,7 +155,8 @@ class ReflectionGenerator:
                 "role": "user",
                 "content": (
                     f"{language_instruction}\nOriginal situation:\n{situation}\n\n"
-                    f"Latest question:\n{question}\n\nSupplied passages:\n{passages}"
+                    f"Latest question:\n{question}\n\nCURRENTLY DISCUSSED PASSAGES:\n{current_passages}\n\n"
+                    f"CANDIDATE PASSAGES:\n{candidate_passages}"
                 ),
             }
         )
@@ -164,10 +175,45 @@ class ReflectionGenerator:
                 json=payload,
             )
             response.raise_for_status()
-        answer = str(json.loads(response.json()["choices"][0]["message"]["content"])["answer"]).strip()
+        content = str(response.json()["choices"][0]["message"]["content"]).strip()
+        data = self._parse_chat_content(content)
+        answer = data["answer"]
         if not answer:
             raise ValueError("Empty model response")
-        return GeneratedAnswer(answer, f"hugging-face:{self.settings.hf_model}")
+        return GeneratedAnswer(
+            answer,
+            f"hugging-face:{self.settings.hf_model}",
+            tuple(data["source_ids"]),
+        )
+
+    @staticmethod
+    def _parse_chat_content(content: str) -> dict[str, object]:
+        """Accept strict JSON, fenced JSON, or useful plain prose from chat providers."""
+        stripped = content.strip()
+        if stripped.startswith("```"):
+            stripped = stripped.removeprefix("```json").removeprefix("```")
+            stripped = stripped.removesuffix("```").strip()
+        try:
+            parsed = json.loads(stripped)
+        except json.JSONDecodeError:
+            start, end = stripped.find("{"), stripped.rfind("}")
+            if start >= 0 and end > start:
+                try:
+                    parsed = json.loads(stripped[start : end + 1])
+                except json.JSONDecodeError:
+                    parsed = {"answer": content, "source_ids": []}
+            else:
+                parsed = {"answer": content, "source_ids": []}
+        if not isinstance(parsed, dict):
+            return {"answer": content, "source_ids": []}
+        answer = str(parsed.get("answer", "")).strip()
+        source_ids = parsed.get("source_ids", [])
+        if not isinstance(source_ids, list):
+            source_ids = []
+        return {
+            "answer": answer or content,
+            "source_ids": [str(source_id) for source_id in source_ids[:4]],
+        }
 
     @staticmethod
     def _generate_local(results: list[SearchResult], language: Language) -> GeneratedReflection:

@@ -87,6 +87,7 @@ async def create_reflection(payload: ReflectionRequest, request: Request) -> Ref
 def _sources_from_results(results, language):
     return [
         Source(
+            source_id=Retriever.source_id(result.passage),
             reference=reference(
                 result.passage.book,
                 result.passage.chapter,
@@ -121,6 +122,7 @@ async def continue_conversation(payload: ChatRequest, request: Request) -> ChatR
     generator: ReflectionGenerator = request.app.state.generator
     safety = check_safety(f"{payload.situation} {payload.question}", payload.language)
     results = retriever.search(f"{payload.situation} {payload.question}", limit=4)
+    current_results = retriever.results_for_source_ids(payload.source_ids)
     if not results:
         fallback = "mądrość miłość prawda współczucie" if payload.language == "pl" else "wisdom love truth compassion"
         results = retriever.search(fallback, limit=4)
@@ -130,6 +132,7 @@ async def continue_conversation(payload: ChatRequest, request: Request) -> ChatR
             payload.question,
             [turn.model_dump() for turn in payload.history],
             results,
+            current_results,
             payload.language,
         )
     except ChatModelUnavailable as error:
@@ -139,9 +142,21 @@ async def continue_conversation(payload: ChatRequest, request: Request) -> ChatR
             else "Conversation requires a configured language model. Set HF_TOKEN and try again."
         )
         raise HTTPException(status_code=503, detail=detail) from error
+    all_results = current_results + [
+        result
+        for result in results
+        if Retriever.source_id(result.passage)
+        not in {Retriever.source_id(current.passage) for current in current_results}
+    ]
+    cited_results = [
+        result
+        for result in all_results
+        if Retriever.source_id(result.passage) in generated.source_ids
+    ]
+    response_results = cited_results or all_results[:4]
     return ChatResponse(
         answer=generated.answer,
-        sources=_sources_from_results(results, payload.language),
+        sources=_sources_from_results(response_results[:4], payload.language),
         safety_message=safety.message,
         limitations=LIMITATIONS_PL if payload.language == "pl" else LIMITATIONS_EN,
         generated_with=generated.mode,

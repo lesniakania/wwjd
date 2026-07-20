@@ -20,6 +20,7 @@ class ReflectionRequest(BaseModel):
 
 
 class Source(BaseModel):
+    source_id: str
     reference: str
     quotation: str
     translation: str = "World English Bible (WEB)"
@@ -52,6 +53,7 @@ class ChatRequest(BaseModel):
     situation: str = Field(min_length=20)
     question: str = Field(min_length=2, max_length=1000)
     history: list[ConversationTurn] = Field(default_factory=list, max_length=12)
+    source_ids: list[str] = Field(default_factory=list, max_length=8)
     language: Language = "pl"
 
     @field_validator("situation", "question")

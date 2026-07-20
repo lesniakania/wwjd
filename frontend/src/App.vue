@@ -97,7 +97,13 @@ async function askFollowup() {
   chatLoading.value = true
   error.value = ''
   try {
-    const reply = await continueConversation(situation.value.trim(), question, history, language.value)
+    const latestAssistantSources = [...conversation.value].reverse().find(message => message.sources?.length)?.sources
+    const activeSources = latestAssistantSources || reflection.value.sources
+    const reply = await continueConversation(
+      situation.value.trim(), question, history,
+      activeSources.map(source => source.source_id).filter((sourceId): sourceId is string => Boolean(sourceId)),
+      language.value,
+    )
     conversation.value.push({
       role: 'assistant', content: reply.answer, sources: reply.sources, safetyMessage: reply.safety_message,
     })

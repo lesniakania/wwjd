@@ -1,4 +1,5 @@
 export interface Source {
+  source_id: string
   reference: string
   quotation: string
   translation: string
@@ -50,12 +51,13 @@ export async function continueConversation(
   situation: string,
   question: string,
   history: ConversationTurn[],
+  sourceIds: string[],
   language: 'pl' | 'en',
 ): Promise<ChatReply> {
   const response = await fetch('/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ situation, question, history, language }),
+    body: JSON.stringify({ situation, question, history, source_ids: sourceIds, language }),
   })
 
   if (!response.ok) {

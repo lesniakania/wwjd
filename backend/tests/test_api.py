@@ -60,10 +60,14 @@ def test_polish_is_default_and_returns_polish_scripture():
 
 
 def test_chat_answers_followup_with_server_owned_sources(monkeypatch):
+    captured = {}
+
     async def generated_answer(*args, **kwargs):
+        captured["current_results"] = args[5]
         return GeneratedAnswer(
             "Model explains the selected passages in response to this particular question.",
             "hugging-face:test-model",
+            ("Luke:10:27-27",),
         )
 
     monkeypatch.setattr(ReflectionGenerator, "answer_followup", generated_answer)
@@ -76,6 +80,7 @@ def test_chat_answers_followup_with_server_owned_sources(monkeypatch):
                 "history": [
                     {"role": "assistant", "content": "Najpierw oddzielmy fakty od przypuszczeń."}
                 ],
+                "source_ids": ["Luke:10:27-27"],
                 "language": "pl",
             },
         )
@@ -84,6 +89,8 @@ def test_chat_answers_followup_with_server_owned_sources(monkeypatch):
     assert body["answer"]
     assert body["sources"]
     assert all("translation" in source for source in body["sources"])
+    assert body["sources"][0]["source_id"] == "Luke:10:27-27"
+    assert captured["current_results"][0].passage.reference == "Luke 10:27"
     assert body["generated_with"] == "hugging-face:test-model"
 
 

@@ -53,4 +53,34 @@ describe('App', () => {
     expect(await screen.findByText('Choose honesty with compassion.')).toBeTruthy()
     expect(screen.getByText('Matthew 5:44')).toBeTruthy()
   })
+
+  it('continues with a source-grounded follow-up conversation', async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          summary: 'Choose honesty with compassion.', suggested_actions: ['Check the facts.'],
+          sources: [{ reference: 'Proverbs 18:13', quotation: 'He who answers before he hears...', translation: 'WEB', context_note: null, relevance: 'Checking claims.', context_reference: 'Proverbs 18:11–15', context_quotation: 'Context.' }],
+          safety_message: null, limitations: 'A reflection, not certainty.', generated_with: 'local-extractive',
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          answer: 'The passage asks you to listen before reaching a conclusion.',
+          sources: [{ reference: 'Proverbs 18:13', quotation: 'He who answers before he hears...', translation: 'WEB', context_note: null, relevance: 'Checking claims.', context_reference: 'Proverbs 18:11–15', context_quotation: 'Context.' }],
+          safety_message: null, limitations: 'A reflection, not certainty.', generated_with: 'local-extractive',
+        }),
+      })
+    vi.stubGlobal('fetch', fetchMock)
+    render(App)
+    await fireEvent.click(screen.getByRole('button', { name: 'EN' }))
+    await fireEvent.update(screen.getByLabelText('What would Jesus do?'), 'I saw a claim online and want to judge the situation fairly.')
+    await fireEvent.click(screen.getByRole('button', { name: /find a way forward/i }))
+    await screen.findByText('Choose honesty with compassion.')
+    await fireEvent.update(screen.getByLabelText('Your question'), 'What does this passage mean in context?')
+    await fireEvent.click(screen.getByRole('button', { name: 'Ask' }))
+    expect(await screen.findByText(/listen before reaching a conclusion/i)).toBeTruthy()
+    expect(fetchMock).toHaveBeenLastCalledWith('/api/chat', expect.objectContaining({ method: 'POST' }))
+  })
 })

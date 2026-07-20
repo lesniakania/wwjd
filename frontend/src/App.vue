@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { requestReflection, type Reflection } from './api'
+import { continueConversation, requestReflection, type ConversationTurn, type Reflection, type Source } from './api'
 
 const maxLength = 3000
 type Language = 'pl' | 'en'
@@ -8,7 +8,14 @@ const language = ref<Language>('pl')
 const situation = ref('')
 const reflection = ref<Reflection | null>(null)
 const loading = ref(false)
+const chatLoading = ref(false)
 const error = ref('')
+const followup = ref('')
+interface ChatMessage extends ConversationTurn {
+  sources?: Source[]
+  safetyMessage?: string | null
+}
+const conversation = ref<ChatMessage[]>([])
 
 const copy = {
   pl: {
@@ -22,6 +29,10 @@ const copy = {
     read: 'Przeczytaj samodzielnie', sources: 'Pismo stojące za refleksją', footerBible: 'Cytaty: Uwspółcześniona Biblia Gdańska, © 2018 Fundacja Wrota Nadziei, CC BY-ND 4.0.',
     selectedVerse: 'Wybrany werset', passageContext: 'Kontekst fragmentu',
     footerPrivacy: 'Ta aplikacja nie zapisuje opisu Twojej sytuacji.',
+    chatTitle: 'Porozmawiaj o tych fragmentach', chatIntro: 'Zapytaj o kontekst, znaczenie albo możliwe zastosowanie. Odpowiedź pozostanie oparta na pokazanych źródłach.',
+    chatLabel: 'Twoje pytanie', chatPlaceholder: 'Dlaczego ten fragment pasuje do mojej sytuacji?', send: 'Zapytaj', sending: 'Odpowiadam…',
+    you: 'Ty', guide: 'Przewodnik', cited: 'Fragmenty wykorzystane w odpowiedzi',
+    prompts: ['Wyjaśnij kontekst pierwszego fragmentu', 'Dlaczego te cytaty pasują do tej sytuacji?', 'Czego nie należy z nich wywnioskować?'],
   },
   en: {
     header: 'A Bible-grounded reflection', eyebrow: 'A moment to pause', title1: 'What would', title2: 'Jesus do?',
@@ -34,6 +45,10 @@ const copy = {
     read: 'Read it for yourself', sources: 'Scripture behind the reflection', footerBible: 'Scripture quotations from the public-domain World English Bible.',
     selectedVerse: 'Selected verse', passageContext: 'Passage context',
     footerPrivacy: 'Your situation is not stored by this application.',
+    chatTitle: 'Talk through these passages', chatIntro: 'Ask about context, meaning, or a possible application. The answer will remain grounded in the displayed sources.',
+    chatLabel: 'Your question', chatPlaceholder: 'Why does this passage fit my situation?', send: 'Ask', sending: 'Answering…',
+    you: 'You', guide: 'Guide', cited: 'Passages used in this answer',
+    prompts: ['Explain the context of the first passage', 'Why do these quotations fit this situation?', 'What should I not infer from them?'],
   },
 } as const
 
@@ -48,6 +63,7 @@ async function submit() {
   reflection.value = null
   try {
     reflection.value = await requestReflection(situation.value.trim(), language.value)
+    conversation.value = []
   } catch (caught) {
     error.value = caught instanceof Error ? caught.message : t.value.fallbackError
   } finally {
@@ -58,6 +74,7 @@ async function submit() {
 function setLanguage(next: Language) {
   language.value = next
   reflection.value = null
+  conversation.value = []
   error.value = ''
 }
 
@@ -67,6 +84,33 @@ function reset() {
   reflection.value = null
   error.value = ''
   situation.value = ''
+  followup.value = ''
+  conversation.value = []
+}
+
+async function askFollowup() {
+  const question = followup.value.trim()
+  if (!reflection.value || question.length < 2 || chatLoading.value) return
+  const history = conversation.value.map(({ role, content }) => ({ role, content }))
+  conversation.value.push({ role: 'user', content: question })
+  followup.value = ''
+  chatLoading.value = true
+  error.value = ''
+  try {
+    const reply = await continueConversation(situation.value.trim(), question, history, language.value)
+    conversation.value.push({
+      role: 'assistant', content: reply.answer, sources: reply.sources, safetyMessage: reply.safety_message,
+    })
+  } catch (caught) {
+    error.value = caught instanceof Error ? caught.message : t.value.fallbackError
+  } finally {
+    chatLoading.value = false
+  }
+}
+
+function askPrompt(prompt: string) {
+  followup.value = prompt
+  void askFollowup()
 }
 </script>
 
@@ -164,6 +208,46 @@ function reset() {
               </figcaption>
             </figure>
           </div>
+        </section>
+
+        <section class="conversation" aria-labelledby="chat-title">
+          <div class="section-heading">
+            <p>{{ t.guide }}</p>
+            <h2 id="chat-title">{{ t.chatTitle }}</h2>
+            <span>{{ t.chatIntro }}</span>
+          </div>
+
+          <div v-if="conversation.length" class="message-list" aria-live="polite">
+            <article v-for="(message, index) in conversation" :key="index" class="message" :class="message.role">
+              <span class="message-role">{{ message.role === 'user' ? t.you : t.guide }}</span>
+              <p>{{ message.content }}</p>
+              <div v-if="message.safetyMessage" class="safety" role="alert">{{ message.safetyMessage }}</div>
+              <details v-if="message.sources?.length" class="message-sources">
+                <summary>{{ t.cited }} ({{ message.sources.length }})</summary>
+                <ul>
+                  <li v-for="source in message.sources" :key="source.reference">
+                    <strong>{{ source.reference }}</strong> — “{{ source.quotation }}”
+                  </li>
+                </ul>
+              </details>
+            </article>
+          </div>
+
+          <div v-if="!conversation.length" class="prompt-suggestions">
+            <button v-for="prompt in t.prompts" :key="prompt" type="button" @click="askPrompt(prompt)">{{ prompt }}</button>
+          </div>
+
+          <form class="chat-form" @submit.prevent="askFollowup">
+            <label for="followup">{{ t.chatLabel }}</label>
+            <div class="chat-input-row">
+              <textarea id="followup" v-model="followup" rows="2" maxlength="1000" :placeholder="t.chatPlaceholder"></textarea>
+              <button type="submit" :disabled="followup.trim().length < 2 || chatLoading">
+                <span v-if="chatLoading" class="spinner" aria-hidden="true"></span>
+                {{ chatLoading ? t.sending : t.send }}
+              </button>
+            </div>
+          </form>
+          <p v-if="error" class="error" role="alert">{{ error }}</p>
         </section>
 
         <p class="limitations">{{ reflection.limitations }}</p>

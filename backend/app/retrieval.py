@@ -70,7 +70,11 @@ THEME_PATTERNS = {
         r"\bpodobno\b", r"\bszum\w*", r"\bviral\w*", r"\bsocial media\b",
         r"\brumou?r\w*", r"\balleg\w*", r"\bmisinformation\w*",
     ),
-    "conflict": (r"\batak\w*", r"\bprzemoc\w*", r"\battack\w*", r"\bviolence\w*"),
+    "conflict": (
+        r"\bkonflikt\w*", r"\batak\w*", r"\bprzemoc\w*", r"\bnie słuch\w*",
+        r"\bconflict\w*", r"\battack\w*", r"\bviolence\w*",
+    ),
+    "anger": (r"\bnienawi\w*", r"\bhate\w*", r"\bhatred\w*"),
 }
 THEME_ANCHORS = {
     "anger": (

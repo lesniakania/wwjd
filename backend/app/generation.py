@@ -25,12 +25,30 @@ class GeneratedReflection:
     mode: str
 
 
+@dataclass(frozen=True)
+class GeneratedAnswer:
+    answer: str
+    mode: str
+
+
+class ChatModelUnavailable(RuntimeError):
+    """Raised when a genuine generative conversation cannot be provided."""
+
+
 SYSTEM_PROMPT = """You write a cautious, compassionate Bible-grounded reflection.
 Use only the supplied passages as scriptural evidence. Do not add Bible references or quotations.
 Never claim certainty about what Jesus would do. Distinguish an application from the passage itself.
 Do not advise secrecy, retaliation, or remaining in danger. Professional and emergency help take priority.
 Explain the connection between the situation and the supplied passages; do not merely summarize them.
 Return strict JSON with keys summary (2-4 sentences) and suggested_actions (1-3 short strings)."""
+
+CHAT_SYSTEM_PROMPT = """You continue a conversation that helps a user understand Bible passages.
+Use only the supplied passages as scriptural evidence. Never invent a quotation or Bible reference.
+Directly answer the latest question in 2-5 concise paragraphs. Explain separately what the passage
+says in context and how it may apply; explicitly say when an application goes beyond the text.
+Correct readings that blame an entire group for one person's actions or use a descriptive hostile-nation
+passage as a command about modern ethnic groups. Do not claim certainty about what Jesus would do.
+Do not advise secrecy, retaliation, or remaining in danger. Return strict JSON with key answer."""
 
 
 class ReflectionGenerator:
@@ -88,6 +106,68 @@ class ReflectionGenerator:
         if not summary or not actions:
             raise ValueError("Empty model response")
         return GeneratedReflection(summary, actions, f"hugging-face:{self.settings.hf_model}")
+
+    async def answer_followup(
+        self,
+        situation: str,
+        question: str,
+        history: list[dict[str, str]],
+        results: list[SearchResult],
+        language: Language,
+    ) -> GeneratedAnswer:
+        if not self.settings.hf_token:
+            raise ChatModelUnavailable("HF_TOKEN is not configured")
+        try:
+            return await self._answer_followup_remote(
+                situation, question, history, results, language
+            )
+        except (httpx.HTTPError, KeyError, TypeError, ValueError, json.JSONDecodeError) as error:
+            raise ChatModelUnavailable("The conversation model is unavailable") from error
+
+    async def _answer_followup_remote(
+        self,
+        situation: str,
+        question: str,
+        history: list[dict[str, str]],
+        results: list[SearchResult],
+        language: Language,
+    ) -> GeneratedAnswer:
+        passages = "\n".join(
+            f"[{index}] Selected verse: {result.passage.reference}: {result.passage.text}\n"
+            f"Context: {result.context.reference}: {result.context.text}"
+            for index, result in enumerate(results, start=1)
+        )
+        language_instruction = "Write in Polish." if language == "pl" else "Write in English."
+        messages = [{"role": "system", "content": CHAT_SYSTEM_PROMPT}]
+        messages.extend(history[-8:])
+        messages.append(
+            {
+                "role": "user",
+                "content": (
+                    f"{language_instruction}\nOriginal situation:\n{situation}\n\n"
+                    f"Latest question:\n{question}\n\nSupplied passages:\n{passages}"
+                ),
+            }
+        )
+        payload = {
+            "model": self.settings.hf_model,
+            "messages": messages,
+            "temperature": 0.2,
+            "max_tokens": 650,
+            "response_format": {"type": "json_object"},
+        }
+        headers = {"Authorization": f"Bearer {self.settings.hf_token}"}
+        async with httpx.AsyncClient(timeout=45) as client:
+            response = await client.post(
+                f"{self.settings.hf_base_url.rstrip('/')}/chat/completions",
+                headers=headers,
+                json=payload,
+            )
+            response.raise_for_status()
+        answer = str(json.loads(response.json()["choices"][0]["message"]["content"])["answer"]).strip()
+        if not answer:
+            raise ValueError("Empty model response")
+        return GeneratedAnswer(answer, f"hugging-face:{self.settings.hf_model}")
 
     @staticmethod
     def _generate_local(results: list[SearchResult], language: Language) -> GeneratedReflection:

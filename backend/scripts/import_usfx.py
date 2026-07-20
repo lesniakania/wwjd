@@ -11,7 +11,9 @@ BOOK_NAMES = {
     "DEU": "Deuteronomy", "JOS": "Joshua", "JDG": "Judges", "RUT": "Ruth",
     "1SA": "1 Samuel", "2SA": "2 Samuel", "1KI": "1 Kings", "2KI": "2 Kings",
     "1CH": "1 Chronicles", "2CH": "2 Chronicles", "EZR": "Ezra", "NEH": "Nehemiah",
-    "EST": "Esther", "JOB": "Job", "PSA": "Psalms", "PRO": "Proverbs",
+    "EST": "Esther", "TOB": "Tobit", "JDT": "Judith", "1MA": "1 Maccabees",
+    "2MA": "2 Maccabees", "WIS": "Wisdom", "SIR": "Sirach", "BAR": "Baruch",
+    "JOB": "Job", "PSA": "Psalms", "PRO": "Proverbs",
     "ECC": "Ecclesiastes", "SNG": "Song of Solomon", "ISA": "Isaiah",
     "JER": "Jeremiah", "LAM": "Lamentations", "EZK": "Ezekiel", "DAN": "Daniel",
     "HOS": "Hosea", "JOL": "Joel", "AMO": "Amos", "OBA": "Obadiah", "JON": "Jonah",
@@ -77,7 +79,17 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Convert an eBible USFX file to compact verse JSON")
     parser.add_argument("source", type=Path)
     parser.add_argument("destination", type=Path)
+    parser.add_argument(
+        "--license-manifest", type=Path,
+        help="Required for restricted translations; records written permission and attribution",
+    )
     args = parser.parse_args()
+    if "tysiac" in args.source.name.lower() or "millennium" in args.source.name.lower():
+        if not args.license_manifest or not args.license_manifest.exists():
+            parser.error("Biblia Tysiąclecia import requires an approved license manifest")
+        manifest = json.loads(args.license_manifest.read_text(encoding="utf-8"))
+        if manifest.get("digital_application_permission") is not True:
+            parser.error("License manifest does not approve digital application use")
     verses = parse_usfx(args.source)
     args.destination.parent.mkdir(parents=True, exist_ok=True)
     args.destination.write_text(json.dumps(verses, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
@@ -86,4 +98,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

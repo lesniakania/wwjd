@@ -32,7 +32,14 @@ describe('App', () => {
         sources: [{
           reference: 'Matthew 5:44',
           quotation: 'Love your enemies.',
-          explanation: 'Jesus calls his listeners to answer hostility with active goodwill; this challenges retaliation in the described situation.',
+          literary_type: 'Teaching of Jesus',
+          origin_context: 'Jesus is teaching his disciples and the crowd.',
+          broader_context: 'This forms part of the Sermon on the Mount.',
+          original_meaning: 'Jesus calls his listeners to answer hostility with active goodwill.',
+          situation_application: 'This challenges retaliation in the described situation.',
+          context_sources: ['Matthew 5:1–7:29'],
+          context_confidence: 'high',
+          context_reviewed: true,
           translation: 'World English Bible (WEB)',
           context_note: 'From one of the four Gospels',
           relevance: 'This passage addresses honesty.',
@@ -54,6 +61,6 @@ describe('App', () => {
     expect(await screen.findByText('Choose honesty with compassion.')).toBeTruthy()
     expect(screen.getByText('Matthew 5:44')).toBeTruthy()
     expect(screen.getByText(/Jesus calls his listeners/i)).toBeTruthy()
-    expect(screen.getByText(/show the longer context/i)).toBeTruthy()
+    expect(screen.getByText(/read the complete unit/i)).toBeTruthy()
   })
 })

@@ -20,7 +20,14 @@ class ReflectionRequest(BaseModel):
 class Source(BaseModel):
     reference: str
     quotation: str
-    explanation: str
+    literary_type: str
+    origin_context: str
+    broader_context: str
+    original_meaning: str
+    situation_application: str
+    context_sources: list[str] = Field(default_factory=list)
+    context_confidence: str
+    context_reviewed: bool
     translation: str = "World English Bible (WEB)"
     context_note: str | None = None
     relevance: str

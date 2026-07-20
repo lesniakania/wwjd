@@ -4,6 +4,7 @@ from dataclasses import dataclass
 import httpx
 
 from .config import Settings
+from .context import ContextCard
 from .localization import Language, reference, relevance_note
 from .retrieval import Retriever, SearchResult
 
@@ -24,23 +25,21 @@ class GeneratedReflection:
     actions: list[str]
     mode: str
     source_ids: tuple[str, ...]
-    explanations: dict[str, str]
+    applications: dict[str, str]
 
 
 SYSTEM_PROMPT = """You write a cautious, compassionate Bible-grounded reflection.
 Use only the supplied passages as scriptural evidence. Do not add Bible references or quotations.
 Never claim certainty about what Jesus would do. Distinguish an application from the passage itself.
 Do not advise secrecy, retaliation, or remaining in danger. Professional and emergency help take priority.
-Explain the connection between the situation and the supplied passages; do not merely summarize them.
+The supplied reviewed context cards are the only source of facts about a passage. Do not reconstruct,
+expand, correct, or repeat their historical and literary claims. Write only the modern application.
 Select only 1-3 of the supplied candidate passages. Prefer fewer passages when another candidate adds
 little, is only indirectly related, or requires a strained application. For every selected passage, write
-a clear explanation of exactly four substantive sentences in this order: (1) who is speaking or writing and
-to whom, (2) the immediate narrative or argumentative situation, (3) the passage's original main point, and
-(4) why that point is relevant here and the limit of that application. If the supplied context does not
-establish one of those facts, say so briefly rather than inventing it. Explicitly distinguish original meaning from modern
-application. Return strict JSON with keys: summary (2-4 sentences), suggested_actions (1-3 short strings),
-and selected_sources (an array of 1-3 objects). Every selected source object must contain exactly these
-string fields: id, speaker_and_audience, immediate_context, original_meaning, and situation_application."""
+a natural situation_application of 1-3 sentences explaining why its reviewed original meaning is relevant
+and where that application has limits. Return strict JSON with keys: summary (2-4 sentences),
+suggested_actions (1-3 short strings), and selected_sources (an array of 1-3 objects). Every selected source
+object must contain exactly these string fields: id and situation_application."""
 
 
 class ReflectionGenerator:
@@ -52,12 +51,13 @@ class ReflectionGenerator:
         return "hugging-face" if self.settings.hf_token else "local-extractive"
 
     async def generate(
-        self, situation: str, results: list[SearchResult], language: Language
+        self, situation: str, results: list[SearchResult], language: Language,
+        contexts: dict[str, ContextCard] | None = None,
     ) -> GeneratedReflection:
         if self.settings.hf_token:
             for _ in range(2):
                 try:
-                    return await self._generate_remote(situation, results, language)
+                    return await self._generate_remote(situation, results, language, contexts or {})
                 except (httpx.HTTPError, KeyError, TypeError, ValueError, json.JSONDecodeError):
                     pass
             # A configured remote model is an enhancement, not a hard
@@ -67,14 +67,19 @@ class ReflectionGenerator:
         return self._generate_local(results, language)
 
     async def _generate_remote(
-        self, situation: str, results: list[SearchResult], language: Language
+        self, situation: str, results: list[SearchResult], language: Language,
+        contexts: dict[str, ContextCard],
     ) -> GeneratedReflection:
-        passages = "\n".join(
-            f"[ID {result.passage.book}:{result.passage.chapter}:{result.passage.verse_start}-{result.passage.verse_end}] "
-            f"Selected verse: {result.passage.reference}: {result.passage.text}\n"
-            f"Context: {result.context.reference}: {result.context.text}"
-            for result in results
-        )
+        blocks = []
+        for result in results:
+            source_id = Retriever.source_id(result.passage)
+            card = contexts[source_id]
+            blocks.append(
+                f"[ID {source_id}] Selected verse: {result.passage.reference}: {result.passage.text}\n"
+                f"Reviewed context: {card.origin_context} {card.broader_context}\n"
+                f"Reviewed original meaning: {card.original_meaning}"
+            )
+        passages = "\n".join(blocks)
         language_instruction = "Write in Polish." if language == "pl" else "Write in English."
         user_prompt = (
             f"{language_instruction}\nSituation:\n{situation}\n\nSupplied passages:\n{passages}"
@@ -107,33 +112,20 @@ class ReflectionGenerator:
         }
         selected_sources = data.get("selected_sources", [])
         source_ids: tuple[str, ...] = ()
-        explanations: dict[str, str] = {}
+        applications: dict[str, str] = {}
         if isinstance(selected_sources, list):
             pairs = []
             for item in selected_sources[:3]:
                 if not isinstance(item, dict):
                     continue
                 source_id = self._canonical_source_id(str(item.get("id", "")), valid_ids)
-                parts = [
-                    str(item.get(field, "")).strip()
-                    for field in (
-                        "speaker_and_audience",
-                        "immediate_context",
-                        "original_meaning",
-                        "situation_application",
-                    )
-                ]
-                explanation = " ".join(part for part in parts if part)
-                # Accept the earlier single-field shape from providers that
-                # continue to imitate it despite the updated schema.
-                if not explanation:
-                    explanation = str(item.get("explanation", "")).strip()
-                pairs.append((source_id, explanation))
-            source_ids = tuple(source_id for source_id, explanation in pairs if source_id in valid_ids and explanation)
-            explanations = {
-                source_id: explanation
-                for source_id, explanation in pairs
-                if source_id in valid_ids and explanation
+                application = str(item.get("situation_application", "")).strip()
+                pairs.append((source_id, application))
+            source_ids = tuple(source_id for source_id, application in pairs if source_id in valid_ids and application)
+            applications = {
+                source_id: application
+                for source_id, application in pairs
+                if source_id in valid_ids and application
             }
         # Accept the previous shape during rolling deployments and from models
         # that imitate an earlier response found in their context.
@@ -143,21 +135,21 @@ class ReflectionGenerator:
                 for source_id in data.get("selected_source_ids", [])[:3]
                 if self._canonical_source_id(str(source_id), valid_ids)
             )
-            raw_explanations = data.get("source_explanations", {})
-            if isinstance(raw_explanations, dict):
-                explanations = {
-                    source_id: str(raw_explanations.get(source_id, "")).strip()
+            raw_applications = data.get("source_explanations", {})
+            if isinstance(raw_applications, dict):
+                applications = {
+                    source_id: str(raw_applications.get(source_id, "")).strip()
                     for source_id in source_ids
-                    if str(raw_explanations.get(source_id, "")).strip()
+                    if str(raw_applications.get(source_id, "")).strip()
                 }
-        if not summary or not actions or not source_ids or len(explanations) != len(source_ids):
+        if not summary or not actions or not source_ids or len(applications) != len(source_ids):
             raise ValueError("Empty model response")
         return GeneratedReflection(
             summary,
             actions,
             f"hugging-face:{self.settings.hf_model}",
             source_ids,
-            explanations,
+            applications,
         )
 
     @staticmethod
@@ -215,12 +207,12 @@ class ReflectionGenerator:
             ]
             if secondary_reference:
                 actions.append(f"Porównaj to zastosowanie z perspektywą w {secondary_reference}.")
-            explanations = {
+            applications = {
                 Retriever.source_id(result.passage): relevance_note(result.themes, language)
                 for result in selected_results
             }
             return GeneratedReflection(
-                summary, actions[:3], "local-extractive", tuple(explanations), explanations
+                summary, actions[:3], "local-extractive", tuple(applications), applications
             )
         summary = (
             f"A Bible-grounded approach begins with the principle expressed in {primary_reference}. "
@@ -233,10 +225,10 @@ class ReflectionGenerator:
         ]
         if secondary:
             actions.append(f"Compare that application with the perspective in {secondary_reference}.")
-        explanations = {
+        applications = {
             Retriever.source_id(result.passage): relevance_note(result.themes, language)
             for result in selected_results
         }
         return GeneratedReflection(
-            summary, actions[:3], "local-extractive", tuple(explanations), explanations
+            summary, actions[:3], "local-extractive", tuple(applications), applications
         )

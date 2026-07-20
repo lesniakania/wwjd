@@ -360,6 +360,16 @@ class Retriever:
         text = " ".join(f"[{verse.verse}] {verse.text}" for verse in chapter_verses)
         return Passage(first.book, first.chapter, first.verse, last.verse, text)
 
+    def passage_range(self, book: str, chapter: int, verse_start: int, verse_end: int) -> Passage:
+        verses = [
+            verse for verse in self.verses
+            if verse.book == book and verse.chapter == chapter and verse_start <= verse.verse <= verse_end
+        ]
+        if not verses:
+            raise ValueError(f"Unknown passage range: {book} {chapter}:{verse_start}-{verse_end}")
+        text = " ".join(f"[{verse.verse}] {verse.text}" for verse in verses)
+        return Passage(book, chapter, verses[0].verse, verses[-1].verse, text)
+
     @staticmethod
     def source_id(passage: Passage) -> str:
         return f"{passage.book}:{passage.chapter}:{passage.verse_start}-{passage.verse_end}"

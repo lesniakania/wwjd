@@ -20,7 +20,9 @@ const copy = {
     fallbackError: 'Coś poszło nie tak.', back: 'Zadaj inne pytanie', resultEyebrow: 'Refleksja oparta na źródłach',
     result1: 'Droga', result2: 'naprzód.', safetyTitle: 'Zatrzymaj się i poszukaj natychmiastowego wsparcia', actions: 'Rozważ te kolejne kroki',
     read: 'Przeczytaj samodzielnie', sources: 'Pismo stojące za refleksją', footerBible: 'Cytaty: Uwspółcześniona Biblia Gdańska, © 2018 Fundacja Wrota Nadziei, CC BY-ND 4.0.',
-    selectedVerse: 'Wybrany werset', explanation: 'Co ten fragment znaczy i dlaczego pasuje', passageContext: 'Pokaż dłuższy kontekst',
+    selectedVerse: 'Wybrany werset', contextOrigin: 'Skąd pochodzi ten fragment?', broaderContext: 'Szerszy kontekst',
+    originalMeaning: 'Co znaczył pierwotnie?', application: 'Jak odnosi się do Twojej sytuacji?',
+    passageContext: 'Przeczytaj całą jednostkę', contextSources: 'Podstawa opracowania',
     footerPrivacy: 'Ta aplikacja nie zapisuje opisu Twojej sytuacji.',
   },
   en: {
@@ -32,7 +34,9 @@ const copy = {
     fallbackError: 'Something went wrong.', back: 'Ask another question', resultEyebrow: 'A grounded reflection',
     result1: 'A way', result2: 'forward.', safetyTitle: 'Pause and seek immediate support', actions: 'Consider these next steps',
     read: 'Read it for yourself', sources: 'Scripture behind the reflection', footerBible: 'Scripture quotations from the public-domain World English Bible.',
-    selectedVerse: 'Selected verse', explanation: 'What it means and why it fits', passageContext: 'Show the longer context',
+    selectedVerse: 'Selected verse', contextOrigin: 'Where does this passage come from?', broaderContext: 'The wider context',
+    originalMeaning: 'What did it originally mean?', application: 'How does it relate to your situation?',
+    passageContext: 'Read the complete unit', contextSources: 'Editorial basis',
     footerPrivacy: 'Your situation is not stored by this application.',
   },
 } as const
@@ -154,11 +158,22 @@ function reset() {
               <blockquote class="focus-quote">“{{ source.quotation }}”</blockquote>
               <figcaption>
                 <strong>{{ source.reference }}</strong>
-                <span class="explanation-label">{{ t.explanation }}</span>
-                <p class="explanation">{{ source.explanation }}</p>
+                <span class="context-kind">{{ source.literary_type }}</span>
+                <span class="explanation-label">{{ t.contextOrigin }}</span>
+                <p class="explanation">{{ source.origin_context }}</p>
+                <span class="explanation-label">{{ t.broaderContext }}</span>
+                <p class="explanation">{{ source.broader_context }}</p>
+                <span class="explanation-label">{{ t.originalMeaning }}</span>
+                <p class="explanation">{{ source.original_meaning }}</p>
+                <span class="explanation-label">{{ t.application }}</span>
+                <p class="explanation application">{{ source.situation_application }}</p>
                 <details class="context-block">
                   <summary>{{ t.passageContext }} · {{ source.context_reference }}</summary>
                   <p>{{ source.context_quotation }}</p>
+                </details>
+                <details v-if="source.context_sources.length" class="context-sources">
+                  <summary>{{ t.contextSources }}</summary>
+                  <ul><li v-for="item in source.context_sources" :key="item">{{ item }}</li></ul>
                 </details>
                 <span>{{ source.translation }}</span>
                 <small v-if="source.context_note">{{ source.context_note }}</small>

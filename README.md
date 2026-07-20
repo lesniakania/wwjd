@@ -50,7 +50,7 @@ Copy `.env.example` to `.env` or export the values before starting FastAPI.
 
 The application does not persist user situations. Avoid enabling request-body logging at the proxy or hosting-provider layer. A remote inference provider may have its own retention policy.
 
-## Bible data and retrieval
+## Bible data, literary context, and retrieval
 
 The committed English and Polish corpora were generated from eBible.org's official `engwebp_usfx.zip` and `polubg_usfx.zip` archives. Regenerate either with:
 
@@ -64,6 +64,16 @@ Retrieval uses multilingual Sentence Transformers embeddings together with BM25 
 cd backend
 uv run python scripts/build_indexes.py
 ```
+
+Displayed context comes from versioned, bilingual literary-unit cards in
+`backend/app/data/context_cards.json`. Only cards with explicit human review are used; uncovered
+passages receive a deliberately limited chapter-level fallback. Validate cards or create a draft
+editorial queue with `python backend/scripts/context_cards.py CARD_FILE`.
+
+The importer recognizes the seven deuterocanonical books and the additions carried by Catholic
+Esther and Daniel source files. English can be migrated to the public-domain World English Bible
+Catholic Edition. The Polish production corpus remains the licensed 66-book UBG until written
+digital-use permission for Biblia Tysiąclecia is obtained; no protected text is bundled here.
 
 ## Verification
 

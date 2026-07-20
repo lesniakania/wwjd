@@ -5,6 +5,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import get_settings
+from .context import ContextRegistry
 from .generation import LIMITATIONS_EN, LIMITATIONS_PL, ReflectionGenerator
 from .localization import reference, relevance_note, translation_name
 from .models import HealthResponse, ReflectionRequest, ReflectionResponse, Source
@@ -33,6 +34,7 @@ async def lifespan(app: FastAPI):
         ),
     }
     app.state.generator = ReflectionGenerator(settings)
+    app.state.contexts = ContextRegistry()
     yield
 
 
@@ -64,6 +66,7 @@ async def health(request: Request) -> HealthResponse:
 async def create_reflection(payload: ReflectionRequest, request: Request) -> ReflectionResponse:
     retriever: Retriever = request.app.state.retrievers[payload.language]
     generator: ReflectionGenerator = request.app.state.generator
+    context_registry: ContextRegistry = request.app.state.contexts
     safety = check_safety(payload.situation, payload.language)
     results = retriever.search(payload.situation, limit=6)
     if not results:
@@ -72,14 +75,20 @@ async def create_reflection(payload: ReflectionRequest, request: Request) -> Ref
             else "wisdom love truth compassion"
         )
         results = retriever.search(fallback, limit=3)
-    generated = await generator.generate(payload.situation, results, payload.language)
+    contexts = {
+        Retriever.source_id(result.passage): context_registry.for_passage(result.passage, payload.language)
+        for result in results
+    }
+    generated = await generator.generate(payload.situation, results, payload.language, contexts)
     result_by_id = {Retriever.source_id(result.passage): result for result in results}
     selected_results = [
         result_by_id[source_id]
         for source_id in generated.source_ids
         if source_id in result_by_id
     ]
-    sources = _sources_from_results(selected_results, payload.language, generated.explanations)
+    sources = _sources_from_results(
+        selected_results, payload.language, generated.applications, contexts, retriever
+    )
     return ReflectionResponse(
         summary=generated.summary,
         suggested_actions=generated.actions,
@@ -90,7 +99,7 @@ async def create_reflection(payload: ReflectionRequest, request: Request) -> Ref
     )
 
 
-def _sources_from_results(results, language, explanations):
+def _sources_from_results(results, language, applications, contexts, retriever):
     return [
         Source(
             reference=reference(
@@ -101,7 +110,14 @@ def _sources_from_results(results, language, explanations):
             language,
             ),
             quotation=result.passage.text,
-            explanation=explanations[Retriever.source_id(result.passage)],
+            literary_type=contexts[Retriever.source_id(result.passage)].literary_type,
+            origin_context=contexts[Retriever.source_id(result.passage)].origin_context,
+            broader_context=contexts[Retriever.source_id(result.passage)].broader_context,
+            original_meaning=contexts[Retriever.source_id(result.passage)].original_meaning,
+            situation_application=applications[Retriever.source_id(result.passage)],
+            context_sources=list(contexts[Retriever.source_id(result.passage)].context_sources),
+            context_confidence=contexts[Retriever.source_id(result.passage)].confidence,
+            context_reviewed=contexts[Retriever.source_id(result.passage)].reviewed,
             translation=translation_name(language),
             context_note=(
                 ("Fragment jednej z czterech Ewangelii" if language == "pl" else "From one of the four Gospels")
@@ -110,13 +126,18 @@ def _sources_from_results(results, language, explanations):
             ),
             relevance=relevance_note(result.themes, language),
             context_reference=reference(
-                result.context.book,
-                result.context.chapter,
-                result.context.verse_start,
-                result.context.verse_end,
+                contexts[Retriever.source_id(result.passage)].book,
+                contexts[Retriever.source_id(result.passage)].context_chapter,
+                contexts[Retriever.source_id(result.passage)].context_verse_start,
+                contexts[Retriever.source_id(result.passage)].context_verse_end,
                 language,
             ),
-            context_quotation=result.context.text,
+            context_quotation=retriever.passage_range(
+                contexts[Retriever.source_id(result.passage)].book,
+                contexts[Retriever.source_id(result.passage)].context_chapter,
+                contexts[Retriever.source_id(result.passage)].context_verse_start,
+                contexts[Retriever.source_id(result.passage)].context_verse_end,
+            ).text,
         )
         for result in results
     ]

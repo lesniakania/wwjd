@@ -89,6 +89,11 @@ textarea::placeholder { color: #9a9b91; }
 .source-card figcaption { display: flex; flex-direction: column; gap: 3px; }
 .source-card .relevance { margin: 4px 0 10px; color: #425c53; font-family: 'DM Sans', sans-serif; font-size: 12px; line-height: 1.55; }
 .explanation-label { margin-top: 13px; color: #9c5138 !important; font-size: 9px !important; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
+.context-kind { display: inline-block; margin-top: 13px; color: #52685f; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.application { border-left: 3px solid #9c5138; padding-left: 12px; }
+.context-sources { margin: 5px 0 15px; color: #687872; font-size: 11px; }
+.context-sources summary { cursor: pointer; font-weight: 600; }
+.context-sources ul { margin: 8px 0 0; padding-left: 18px; }
 .source-card .explanation { margin: 6px 0 14px; color: #425c53; font-family: 'DM Sans', sans-serif; font-size: 14px; line-height: 1.65; }
 .context-block { margin: 5px 0 15px; padding: 13px 15px; background: rgba(40, 76, 64, .055); }
 .context-block summary { color: #52685f; cursor: pointer; font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }

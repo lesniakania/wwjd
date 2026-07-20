@@ -25,8 +25,10 @@ def test_reflection_returns_server_owned_sources():
     body = response.json()
     assert body["sources"]
     assert 1 <= len(body["sources"]) <= 3
-    assert all(source["explanation"] for source in body["sources"])
-    assert all(source["translation"] == "World English Bible (WEB)" for source in body["sources"])
+    assert all(source["origin_context"] for source in body["sources"])
+    assert all(source["original_meaning"] for source in body["sources"])
+    assert all(source["situation_application"] for source in body["sources"])
+    assert all("Catholic Edition" in source["translation"] for source in body["sources"])
     assert body["generated_with"] == "local-extractive"
 
 
@@ -63,14 +65,14 @@ def test_polish_is_default_and_returns_polish_scripture():
 
 
 def test_model_can_reduce_candidates_to_one_explained_source(monkeypatch):
-    async def select_one(self, situation, results, language):
+    async def select_one(self, situation, results, language, contexts):
         source_id = Retriever.source_id(results[0].passage)
         return GeneratedReflection(
             summary="One passage is enough here.",
             actions=["Consider its application carefully."],
             mode="hugging-face:test-model",
             source_ids=(source_id,),
-            explanations={source_id: "This explains the passage in context and its limited application."},
+            applications={source_id: "This is a careful and limited application."},
         )
 
     monkeypatch.setattr(ReflectionGenerator, "generate", select_one)
@@ -84,4 +86,4 @@ def test_model_can_reduce_candidates_to_one_explained_source(monkeypatch):
         )
     assert response.status_code == 200
     assert len(response.json()["sources"]) == 1
-    assert "limited application" in response.json()["sources"][0]["explanation"]
+    assert "limited application" in response.json()["sources"][0]["situation_application"]

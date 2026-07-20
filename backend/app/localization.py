@@ -9,7 +9,10 @@ POLISH_BOOKS = {
     "Judges": "Sędziów", "Ruth": "Rut", "1 Samuel": "1 Samuela", "2 Samuel": "2 Samuela",
     "1 Kings": "1 Królewska", "2 Kings": "2 Królewska", "1 Chronicles": "1 Kronik",
     "2 Chronicles": "2 Kronik", "Ezra": "Ezdrasza", "Nehemiah": "Nehemiasza",
-    "Esther": "Estery", "Job": "Hioba", "Psalms": "Psalmów", "Proverbs": "Przysłów",
+    "Esther": "Estery", "Tobit": "Tobiasza", "Judith": "Judyty",
+    "1 Maccabees": "1 Machabejska", "2 Maccabees": "2 Machabejska",
+    "Wisdom": "Mądrości", "Sirach": "Mądrości Syracha", "Baruch": "Barucha",
+    "Job": "Hioba", "Psalms": "Psalmów", "Proverbs": "Przysłów",
     "Ecclesiastes": "Kaznodziei", "Song of Solomon": "Pieśń nad Pieśniami",
     "Isaiah": "Izajasza", "Jeremiah": "Jeremiasza", "Lamentations": "Lamentacje",
     "Ezekiel": "Ezechiela", "Daniel": "Daniela", "Hosea": "Ozeasza", "Joel": "Joela",
@@ -37,7 +40,7 @@ def reference(book: str, chapter: int, verse_start: int, verse_end: int, languag
 def translation_name(language: Language) -> str:
     if language == "pl":
         return "Uwspółcześniona Biblia Gdańska (UBG), © 2018 Fundacja Wrota Nadziei, CC BY-ND 4.0"
-    return "World English Bible (WEB)"
+    return "World English Bible, Catholic Edition (WEBC), public domain"
 
 
 THEME_NAMES = {

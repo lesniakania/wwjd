@@ -1,7 +1,14 @@
 export interface Source {
   reference: string
   quotation: string
-  explanation: string
+  literary_type: string
+  origin_context: string
+  broader_context: string
+  original_meaning: string
+  situation_application: string
+  context_sources: string[]
+  context_confidence: string
+  context_reviewed: boolean
   translation: string
   context_note: string | null
   relevance: string

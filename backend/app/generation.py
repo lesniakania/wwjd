@@ -1,5 +1,7 @@
 import json
+import logging
 import re
+from time import perf_counter
 from dataclasses import dataclass
 
 import httpx
@@ -8,6 +10,9 @@ from .config import Settings
 from .context import ContextCard
 from .localization import Language, reference, relevance_note
 from .retrieval import Retriever, SearchResult
+
+
+logger = logging.getLogger(__name__)
 
 
 LIMITATIONS_EN = (
@@ -68,14 +73,61 @@ class ReflectionGenerator:
         contexts: dict[str, ContextCard] | None = None,
     ) -> GeneratedReflection:
         if self.settings.hf_token:
-            for _ in range(2):
+            for attempt in range(1, 3):
+                started = perf_counter()
                 try:
-                    return await self._generate_remote(situation, results, language, contexts or {})
-                except (httpx.HTTPError, KeyError, TypeError, ValueError, json.JSONDecodeError):
-                    pass
+                    generated = await self._generate_remote(
+                        situation, results, language, contexts or {}
+                    )
+                    logger.info(
+                        "reflection_model completed duration_ms=%.1f attempt=%d model=%s",
+                        (perf_counter() - started) * 1000,
+                        attempt,
+                        self.model_for(language),
+                    )
+                    return generated
+                except httpx.HTTPStatusError as exc:
+                    retryable = exc.response.status_code == 429 or exc.response.status_code >= 500
+                    logger.warning(
+                        "reflection_model failed duration_ms=%.1f attempt=%d model=%s "
+                        "status_code=%d retryable=%s",
+                        (perf_counter() - started) * 1000,
+                        attempt,
+                        self.model_for(language),
+                        exc.response.status_code,
+                        retryable,
+                    )
+                    if not retryable or attempt == 2:
+                        break
+                except httpx.TransportError:
+                    logger.warning(
+                        "reflection_model failed duration_ms=%.1f attempt=%d model=%s "
+                        "error=transport retryable=true",
+                        (perf_counter() - started) * 1000,
+                        attempt,
+                        self.model_for(language),
+                    )
+                    if attempt == 2:
+                        break
+                except (KeyError, TypeError, ValueError, json.JSONDecodeError):
+                    logger.warning(
+                        "reflection_model failed duration_ms=%.1f attempt=%d model=%s "
+                        "error=invalid_response retryable=%s",
+                        (perf_counter() - started) * 1000,
+                        attempt,
+                        self.model_for(language),
+                        attempt == 1,
+                    )
+                    if attempt == 2:
+                        break
             # A configured remote model is an enhancement, not a hard
             # dependency. Keep the endpoint available when the provider is
             # down or returns JSON that does not match the requested schema.
+            logger.warning(
+                "reflection_model using_local_fallback model=%s candidate_count=%d",
+                self.model_for(language),
+                len(results),
+            )
             return self._generate_local(results, language)
         return self._generate_local(results, language)
 
@@ -105,11 +157,11 @@ class ReflectionGenerator:
                 {"role": "user", "content": user_prompt},
             ],
             "temperature": 0.15,
-            "max_tokens": 1200,
+            "max_tokens": self.settings.hf_max_tokens,
             "response_format": {"type": "json_object"},
         }
         headers = {"Authorization": f"Bearer {self.settings.hf_token}"}
-        async with httpx.AsyncClient(timeout=45) as client:
+        async with httpx.AsyncClient(timeout=self.settings.hf_timeout_seconds) as client:
             response = await client.post(
                 f"{self.settings.hf_base_url.rstrip('/')}/chat/completions",
                 headers=headers,

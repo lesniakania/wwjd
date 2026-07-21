@@ -42,7 +42,7 @@ def test_rejects_known_unnatural_polish_constructions():
     )
 
 
-async def test_generation_retries_one_malformed_model_response(monkeypatch):
+async def test_generation_retries_one_transport_error(monkeypatch):
     generator = ReflectionGenerator(Settings(hf_token="test-token", embedding_model=""))
     expected = GeneratedReflection(
         "Summary", ["Action"], "hugging-face:test", ("Luke:10:27-27",),
@@ -54,7 +54,9 @@ async def test_generation_retries_one_malformed_model_response(monkeypatch):
         nonlocal attempts
         attempts += 1
         if attempts == 1:
-            raise ValueError("malformed JSON")
+            import httpx
+
+            raise httpx.ConnectError("temporary connection failure")
         return expected
 
     monkeypatch.setattr(generator, "_generate_remote", flaky_remote)
@@ -62,7 +64,29 @@ async def test_generation_retries_one_malformed_model_response(monkeypatch):
     assert attempts == 2
 
 
-async def test_generation_falls_back_locally_when_remote_model_keeps_failing(monkeypatch):
+async def test_generation_retries_malformed_model_response(monkeypatch):
+    generator = ReflectionGenerator(Settings(hf_token="test-token", embedding_model=""))
+    attempts = 0
+
+    expected = GeneratedReflection(
+        "Summary", ["Action"], "hugging-face:test", ("Luke:10:27-27",),
+        {"Luke:10:27-27": "Explanation"},
+    )
+
+    async def malformed_once(*args):
+        nonlocal attempts
+        attempts += 1
+        if attempts == 1:
+            raise ValueError("malformed JSON")
+        return expected
+
+    monkeypatch.setattr(generator, "_generate_remote", malformed_once)
+
+    assert await generator.generate("A sufficiently long situation", [], "en") == expected
+    assert attempts == 2
+
+
+async def test_generation_falls_back_locally_when_remote_response_is_malformed(monkeypatch):
     generator = ReflectionGenerator(Settings(hf_token="test-token", embedding_model=""))
     attempts = 0
 

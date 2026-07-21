@@ -46,6 +46,8 @@ Copy `.env.example` to `.env` or export the values before starting FastAPI.
 | `HF_MODEL` | `Qwen/Qwen3-4B-Instruct-2507` | Chat model ID |
 | `HF_MODEL_PL` | `speakleash/Bielik-11B-v3.0-Instruct` | Polish-specialized chat model ID |
 | `HF_BASE_URL` | Hugging Face router | OpenAI-compatible endpoint |
+| `HF_MAX_TOKENS` | `1200` | Maximum generated tokens per reflection |
+| `HF_TIMEOUT_SECONDS` | `45` | Timeout for one remote model attempt |
 | `ALLOWED_ORIGINS` | localhost Vite URLs | Comma-separated CORS origins |
 | `MAX_SITUATION_LENGTH` | `3000` | Input limit |
 

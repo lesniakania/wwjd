@@ -1,5 +1,7 @@
 from contextlib import asynccontextmanager
+import logging
 from pathlib import Path
+from time import perf_counter
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,6 +13,9 @@ from .localization import reference, relevance_note, translation_name
 from .models import HealthResponse, ReflectionRequest, ReflectionResponse, Source
 from .retrieval import Retriever, SemanticEncoder
 from .safety import check_safety
+
+
+logger = logging.getLogger(__name__)
 
 
 DATA_PATH = Path(__file__).parent / "data" / "web_verses.json"
@@ -68,6 +73,7 @@ async def create_reflection(payload: ReflectionRequest, request: Request) -> Ref
     generator: ReflectionGenerator = request.app.state.generator
     context_registry: ContextRegistry = request.app.state.contexts
     safety = check_safety(payload.situation, payload.language)
+    retrieval_started = perf_counter()
     results = retriever.search(payload.situation, limit=6)
     if not results:
         fallback = (
@@ -75,6 +81,12 @@ async def create_reflection(payload: ReflectionRequest, request: Request) -> Ref
             else "wisdom love truth compassion"
         )
         results = retriever.search(fallback, limit=3)
+    logger.info(
+        "reflection_retrieval completed duration_ms=%.1f language=%s result_count=%d",
+        (perf_counter() - retrieval_started) * 1000,
+        payload.language,
+        len(results),
+    )
     contexts = {
         Retriever.source_id(result.passage): context_registry.for_passage(result.passage, payload.language)
         for result in results

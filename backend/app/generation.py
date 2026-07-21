@@ -1,4 +1,5 @@
 import json
+import re
 from dataclasses import dataclass
 
 import httpx
@@ -32,6 +33,9 @@ SYSTEM_PROMPT = """You write a cautious, compassionate Bible-grounded reflection
 Use only the supplied passages as scriptural evidence. Do not add Bible references or quotations.
 Never claim certainty about what Jesus would do. Distinguish an application from the passage itself.
 Do not advise secrecy, retaliation, or remaining in danger. Professional and emergency help take priority.
+Write natural, idiomatic prose in the requested language. In Polish, proofread every sentence for correct
+case, agreement, and inflection before returning it. Use plain text only: never use Markdown, asterisks,
+headings, or emphasis markers in any JSON string.
 The supplied reviewed context cards are the only source of facts about a passage. Do not reconstruct,
 expand, correct, or repeat their historical and literary claims. Write only the modern application.
 Select only 1-3 of the supplied candidate passages. Prefer fewer passages when another candidate adds
@@ -39,7 +43,13 @@ little, is only indirectly related, or requires a strained application. For ever
 a natural situation_application of 1-3 sentences explaining why its reviewed original meaning is relevant
 and where that application has limits. Return strict JSON with keys: summary (2-4 sentences),
 suggested_actions (1-3 short strings), and selected_sources (an array of 1-3 objects). Every selected source
-object must contain exactly these string fields: id and situation_application."""
+object must contain exactly these string fields: id and situation_application.
+The situation_application must contain exactly two short sentences. State the connection directly in the
+first sentence. In the second, give a natural qualification beginning with "Nie oznacza to jednak, że..."
+in Polish or "This does not mean that..." in English. Never refer to the text as "aplikacja", "application",
+"powyższy fragment", or "the above passage". Prefer ordinary verbs and concrete language. In Polish write
+"wchodzić w konflikt", never "się wchodzić w konflikt"; write "nie ulegać fałszywym informacjom", never
+"nieprzywilejować się wobec informacji"."""
 
 
 class ReflectionGenerator:
@@ -49,6 +59,9 @@ class ReflectionGenerator:
     @property
     def mode(self) -> str:
         return "hugging-face" if self.settings.hf_token else "local-extractive"
+
+    def model_for(self, language: Language) -> str:
+        return self.settings.hf_model_pl if language == "pl" else self.settings.hf_model
 
     async def generate(
         self, situation: str, results: list[SearchResult], language: Language,
@@ -84,13 +97,14 @@ class ReflectionGenerator:
         user_prompt = (
             f"{language_instruction}\nSituation:\n{situation}\n\nSupplied passages:\n{passages}"
         )
+        model = self.model_for(language)
         payload = {
-            "model": self.settings.hf_model,
+            "model": model,
             "messages": [
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": user_prompt},
             ],
-            "temperature": 0.0,
+            "temperature": 0.15,
             "max_tokens": 1200,
             "response_format": {"type": "json_object"},
         }
@@ -104,8 +118,8 @@ class ReflectionGenerator:
             response.raise_for_status()
         content = str(response.json()["choices"][0]["message"]["content"])
         data = self._parse_json_content(content)
-        summary = str(data["summary"]).strip()
-        actions = [str(action).strip() for action in data["suggested_actions"]][:3]
+        summary = self._plain_text(data["summary"])
+        actions = [self._plain_text(action) for action in data["suggested_actions"]][:3]
         valid_ids = {
             Retriever.source_id(result.passage)
             for result in results
@@ -119,7 +133,9 @@ class ReflectionGenerator:
                 if not isinstance(item, dict):
                     continue
                 source_id = self._canonical_source_id(str(item.get("id", "")), valid_ids)
-                application = str(item.get("situation_application", "")).strip()
+                application = self._plain_text(item.get("situation_application", ""))
+                if language == "pl" and self._has_unnatural_polish(application):
+                    raise ValueError("Unnatural Polish application")
                 pairs.append((source_id, application))
             source_ids = tuple(source_id for source_id, application in pairs if source_id in valid_ids and application)
             applications = {
@@ -147,7 +163,7 @@ class ReflectionGenerator:
         return GeneratedReflection(
             summary,
             actions,
-            f"hugging-face:{self.settings.hf_model}",
+            f"hugging-face:{model}",
             source_ids,
             applications,
         )
@@ -168,6 +184,32 @@ class ReflectionGenerator:
         if not isinstance(parsed, dict):
             raise ValueError("Model response is not a JSON object")
         return parsed
+
+    @staticmethod
+    def _plain_text(value: object) -> str:
+        """Defensively remove common Markdown emphasis leaked by chat providers."""
+        if isinstance(value, (list, tuple)):
+            return " ".join(
+                part
+                for item in value
+                if (part := ReflectionGenerator._plain_text(item))
+            )
+        text = str(value).strip()
+        text = re.sub(r"\*\*(.+?)\*\*|__(.+?)__", lambda match: match.group(1) or match.group(2), text)
+        return text.replace("`", "").strip()
+
+    @staticmethod
+    def _has_unnatural_polish(text: str) -> bool:
+        lowered = text.lower()
+        rejected = (
+            "aplikacja ma ograniczenia",
+            "powinien się wchodzić",
+            "powinna się wchodzić",
+            "powinni się wchodzić",
+            "nieprzywilejowania się",
+            "nieprzywilejować się",
+        )
+        return any(phrase in lowered for phrase in rejected)
 
     @staticmethod
     def _canonical_source_id(source_id: str, valid_ids: set[str]) -> str:

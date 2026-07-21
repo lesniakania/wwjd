@@ -58,7 +58,8 @@ describe('App', () => {
       'My friend hurt me and I am unsure how to respond with kindness.',
     )
     await fireEvent.click(screen.getByRole('button', { name: /find a way forward/i }))
-    expect(await screen.findByText('Choose honesty with compassion.')).toBeTruthy()
+    expect(await screen.findByRole('heading', { name: /Bible passages and their context/i })).toBeTruthy()
+    expect(screen.queryByText('Choose honesty with compassion.')).toBeNull()
     expect(screen.getByText('Matthew 5:44')).toBeTruthy()
     expect(screen.getByText(/Jesus calls his listeners/i)).toBeTruthy()
     expect(screen.getByText(/read the complete unit/i)).toBeTruthy()

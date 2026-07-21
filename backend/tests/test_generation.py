@@ -18,6 +18,30 @@ def test_model_source_id_accepts_omitted_repeated_end_verse():
     ) == "Proverbs:18:13-13"
 
 
+def test_generated_copy_is_normalized_to_plain_text():
+    assert ReflectionGenerator._plain_text(
+        "Działaj z **miłosierdziem**, nie z `nienawiścią`."
+    ) == "Działaj z miłosierdziem, nie z nienawiścią."
+
+
+def test_generated_sentence_array_is_joined_as_plain_text():
+    assert ReflectionGenerator._plain_text(
+        ["Pierwsze zdanie.", "Drugie **zdanie**."]
+    ) == "Pierwsze zdanie. Drugie zdanie."
+
+
+def test_rejects_known_unnatural_polish_constructions():
+    assert ReflectionGenerator._has_unnatural_polish(
+        "Aplikacja ma ograniczenia – nie oznacza, że każdy powinien się wchodzić w konflikty."
+    )
+    assert ReflectionGenerator._has_unnatural_polish(
+        "Tekst zachęca do nieprzywilejowania się wobec fałszywych informacji."
+    )
+    assert not ReflectionGenerator._has_unnatural_polish(
+        "Nie oznacza to jednak, że każdy powinien wchodzić w cudzy konflikt."
+    )
+
+
 async def test_generation_retries_one_malformed_model_response(monkeypatch):
     generator = ReflectionGenerator(Settings(hf_token="test-token", embedding_model=""))
     expected = GeneratedReflection(

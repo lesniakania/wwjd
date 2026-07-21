@@ -19,7 +19,7 @@ const copy = {
     tips: ['Najpierw opisz fakty, a potem własną interpretację.', 'Napisz, jaką decyzję próbujesz podjąć.', 'Wspomnij, komu ta decyzja może pomóc lub zaszkodzić.', 'Pomiń imiona, adresy i dane pozwalające zidentyfikować osoby.'],
     fallbackError: 'Coś poszło nie tak.', back: 'Zadaj inne pytanie', resultEyebrow: 'Refleksja oparta na źródłach',
     result1: 'Droga', result2: 'naprzód.', safetyTitle: 'Zatrzymaj się i poszukaj natychmiastowego wsparcia', actions: 'Rozważ te kolejne kroki',
-    read: 'Przeczytaj samodzielnie', sources: 'Pismo stojące za refleksją', footerBible: 'Cytaty: Uwspółcześniona Biblia Gdańska, © 2018 Fundacja Wrota Nadziei, CC BY-ND 4.0.',
+    read: 'Przeczytaj i zobacz szersze znaczenie', sources: 'Fragmenty Biblii i ich kontekst', footerBible: 'Cytaty: Uwspółcześniona Biblia Gdańska, © 2018 Fundacja Wrota Nadziei, CC BY-ND 4.0.',
     selectedVerse: 'Wybrany werset', contextOrigin: 'Skąd pochodzi ten fragment?', broaderContext: 'Szerszy kontekst',
     originalMeaning: 'Co znaczył pierwotnie?', application: 'Jak odnosi się do Twojej sytuacji?',
     passageContext: 'Przeczytaj całą jednostkę', contextSources: 'Podstawa opracowania',
@@ -33,7 +33,7 @@ const copy = {
     tips: ['Describe the facts before your interpretation of them.', 'Include the decision you are trying to make.', 'Mention who may be helped or harmed by the decision.', 'Leave out names, addresses, and identifying details.'],
     fallbackError: 'Something went wrong.', back: 'Ask another question', resultEyebrow: 'A grounded reflection',
     result1: 'A way', result2: 'forward.', safetyTitle: 'Pause and seek immediate support', actions: 'Consider these next steps',
-    read: 'Read it for yourself', sources: 'Scripture behind the reflection', footerBible: 'Scripture quotations from the public-domain World English Bible.',
+    read: 'Read and explore the wider meaning', sources: 'Bible passages and their context', footerBible: 'Scripture quotations from the public-domain World English Bible.',
     selectedVerse: 'Selected verse', contextOrigin: 'Where does this passage come from?', broaderContext: 'The wider context',
     originalMeaning: 'What did it originally mean?', application: 'How does it relate to your situation?',
     passageContext: 'Read the complete unit', contextSources: 'Editorial basis',
@@ -129,23 +129,11 @@ function reset() {
 
       <section v-else class="result" aria-live="polite">
         <button class="back-button" type="button" @click="reset">← {{ t.back }}</button>
-        <div class="result-heading">
-          <div class="eyebrow"><span></span> {{ t.resultEyebrow }}</div>
-          <h1>{{ t.result1 }}<br /><em>{{ t.result2 }}</em></h1>
-        </div>
 
         <div v-if="reflection.safety_message" class="safety" role="alert">
           <strong>{{ t.safetyTitle }}</strong>
           <p>{{ reflection.safety_message }}</p>
         </div>
-
-        <article class="reflection-card">
-          <p class="summary">{{ reflection.summary }}</p>
-          <h2>{{ t.actions }}</h2>
-          <ol>
-            <li v-for="action in reflection.suggested_actions" :key="action">{{ action }}</li>
-          </ol>
-        </article>
 
         <section class="sources" aria-labelledby="sources-title">
           <div class="section-heading">

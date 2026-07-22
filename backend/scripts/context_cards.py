@@ -55,7 +55,8 @@ def main() -> None:
             json.dumps(draft_queue(args.references), ensure_ascii=False, indent=2) + "\n",
             encoding="utf-8",
         )
-    print(f"Validated {len(rows)} reviewed context cards")
+    reviewed = sum(row.get("reviewed") is True for row in rows)
+    print(f"Validated {len(rows)} context cards ({reviewed} reviewed, {len(rows) - reviewed} drafts)")
 
 
 if __name__ == "__main__":

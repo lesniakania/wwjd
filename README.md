@@ -73,6 +73,13 @@ Displayed context comes from versioned, bilingual literary-unit cards in
 passages receive a deliberately limited chapter-level fallback. Validate cards or create a draft
 editorial queue with `python backend/scripts/context_cards.py CARD_FILE`.
 
+To prepare a broad 200-card target set from public-domain BSB literary headings, run
+`generate_context_card_drafts.py` with `--prepare-only`. Removing that flag generates bilingual
+drafts through the configured Hugging Face model. Generated cards always remain `reviewed: false`
+until a human editor approves them. The committed `context_card_generation_queue.json` contains
+the current 177-unit expansion plan; it covers 72 books, while the existing Sirach card completes
+coverage of all 73 Catholic-canon books.
+
 The importer recognizes the seven deuterocanonical books and the additions carried by Catholic
 Esther and Daniel source files. English can be migrated to the public-domain World English Bible
 Catholic Edition. The Polish production corpus remains the licensed 66-book UBG until written

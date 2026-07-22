@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 
 from app.context import ContextRegistry
-from app.retrieval import Passage
+from app.retrieval import Passage, THEME_ANCHORS
 
 
 def test_proverbs_18_is_a_reviewed_wisdom_saying_not_a_scene():
@@ -23,12 +23,18 @@ def test_unreviewed_passage_uses_an_honest_stable_fallback():
     assert "Nie mamy jeszcze zatwierdzonej karty" in first.origin_context
 
 
-def test_only_explicitly_reviewed_cards_are_publishable():
+def test_draft_cards_are_not_published():
     rows = json.loads(
         (Path(__file__).parents[1] / "app" / "data" / "context_cards.json").read_text()
     )
     assert rows
-    assert all(row.get("reviewed") is True for row in rows)
+    draft = next(row for row in rows if row.get("reviewed") is False)
+    card = ContextRegistry().for_passage(
+        Passage(draft["book"], draft["chapter_start"], draft["verse_start"], draft["verse_start"], ""),
+        "pl",
+    )
+    assert card.reviewed is False
+    assert card.fallback is True
 
 
 def test_cards_represent_non_narrative_and_deuterocanonical_genres():
@@ -38,3 +44,11 @@ def test_cards_represent_non_narrative_and_deuterocanonical_genres():
     sirach = registry.for_passage(Passage("Sirach", 11, 8, 8, ""), "en")
     assert sirach.reviewed is True
     assert "not a saying of Jesus of Nazareth" in sirach.origin_context
+
+
+def test_every_theme_anchor_has_a_reviewed_card_or_editorial_draft():
+    registry = ContextRegistry()
+    for anchors in THEME_ANCHORS.values():
+        for book, chapter, verse_start, _ in anchors:
+            point = Passage(book, chapter, verse_start, verse_start, "")
+            assert any(registry._contains(row, point) for row in registry.rows), point.reference

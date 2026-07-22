@@ -16,9 +16,9 @@ const consentStorageKey = 'wwjd-analytics-consent'
 
 const copy = {
   pl: {
-    header: 'Refleksja oparta na Biblii', eyebrow: 'Chwila na zatrzymanie', title1: 'Co zrobiłby', title2: 'Jezus?',
+    appTitle: 'Co na to Jezus?', homeLabel: 'Co na to Jezus? — strona główna', header: 'Refleksja oparta na Biblii', eyebrow: 'Chwila na zatrzymanie', title1: 'Co na to', title2: 'Jezus?',
     intro: 'Opisz, z czym się mierzysz. Odszukamy odpowiednie fragmenty Pisma i zaproponujemy przemyślaną, praktyczną refleksję — opartą na tekście, nie na pewności.',
-    label: 'Co zrobiłby Jezus?', placeholder: 'Zmagam się z trudną decyzją w pracy…', privacy: 'Opisz sytuację bez prywatnych danych innych osób.',
+    label: 'Co na to Jezus?', placeholder: 'Zmagam się z trudną decyzją w pracy…', privacy: 'Opisz sytuację bez prywatnych danych innych osób.',
     submit: 'Znajdź drogę naprzód', loading: 'Szukam odpowiedzi…', tipsTitle: 'Jaśniejszy opis sytuacji pozwala stworzyć bardziej pomocną refleksję',
     tips: ['Najpierw opisz fakty, a potem własną interpretację.', 'Napisz, jaką decyzję próbujesz podjąć.', 'Wspomnij, komu ta decyzja może pomóc lub zaszkodzić.', 'Pomiń imiona, adresy i dane pozwalające zidentyfikować osoby.'],
     fallbackError: 'Coś poszło nie tak.', back: 'Zadaj inne pytanie', resultEyebrow: 'Refleksja oparta na źródłach',
@@ -32,7 +32,7 @@ const copy = {
     analyticsAccept: 'Zgadzam się', analyticsReject: 'Nie, dziękuję',
   },
   en: {
-    header: 'A Bible-grounded reflection', eyebrow: 'A moment to pause', title1: 'What would', title2: 'Jesus do?',
+    appTitle: 'What would Jesus do?', homeLabel: 'What would Jesus do? — home', header: 'A Bible-grounded reflection', eyebrow: 'A moment to pause', title1: 'What would', title2: 'Jesus do?',
     intro: 'Describe what you are facing. We’ll look for relevant Scripture and offer a thoughtful, practical reflection—grounded in the text, not certainty.',
     label: 'What would Jesus do?', placeholder: 'I’m struggling with a decision at work...', privacy: 'Share the situation, not anyone’s private details.',
     submit: 'Find a way forward', loading: 'Reflecting…', tipsTitle: 'A clearer situation leads to a more useful reflection',
@@ -77,7 +77,10 @@ function setLanguage(next: Language) {
   trackEvent('language_changed', { language: next })
 }
 
-watch(language, (value) => document.documentElement.setAttribute('lang', value), { immediate: true })
+watch(language, (value) => {
+  document.documentElement.setAttribute('lang', value)
+  document.title = copy[value].appTitle
+}, { immediate: true })
 
 function reset() {
   reflection.value = null
@@ -104,9 +107,9 @@ onMounted(() => {
 <template>
   <div class="page-shell">
     <header class="site-header">
-      <a class="wordmark" href="#" aria-label="WWJD home">
+      <a class="wordmark" href="#" :aria-label="t.homeLabel">
         <span class="wordmark-mark">W</span>
-        <span>WWJD</span>
+        <span>{{ t.appTitle }}</span>
       </a>
       <div class="header-actions">
         <span class="header-note">{{ t.header }}</span>

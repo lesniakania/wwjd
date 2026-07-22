@@ -11,16 +11,20 @@ afterEach(() => {
 describe('App', () => {
   it('guides the user before submission', () => {
     render(App)
-    expect(screen.getByRole('heading', { name: /co zrobiłby jezus/i })).toBeTruthy()
-    expect(screen.getByLabelText('Co zrobiłby Jezus?')).toBeTruthy()
+    expect(screen.getByRole('link', { name: /Co na to Jezus.*strona główna/ })).toBeTruthy()
+    expect(screen.getByRole('heading', { name: /co na to jezus/i })).toBeTruthy()
+    expect(screen.getByLabelText('Co na to Jezus?')).toBeTruthy()
+    expect(document.title).toBe('Co na to Jezus?')
     expect(screen.getByText(/najpierw opisz fakty/i)).toBeTruthy()
   })
 
   it('switches between Polish and English', async () => {
     render(App)
     await fireEvent.click(screen.getByRole('button', { name: 'EN' }))
+    expect(screen.getByRole('link', { name: /What would Jesus do.*home/ })).toBeTruthy()
     expect(screen.getByRole('heading', { name: /what would jesus do/i })).toBeTruthy()
     expect(screen.getByLabelText('What would Jesus do?')).toBeTruthy()
+    expect(document.title).toBe('What would Jesus do?')
   })
 
   it('renders a grounded response', async () => {

@@ -1,171 +1,289 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
-import { createShare, getShare, requestReflection, type Reflection } from './api'
-import { analyticsIsConfigured, enableAnalytics, trackEvent } from './analytics'
+import { computed, onMounted, ref, watch } from "vue";
+import { Link2, Share2 } from "@lucide/vue";
+import {
+  createShare,
+  getShare,
+  requestReflection,
+  type Reflection,
+} from "./api";
+import {
+  analyticsIsConfigured,
+  enableAnalytics,
+  trackEvent,
+} from "./analytics";
 
-const maxLength = 3000
-type Language = 'pl' | 'en'
-const language = ref<Language>('pl')
-const situation = ref('')
-const reflection = ref<Reflection | null>(null)
-const loading = ref(false)
-const error = ref('')
-const isSharedView = ref(false)
-const sharing = ref(false)
-const shareStatus = ref('')
-const shareUrl = ref('')
-type AnalyticsConsent = 'accepted' | 'rejected' | null
-const analyticsConsent = ref<AnalyticsConsent>(null)
-const consentStorageKey = 'wwjd-analytics-consent'
+const maxLength = 3000;
+type Language = "pl" | "en";
+const language = ref<Language>("pl");
+const situation = ref("");
+const reflection = ref<Reflection | null>(null);
+const loading = ref(false);
+const error = ref("");
+const isSharedView = ref(false);
+const sharing = ref(false);
+const shareStatus = ref("");
+const shareUrl = ref("");
+type AnalyticsConsent = "accepted" | "rejected" | null;
+const analyticsConsent = ref<AnalyticsConsent>(null);
+const consentStorageKey = "wwjd-analytics-consent";
 
 const copy = {
   pl: {
-    appTitle: 'Co na to Jezus?', homeLabel: 'Co na to Jezus? — strona główna', header: 'Refleksja oparta na Biblii', eyebrow: 'Chwila na zatrzymanie', title1: 'Co na to', title2: 'Jezus?',
-    intro: 'Opisz, z czym się mierzysz. Odszukamy odpowiednie fragmenty Pisma i zaproponujemy przemyślaną, praktyczną refleksję — opartą na tekście, nie na pewności.',
-    label: 'Co na to Jezus?', placeholder: 'Zmagam się z trudną decyzją w pracy…', privacy: 'Opisz sytuację bez prywatnych danych innych osób.',
-    submit: 'Znajdź drogę naprzód', loading: 'Szukam odpowiedzi…', tipsTitle: 'Jaśniejszy opis sytuacji pozwala stworzyć bardziej pomocną refleksję',
-    tips: ['Najpierw opisz fakty, a potem własną interpretację.', 'Napisz, jaką decyzję próbujesz podjąć.', 'Wspomnij, komu ta decyzja może pomóc lub zaszkodzić.', 'Pomiń imiona, adresy i dane pozwalające zidentyfikować osoby.'],
-    fallbackError: 'Coś poszło nie tak.', back: 'Zadaj inne pytanie', resultEyebrow: 'Refleksja oparta na źródłach',
-    result1: 'Droga', result2: 'naprzód.', safetyTitle: 'Zatrzymaj się i poszukaj natychmiastowego wsparcia', actions: 'Rozważ te kolejne kroki',
-    read: 'Przeczytaj i zobacz szersze znaczenie', sources: 'Fragmenty Biblii i ich kontekst', footerBible: 'Cytaty: Uwspółcześniona Biblia Gdańska, © 2018 Fundacja Wrota Nadziei, CC BY-ND 4.0.',
-    selectedVerse: 'Wybrany werset', contextOrigin: 'Skąd pochodzi ten fragment?', broaderContext: 'Szerszy kontekst',
-    originalMeaning: 'Co znaczył pierwotnie?', application: 'Jak odnosi się do Twojej sytuacji?',
-    passageContext: 'Przeczytaj całą jednostkę', contextSources: 'Podstawa opracowania',
-    footerPrivacy: 'Opis sytuacji zapisujemy tylko wtedy, gdy świadomie utworzysz link do udostępnienia.',
-    analyticsText: 'Czy zgadzasz się na anonimową analitykę, która pomaga nam ulepszać aplikację? Nie wysyłamy treści Twoich pytań.',
-    analyticsAccept: 'Zgadzam się', analyticsReject: 'Nie, dziękuję',
-    question: 'Twoje pytanie', sharedQuestion: 'Udostępnione pytanie', share: 'Udostępnij', sharing: 'Tworzę link…', shared: 'Link skopiowany', ready: 'Link jest gotowy',
-    sharePrivacy: 'Każda osoba z linkiem zobaczy to pytanie i odpowiedź.', sharedBadge: 'Udostępniona odpowiedź',
+    appTitle: "Co na to Jezus?",
+    homeLabel: "Co na to Jezus? — strona główna",
+    header: "Refleksja oparta na Biblii",
+    eyebrow: "Chwila na zatrzymanie",
+    title1: "Co na to",
+    title2: "Jezus?",
+    intro:
+      "Opisz, z czym się mierzysz. Odszukamy odpowiednie fragmenty Pisma i zaproponujemy przemyślaną, praktyczną refleksję opartą na Biblii.",
+    label: "Co na to Jezus?",
+    placeholder: "Zmagam się z trudną decyzją w pracy…",
+    privacy: "Opisz sytuację bez prywatnych danych innych osób.",
+    submit: "Znajdź drogę naprzód",
+    loading: "Szukam odpowiedzi…",
+    tipsTitle:
+      "Jaśniejszy opis sytuacji pozwala stworzyć bardziej pomocną refleksję",
+    tips: [
+      "Najpierw opisz fakty, a potem własną interpretację.",
+      "Staraj się unikać oceniających określeń i osądów.",
+      "Pomiń imiona, adresy i dane pozwalające zidentyfikować osoby.",
+    ],
+    fallbackError: "Coś poszło nie tak.",
+    back: "Zadaj inne pytanie",
+    resultEyebrow: "Refleksja oparta na źródłach",
+    result1: "Droga",
+    result2: "naprzód.",
+    safetyTitle: "Zatrzymaj się i poszukaj natychmiastowego wsparcia",
+    actions: "Rozważ te kolejne kroki",
+    read: "Przeczytaj i zobacz szersze znaczenie",
+    sources: "Fragmenty Biblii i ich kontekst",
+    footerBible:
+      "Cytaty: Uwspółcześniona Biblia Gdańska, © 2018 Fundacja Wrota Nadziei, CC BY-ND 4.0.",
+    selectedVerse: "Wybrany werset",
+    contextOrigin: "Skąd pochodzi ten fragment?",
+    broaderContext: "Szerszy kontekst",
+    originalMeaning: "Co znaczył pierwotnie?",
+    application: "Jak odnosi się do Twojej sytuacji?",
+    passageContext: "Przeczytaj całą jednostkę",
+    contextSources: "Podstawa opracowania",
+    footerPrivacy:
+      "Opis sytuacji zapisujemy tylko wtedy, gdy świadomie utworzysz link do udostępnienia.",
+    analyticsText:
+      "Czy zgadzasz się na anonimową analitykę, która pomaga nam ulepszać aplikację? Nie wysyłamy treści Twoich pytań.",
+    analyticsAccept: "Zgadzam się",
+    analyticsReject: "Nie, dziękuję",
+    question: "Twoje pytanie",
+    sharedQuestion: "Udostępnione pytanie",
+    share: "Udostępnij",
+    sharing: "Tworzę link…",
+    shared: "Link skopiowany",
+    ready: "Link jest gotowy",
+    sharePrivacy: "Każda osoba z linkiem zobaczy to pytanie i odpowiedź.",
+    sharedBadge: "Udostępniona odpowiedź",
   },
   en: {
-    appTitle: 'What would Jesus do?', homeLabel: 'What would Jesus do? — home', header: 'A Bible-grounded reflection', eyebrow: 'A moment to pause', title1: 'What would', title2: 'Jesus do?',
-    intro: 'Describe what you are facing. We’ll look for relevant Scripture and offer a thoughtful, practical reflection—grounded in the text, not certainty.',
-    label: 'What would Jesus do?', placeholder: 'I’m struggling with a decision at work...', privacy: 'Share the situation, not anyone’s private details.',
-    submit: 'Find a way forward', loading: 'Reflecting…', tipsTitle: 'A clearer situation leads to a more useful reflection',
-    tips: ['Describe the facts before your interpretation of them.', 'Include the decision you are trying to make.', 'Mention who may be helped or harmed by the decision.', 'Leave out names, addresses, and identifying details.'],
-    fallbackError: 'Something went wrong.', back: 'Ask another question', resultEyebrow: 'A grounded reflection',
-    result1: 'A way', result2: 'forward.', safetyTitle: 'Pause and seek immediate support', actions: 'Consider these next steps',
-    read: 'Read and explore the wider meaning', sources: 'Bible passages and their context', footerBible: 'Scripture quotations from the public-domain World English Bible.',
-    selectedVerse: 'Selected verse', contextOrigin: 'Where does this passage come from?', broaderContext: 'The wider context',
-    originalMeaning: 'What did it originally mean?', application: 'How does it relate to your situation?',
-    passageContext: 'Read the complete unit', contextSources: 'Editorial basis',
-    footerPrivacy: 'Your situation is stored only when you explicitly create a share link.',
-    analyticsText: 'Do you agree to anonymous analytics that helps us improve the application? We never send the content of your questions.',
-    analyticsAccept: 'Accept', analyticsReject: 'No, thanks',
-    question: 'Your question', sharedQuestion: 'Shared question', share: 'Share', sharing: 'Creating link…', shared: 'Link copied', ready: 'Link is ready',
-    sharePrivacy: 'Anyone with the link can see this question and response.', sharedBadge: 'Shared response',
+    appTitle: "What would Jesus do?",
+    homeLabel: "What would Jesus do? — home",
+    header: "A Bible-grounded reflection",
+    eyebrow: "A moment to pause",
+    title1: "What would",
+    title2: "Jesus do?",
+    intro:
+      "Describe what you are facing. We’ll look for relevant Scripture and offer a thoughtful, practical reflection based on the Bible.",
+    label: "What would Jesus do?",
+    placeholder: "I’m struggling with a decision at work...",
+    privacy: "Share the situation, not anyone’s private details.",
+    submit: "Find a way forward",
+    loading: "Reflecting…",
+    tipsTitle: "A clearer situation leads to a more useful reflection",
+    tips: [
+      "Describe the facts before your interpretation of them.",
+      "Try to avoid judgmental language and assumptions.",
+      "Leave out names, addresses, and identifying details.",
+    ],
+    fallbackError: "Something went wrong.",
+    back: "Ask another question",
+    resultEyebrow: "A grounded reflection",
+    result1: "A way",
+    result2: "forward.",
+    safetyTitle: "Pause and seek immediate support",
+    actions: "Consider these next steps",
+    read: "Read and explore the wider meaning",
+    sources: "Bible passages and their context",
+    footerBible:
+      "Scripture quotations from the public-domain World English Bible.",
+    selectedVerse: "Selected verse",
+    contextOrigin: "Where does this passage come from?",
+    broaderContext: "The wider context",
+    originalMeaning: "What did it originally mean?",
+    application: "How does it relate to your situation?",
+    passageContext: "Read the complete unit",
+    contextSources: "Editorial basis",
+    footerPrivacy:
+      "Your situation is stored only when you explicitly create a share link.",
+    analyticsText:
+      "Do you agree to anonymous analytics that helps us improve the application? We never send the content of your questions.",
+    analyticsAccept: "Accept",
+    analyticsReject: "No, thanks",
+    question: "Your question",
+    sharedQuestion: "Shared question",
+    share: "Share",
+    sharing: "Creating link…",
+    shared: "Link copied",
+    ready: "Link is ready",
+    sharePrivacy: "Anyone with the link can see this question and response.",
+    sharedBadge: "Shared response",
   },
-} as const
+} as const;
 
-const t = computed(() => copy[language.value])
+const t = computed(() => copy[language.value]);
 
-const canSubmit = computed(() => situation.value.trim().length >= 20 && !loading.value)
+const canSubmit = computed(
+  () => situation.value.trim().length >= 20 && !loading.value,
+);
 
 async function submit() {
-  if (!canSubmit.value) return
-  loading.value = true
-  trackEvent('reflection_requested', { language: language.value })
-  error.value = ''
-  reflection.value = null
+  if (!canSubmit.value) return;
+  loading.value = true;
+  trackEvent("reflection_requested", { language: language.value });
+  error.value = "";
+  reflection.value = null;
   try {
-    reflection.value = await requestReflection(situation.value.trim(), language.value)
-    trackEvent('reflection_received', { language: language.value, source_count: reflection.value.sources.length })
+    reflection.value = await requestReflection(
+      situation.value.trim(),
+      language.value,
+    );
+    trackEvent("reflection_received", {
+      language: language.value,
+      source_count: reflection.value.sources.length,
+    });
   } catch (caught) {
-    trackEvent('reflection_error', { language: language.value })
-    error.value = caught instanceof Error ? caught.message : t.value.fallbackError
+    trackEvent("reflection_error", { language: language.value });
+    error.value =
+      caught instanceof Error ? caught.message : t.value.fallbackError;
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 
 function setLanguage(next: Language) {
-  language.value = next
-  reflection.value = null
-  error.value = ''
-  trackEvent('language_changed', { language: next })
+  language.value = next;
+  reflection.value = null;
+  error.value = "";
+  trackEvent("language_changed", { language: next });
 }
 
-watch(language, (value) => {
-  document.documentElement.setAttribute('lang', value)
-  document.title = copy[value].appTitle
-}, { immediate: true })
+watch(
+  language,
+  (value) => {
+    document.documentElement.setAttribute("lang", value);
+    document.title = copy[value].appTitle;
+  },
+  { immediate: true },
+);
 
 function reset() {
   if (isSharedView.value) {
-    window.location.href = '/'
-    return
+    window.location.href = "/";
+    return;
   }
-  reflection.value = null
-  error.value = ''
-  situation.value = ''
+  reflection.value = null;
+  error.value = "";
+  situation.value = "";
 }
 
 async function shareReflection() {
-  if (!reflection.value || sharing.value) return
-  sharing.value = true
-  shareStatus.value = ''
+  if (!reflection.value || sharing.value) return;
+  sharing.value = true;
+  shareStatus.value = "";
   try {
     if (!shareUrl.value) {
-      const id = await createShare(situation.value, language.value, reflection.value)
-      shareUrl.value = `${window.location.origin}/share/${id}`
+      const id = await createShare(
+        situation.value,
+        language.value,
+        reflection.value,
+      );
+      shareUrl.value = `${window.location.origin}/share/${id}`;
     }
     if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(shareUrl.value)
-      shareStatus.value = t.value.shared
+      await navigator.clipboard.writeText(shareUrl.value);
+      shareStatus.value = t.value.shared;
     } else {
-      shareStatus.value = t.value.ready
+      shareStatus.value = t.value.ready;
     }
-    trackEvent('reflection_shared', { language: language.value })
+    trackEvent("reflection_shared", { language: language.value });
   } catch (caught) {
-    shareStatus.value = caught instanceof Error ? caught.message : t.value.fallbackError
+    shareStatus.value =
+      caught instanceof Error ? caught.message : t.value.fallbackError;
   } finally {
-    sharing.value = false
+    sharing.value = false;
   }
 }
 
 function setAnalyticsConsent(value: Exclude<AnalyticsConsent, null>) {
-  analyticsConsent.value = value
-  localStorage.setItem(consentStorageKey, value)
-  if (value === 'accepted') enableAnalytics()
+  analyticsConsent.value = value;
+  localStorage.setItem(consentStorageKey, value);
+  if (value === "accepted") enableAnalytics();
 }
 
 onMounted(async () => {
-  const match = window.location.pathname.match(/^\/share\/([^/]+)\/?$/)
+  const match = window.location.pathname.match(/^\/share\/([^/]+)\/?$/);
   if (match) {
-    loading.value = true
+    loading.value = true;
     try {
-      const shared = await getShare(match[1])
-      language.value = shared.language
-      situation.value = shared.situation
-      reflection.value = shared.reflection
-      isSharedView.value = true
+      const shared = await getShare(match[1]);
+      language.value = shared.language;
+      situation.value = shared.situation;
+      reflection.value = shared.reflection;
+      isSharedView.value = true;
     } catch (caught) {
-      error.value = caught instanceof Error ? caught.message : copy.pl.fallbackError
+      error.value =
+        caught instanceof Error ? caught.message : copy.pl.fallbackError;
     } finally {
-      loading.value = false
+      loading.value = false;
     }
   }
-  if (!analyticsIsConfigured()) return
-  const savedConsent = localStorage.getItem(consentStorageKey)
-  if (savedConsent === 'accepted' || savedConsent === 'rejected') {
-    analyticsConsent.value = savedConsent
-    if (savedConsent === 'accepted') enableAnalytics()
+  if (!analyticsIsConfigured()) return;
+  const savedConsent = localStorage.getItem(consentStorageKey);
+  if (savedConsent === "accepted" || savedConsent === "rejected") {
+    analyticsConsent.value = savedConsent;
+    if (savedConsent === "accepted") enableAnalytics();
   }
-})
+});
 </script>
 
 <template>
   <div class="page-shell">
     <header class="site-header">
       <a class="wordmark" href="#" :aria-label="t.homeLabel">
-        <span class="wordmark-mark">W</span>
+        <span class="wordmark-mark">J</span>
         <span>{{ t.appTitle }}</span>
       </a>
       <div class="header-actions">
         <span class="header-note">{{ t.header }}</span>
-        <div v-if="!isSharedView" class="language-switch" aria-label="Language / Język">
-          <button type="button" :class="{ active: language === 'pl' }" :aria-pressed="language === 'pl'" @click="setLanguage('pl')">PL</button>
-          <button type="button" :class="{ active: language === 'en' }" :aria-pressed="language === 'en'" @click="setLanguage('en')">EN</button>
+        <div
+          v-if="!isSharedView"
+          class="language-switch"
+          aria-label="Language / Język"
+        >
+          <button
+            type="button"
+            :class="{ active: language === 'pl' }"
+            :aria-pressed="language === 'pl'"
+            @click="setLanguage('pl')"
+          >
+            PL
+          </button>
+          <button
+            type="button"
+            :class="{ active: language === 'en' }"
+            :aria-pressed="language === 'en'"
+            @click="setLanguage('en')"
+          >
+            EN
+          </button>
         </div>
       </div>
     </header>
@@ -173,7 +291,9 @@ onMounted(async () => {
     <main>
       <section v-if="!reflection" class="hero" aria-labelledby="page-title">
         <div class="eyebrow"><span></span> {{ t.eyebrow }}</div>
-        <h1 id="page-title">{{ t.title1 }}<br /><em>{{ t.title2 }}</em></h1>
+        <h1 id="page-title">
+          {{ t.title1 }}<br /><em>{{ t.title2 }}</em>
+        </h1>
         <p class="intro">{{ t.intro }}</p>
 
         <form class="prompt-card" @submit.prevent="submit">
@@ -208,21 +328,47 @@ onMounted(async () => {
       </section>
 
       <section v-else class="result" aria-live="polite">
-        <button class="back-button" type="button" @click="reset">← {{ t.back }}</button>
+        <button class="back-button" type="button" @click="reset">
+          ← {{ t.back }}
+        </button>
 
         <div class="result-tools">
-          <span v-if="isSharedView" class="shared-badge">{{ t.sharedBadge }}</span>
+          <span v-if="isSharedView" class="shared-badge">{{
+            t.sharedBadge
+          }}</span>
           <template v-else>
-            <button class="share-button" type="button" :disabled="sharing" @click="shareReflection">
-              {{ sharing ? t.sharing : t.share }} ↗
-            </button>
-            <span class="share-privacy">{{ shareStatus || t.sharePrivacy }}</span>
-            <a v-if="shareUrl" class="share-link" :href="shareUrl">{{ shareUrl }}</a>
+            <div class="share-controls">
+              <button
+                class="share-button"
+                type="button"
+                :disabled="sharing"
+                @click="shareReflection"
+              >
+                {{ sharing ? t.sharing : t.share }}
+                <Share2 v-if="!sharing" class="share-icon" aria-hidden="true" />
+              </button>
+              <span class="share-privacy">{{ t.sharePrivacy }}</span>
+              <a v-if="shareUrl" class="share-link" :href="shareUrl">
+                <Link2 class="share-link-icon" aria-hidden="true" />
+                <span class="share-link-url">{{ shareUrl }}</span>
+                <span v-if="shareStatus" class="share-link-status" role="status">{{
+                  shareStatus
+                }}</span>
+              </a>
+              <span v-else-if="shareStatus" class="share-status" role="status">{{
+                shareStatus
+              }}</span>
+            </div>
           </template>
         </div>
 
-        <section class="shared-question" aria-labelledby="shared-question-title">
-          <span id="shared-question-title">{{ isSharedView ? t.sharedQuestion : t.question }}</span>
+        <section
+          class="shared-question"
+          aria-labelledby="shared-question-title"
+        >
+          <span id="shared-question-title">{{
+            isSharedView ? t.sharedQuestion : t.question
+          }}</span>
           <p>{{ situation }}</p>
         </section>
 
@@ -237,9 +383,15 @@ onMounted(async () => {
             <h2 id="sources-title">{{ t.sources }}</h2>
           </div>
           <div class="source-grid">
-            <figure v-for="source in reflection.sources" :key="source.reference" class="source-card">
+            <figure
+              v-for="source in reflection.sources"
+              :key="source.reference"
+              class="source-card"
+            >
               <span class="quote-label">{{ t.selectedVerse }}</span>
-              <blockquote class="focus-quote">“{{ source.quotation }}”</blockquote>
+              <blockquote class="focus-quote">
+                “{{ source.quotation }}”
+              </blockquote>
               <figcaption>
                 <strong>{{ source.reference }}</strong>
                 <span class="context-kind">{{ source.literary_type }}</span>
@@ -250,17 +402,30 @@ onMounted(async () => {
                 <span class="explanation-label">{{ t.originalMeaning }}</span>
                 <p class="explanation">{{ source.original_meaning }}</p>
                 <span class="explanation-label">{{ t.application }}</span>
-                <p class="explanation application">{{ source.situation_application }}</p>
+                <p class="explanation application">
+                  {{ source.situation_application }}
+                </p>
                 <details class="context-block">
-                  <summary>{{ t.passageContext }} · {{ source.context_reference }}</summary>
+                  <summary>
+                    {{ t.passageContext }} · {{ source.context_reference }}
+                  </summary>
                   <p>{{ source.context_quotation }}</p>
                 </details>
-                <details v-if="source.context_sources.length" class="context-sources">
+                <details
+                  v-if="source.context_sources.length"
+                  class="context-sources"
+                >
                   <summary>{{ t.contextSources }}</summary>
-                  <ul><li v-for="item in source.context_sources" :key="item">{{ item }}</li></ul>
+                  <ul>
+                    <li v-for="item in source.context_sources" :key="item">
+                      {{ item }}
+                    </li>
+                  </ul>
                 </details>
                 <span>{{ source.translation }}</span>
-                <small v-if="source.context_note">{{ source.context_note }}</small>
+                <small v-if="source.context_note">{{
+                  source.context_note
+                }}</small>
               </figcaption>
             </figure>
           </div>
@@ -275,11 +440,23 @@ onMounted(async () => {
       <span>{{ t.footerPrivacy }}</span>
     </footer>
 
-    <aside v-if="analyticsIsConfigured() && analyticsConsent === null" class="analytics-consent" aria-label="Google Analytics">
+    <aside
+      v-if="analyticsIsConfigured() && analyticsConsent === null"
+      class="analytics-consent"
+      aria-label="Google Analytics"
+    >
       <p>{{ t.analyticsText }}</p>
       <div>
-        <button type="button" class="consent-accept" @click="setAnalyticsConsent('accepted')">{{ t.analyticsAccept }}</button>
-        <button type="button" @click="setAnalyticsConsent('rejected')">{{ t.analyticsReject }}</button>
+        <button
+          type="button"
+          class="consent-accept"
+          @click="setAnalyticsConsent('accepted')"
+        >
+          {{ t.analyticsAccept }}
+        </button>
+        <button type="button" @click="setAnalyticsConsent('rejected')">
+          {{ t.analyticsReject }}
+        </button>
       </div>
     </aside>
   </div>

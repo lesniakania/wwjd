@@ -68,4 +68,30 @@ describe('App', () => {
     expect(screen.getByText(/Jesus calls his listeners/i)).toBeTruthy()
     expect(screen.getByText(/read the complete unit/i)).toBeTruthy()
   })
+
+  it('creates and copies a share link for the exact response', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } })
+    const reflection = {
+      summary: 'Choose honesty.', suggested_actions: ['Speak truthfully.'], safety_message: null,
+      limitations: 'A reflection.', generated_with: 'local-extractive',
+      sources: [{
+        reference: 'Matthew 5:44', quotation: 'Love your enemies.', literary_type: 'Teaching',
+        origin_context: 'A sermon.', broader_context: 'The wider sermon.', original_meaning: 'Active goodwill.',
+        situation_application: 'Do not retaliate.', context_sources: [], context_confidence: 'high',
+        context_reviewed: true, translation: 'WEB', context_note: null, relevance: 'Relevant.',
+        context_reference: 'Matthew 5:43–45', context_quotation: 'Love your enemies.',
+      }],
+    }
+    vi.stubGlobal('fetch', vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => reflection })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ id: 'safe-share-id' }) }))
+    render(App)
+    await fireEvent.update(screen.getByLabelText('Co na to Jezus?'), 'Przyjaciel mnie zranił i nie wiem, jak odpowiedzieć z miłością.')
+    await fireEvent.click(screen.getByRole('button', { name: /znajdź drogę naprzód/i }))
+    await screen.findByText('Matthew 5:44')
+    await fireEvent.click(screen.getByRole('button', { name: /^udostępnij/i }))
+    expect(await screen.findByText('Link skopiowany')).toBeTruthy()
+    expect(writeText).toHaveBeenCalledWith(`${window.location.origin}/share/safe-share-id`)
+  })
 })

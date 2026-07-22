@@ -25,6 +25,13 @@ export interface Reflection {
   generated_with: string
 }
 
+export interface SharedReflection {
+  id: string
+  situation: string
+  language: 'pl' | 'en'
+  reflection: Reflection
+}
+
 export async function requestReflection(situation: string, language: 'pl' | 'en'): Promise<Reflection> {
   const response = await fetch('/api/reflections', {
     method: 'POST',
@@ -40,4 +47,22 @@ export async function requestReflection(situation: string, language: 'pl' | 'en'
     throw new Error(body?.detail || (language === 'pl' ? 'Nie udało się przygotować refleksji. Spróbuj ponownie.' : 'The reflection could not be prepared. Please try again.'))
   }
   return response.json() as Promise<Reflection>
+}
+
+
+export async function createShare(situation: string, language: 'pl' | 'en', reflection: Reflection): Promise<string> {
+  const response = await fetch('/api/shares', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ situation, language, reflection }),
+  })
+  if (!response.ok) throw new Error(language === 'pl' ? 'Nie udało się utworzyć linku.' : 'The share link could not be created.')
+  const body = await response.json() as { id: string }
+  return body.id
+}
+
+export async function getShare(id: string): Promise<SharedReflection> {
+  const response = await fetch(`/api/shares/${encodeURIComponent(id)}`)
+  if (!response.ok) throw new Error('Nie znaleziono udostępnionej odpowiedzi. / Shared response not found.')
+  return response.json() as Promise<SharedReflection>
 }

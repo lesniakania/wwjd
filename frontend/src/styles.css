@@ -67,6 +67,15 @@ textarea::placeholder { color: #9a9b91; }
 
 .result { padding: 60px 0 90px; }
 .back-button { padding: 8px 0; color: #667970; background: none; border: 0; font-size: 13px; }
+.result-tools { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 12px; margin-top: -32px; }
+.share-button { padding: 9px 14px; color: #fff; background: #284c40; border: 0; border-radius: 3px; font-size: 12px; font-weight: 600; }
+.share-button:disabled { opacity: .55; }
+.share-privacy { max-width: 280px; color: #7c847d; font-size: 10px; line-height: 1.35; }
+.share-link { width: 100%; color: #52685f; overflow-wrap: anywhere; text-align: right; font-size: 10px; }
+.shared-badge { color: #9c5138; font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
+.shared-question { max-width: 820px; margin: 54px auto 0; padding: 24px 28px; background: rgba(255, 253, 247, .64); border-left: 3px solid #9c5138; }
+.shared-question span { color: #9c5138; font-size: 9px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
+.shared-question p { margin: 10px 0 0; color: #425c53; font-family: 'Libre Caslon Display', Georgia, serif; font-size: 20px; line-height: 1.5; }
 .result-heading { margin: 62px 0 50px; text-align: center; }
 .result-heading h1 { font-size: clamp(60px, 8vw, 100px); }
 .safety { max-width: 820px; margin: 0 auto 24px; padding: 22px 25px; color: #682f29; background: #f4dfd5; border-left: 4px solid #a94836; }
@@ -120,6 +129,7 @@ footer { min-height: 78px; gap: 20px; color: #7e877f; border-top: 1px solid rgba
   .tips ul, .source-grid { grid-template-columns: 1fr; }
   .tips { padding-inline: 8px; }
   .result { padding-top: 35px; }
+  .result-tools { align-items: flex-end; flex-direction: column; margin-top: 10px; }
   .result-heading { margin-top: 44px; }
   .sources { margin-top: 65px; }
   footer { padding: 20px 0; flex-direction: column; align-items: flex-start; justify-content: center; }

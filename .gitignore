@@ -8,3 +8,5 @@ frontend/node_modules/
 frontend/dist/
 backend/app/data/*.npy
 backend/app/data/models/
+shared_reflections.db
+backend/shared_reflections.db

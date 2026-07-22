@@ -87,3 +87,47 @@ def test_model_can_reduce_candidates_to_one_explained_source(monkeypatch):
     assert response.status_code == 200
     assert len(response.json()["sources"]) == 1
     assert "limited application" in response.json()["sources"][0]["situation_application"]
+
+
+def test_shared_reflection_is_an_exact_snapshot(tmp_path):
+    from app.config import get_settings
+
+    original_path = get_settings().share_database_path
+    get_settings().share_database_path = str(tmp_path / "shares.db")
+    try:
+        with TestClient(app) as client:
+            reflection = client.post(
+                "/api/reflections",
+                json={
+                    "situation": "A friend hurt me and I want to respond with honesty and compassion.",
+                    "language": "en",
+                },
+            ).json()
+            created = client.post(
+                "/api/shares",
+                json={
+                    "situation": "A friend hurt me and I want to respond with honesty and compassion.",
+                    "language": "en",
+                    "reflection": reflection,
+                },
+            )
+            fetched = client.get(f"/api/shares/{created.json()['id']}")
+        assert created.status_code == 201
+        assert fetched.status_code == 200
+        assert fetched.json()["reflection"] == reflection
+        assert fetched.json()["situation"].startswith("A friend hurt me")
+    finally:
+        get_settings().share_database_path = original_path
+
+
+def test_missing_shared_reflection_returns_404(tmp_path):
+    from app.config import get_settings
+
+    original_path = get_settings().share_database_path
+    get_settings().share_database_path = str(tmp_path / "shares.db")
+    try:
+        with TestClient(app) as client:
+            response = client.get("/api/shares/not-a-real-id")
+        assert response.status_code == 404
+    finally:
+        get_settings().share_database_path = original_path

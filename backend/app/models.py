@@ -48,3 +48,25 @@ class HealthResponse(BaseModel):
     status: str
     verses: int
     generation_mode: str
+
+
+class SharedReflectionRequest(BaseModel):
+    situation: str = Field(min_length=20)
+    language: Language = "pl"
+    reflection: ReflectionResponse
+
+    @field_validator("situation")
+    @classmethod
+    def clean_shared_situation(cls, value: str) -> str:
+        cleaned = " ".join(value.split())
+        if len(cleaned) > get_settings().max_situation_length:
+            raise ValueError("Situation is too long")
+        return cleaned
+
+
+class SharedReflectionResponse(SharedReflectionRequest):
+    id: str
+
+
+class ShareCreatedResponse(BaseModel):
+    id: str

@@ -1,16 +1,27 @@
 from contextlib import asynccontextmanager
 import logging
 from pathlib import Path
+import json
+import secrets
+import sqlite3
 from time import perf_counter
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import get_settings
 from .context import ContextRegistry
 from .generation import LIMITATIONS_EN, LIMITATIONS_PL, ReflectionGenerator
 from .localization import reference, relevance_note, translation_name
-from .models import HealthResponse, ReflectionRequest, ReflectionResponse, Source
+from .models import (
+    HealthResponse,
+    ReflectionRequest,
+    ReflectionResponse,
+    ShareCreatedResponse,
+    SharedReflectionRequest,
+    SharedReflectionResponse,
+    Source,
+)
 from .retrieval import Retriever, SemanticEncoder
 from .safety import check_safety
 
@@ -109,6 +120,42 @@ async def create_reflection(payload: ReflectionRequest, request: Request) -> Ref
         limitations=LIMITATIONS_PL if payload.language == "pl" else LIMITATIONS_EN,
         generated_with=generated.mode,
     )
+
+
+def _share_database() -> sqlite3.Connection:
+    connection = sqlite3.connect(get_settings().share_database_path)
+    connection.execute(
+        """CREATE TABLE IF NOT EXISTS shared_reflections (
+        id TEXT PRIMARY KEY,
+        payload TEXT NOT NULL,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )"""
+    )
+    return connection
+
+
+@app.post("/api/shares", response_model=ShareCreatedResponse, status_code=201)
+async def create_share(payload: SharedReflectionRequest) -> ShareCreatedResponse:
+    share_id = secrets.token_urlsafe(16)
+    with _share_database() as connection:
+        connection.execute(
+            "INSERT INTO shared_reflections (id, payload) VALUES (?, ?)",
+            (share_id, payload.model_dump_json()),
+        )
+    return ShareCreatedResponse(id=share_id)
+
+
+@app.get("/api/shares/{share_id}", response_model=SharedReflectionResponse)
+async def get_share(share_id: str) -> SharedReflectionResponse:
+    if len(share_id) > 64:
+        raise HTTPException(status_code=404, detail="Shared reflection not found")
+    with _share_database() as connection:
+        row = connection.execute(
+            "SELECT payload FROM shared_reflections WHERE id = ?", (share_id,)
+        ).fetchone()
+    if row is None:
+        raise HTTPException(status_code=404, detail="Shared reflection not found")
+    return SharedReflectionResponse(id=share_id, **json.loads(row[0]))
 
 
 def _sources_from_results(results, language, applications, contexts, retriever):

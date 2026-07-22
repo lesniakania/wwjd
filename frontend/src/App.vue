@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { requestReflection, type Reflection } from './api'
+import { createShare, getShare, requestReflection, type Reflection } from './api'
 import { analyticsIsConfigured, enableAnalytics, trackEvent } from './analytics'
 
 const maxLength = 3000
@@ -10,6 +10,10 @@ const situation = ref('')
 const reflection = ref<Reflection | null>(null)
 const loading = ref(false)
 const error = ref('')
+const isSharedView = ref(false)
+const sharing = ref(false)
+const shareStatus = ref('')
+const shareUrl = ref('')
 type AnalyticsConsent = 'accepted' | 'rejected' | null
 const analyticsConsent = ref<AnalyticsConsent>(null)
 const consentStorageKey = 'wwjd-analytics-consent'
@@ -27,9 +31,11 @@ const copy = {
     selectedVerse: 'Wybrany werset', contextOrigin: 'Skąd pochodzi ten fragment?', broaderContext: 'Szerszy kontekst',
     originalMeaning: 'Co znaczył pierwotnie?', application: 'Jak odnosi się do Twojej sytuacji?',
     passageContext: 'Przeczytaj całą jednostkę', contextSources: 'Podstawa opracowania',
-    footerPrivacy: 'Ta aplikacja nie zapisuje opisu Twojej sytuacji.',
+    footerPrivacy: 'Opis sytuacji zapisujemy tylko wtedy, gdy świadomie utworzysz link do udostępnienia.',
     analyticsText: 'Czy zgadzasz się na anonimową analitykę, która pomaga nam ulepszać aplikację? Nie wysyłamy treści Twoich pytań.',
     analyticsAccept: 'Zgadzam się', analyticsReject: 'Nie, dziękuję',
+    question: 'Twoje pytanie', sharedQuestion: 'Udostępnione pytanie', share: 'Udostępnij', sharing: 'Tworzę link…', shared: 'Link skopiowany', ready: 'Link jest gotowy',
+    sharePrivacy: 'Każda osoba z linkiem zobaczy to pytanie i odpowiedź.', sharedBadge: 'Udostępniona odpowiedź',
   },
   en: {
     appTitle: 'What would Jesus do?', homeLabel: 'What would Jesus do? — home', header: 'A Bible-grounded reflection', eyebrow: 'A moment to pause', title1: 'What would', title2: 'Jesus do?',
@@ -43,9 +49,11 @@ const copy = {
     selectedVerse: 'Selected verse', contextOrigin: 'Where does this passage come from?', broaderContext: 'The wider context',
     originalMeaning: 'What did it originally mean?', application: 'How does it relate to your situation?',
     passageContext: 'Read the complete unit', contextSources: 'Editorial basis',
-    footerPrivacy: 'Your situation is not stored by this application.',
+    footerPrivacy: 'Your situation is stored only when you explicitly create a share link.',
     analyticsText: 'Do you agree to anonymous analytics that helps us improve the application? We never send the content of your questions.',
     analyticsAccept: 'Accept', analyticsReject: 'No, thanks',
+    question: 'Your question', sharedQuestion: 'Shared question', share: 'Share', sharing: 'Creating link…', shared: 'Link copied', ready: 'Link is ready',
+    sharePrivacy: 'Anyone with the link can see this question and response.', sharedBadge: 'Shared response',
   },
 } as const
 
@@ -83,9 +91,36 @@ watch(language, (value) => {
 }, { immediate: true })
 
 function reset() {
+  if (isSharedView.value) {
+    window.location.href = '/'
+    return
+  }
   reflection.value = null
   error.value = ''
   situation.value = ''
+}
+
+async function shareReflection() {
+  if (!reflection.value || sharing.value) return
+  sharing.value = true
+  shareStatus.value = ''
+  try {
+    if (!shareUrl.value) {
+      const id = await createShare(situation.value, language.value, reflection.value)
+      shareUrl.value = `${window.location.origin}/share/${id}`
+    }
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(shareUrl.value)
+      shareStatus.value = t.value.shared
+    } else {
+      shareStatus.value = t.value.ready
+    }
+    trackEvent('reflection_shared', { language: language.value })
+  } catch (caught) {
+    shareStatus.value = caught instanceof Error ? caught.message : t.value.fallbackError
+  } finally {
+    sharing.value = false
+  }
 }
 
 function setAnalyticsConsent(value: Exclude<AnalyticsConsent, null>) {
@@ -94,7 +129,22 @@ function setAnalyticsConsent(value: Exclude<AnalyticsConsent, null>) {
   if (value === 'accepted') enableAnalytics()
 }
 
-onMounted(() => {
+onMounted(async () => {
+  const match = window.location.pathname.match(/^\/share\/([^/]+)\/?$/)
+  if (match) {
+    loading.value = true
+    try {
+      const shared = await getShare(match[1])
+      language.value = shared.language
+      situation.value = shared.situation
+      reflection.value = shared.reflection
+      isSharedView.value = true
+    } catch (caught) {
+      error.value = caught instanceof Error ? caught.message : copy.pl.fallbackError
+    } finally {
+      loading.value = false
+    }
+  }
   if (!analyticsIsConfigured()) return
   const savedConsent = localStorage.getItem(consentStorageKey)
   if (savedConsent === 'accepted' || savedConsent === 'rejected') {
@@ -113,7 +163,7 @@ onMounted(() => {
       </a>
       <div class="header-actions">
         <span class="header-note">{{ t.header }}</span>
-        <div class="language-switch" aria-label="Language / Język">
+        <div v-if="!isSharedView" class="language-switch" aria-label="Language / Język">
           <button type="button" :class="{ active: language === 'pl' }" :aria-pressed="language === 'pl'" @click="setLanguage('pl')">PL</button>
           <button type="button" :class="{ active: language === 'en' }" :aria-pressed="language === 'en'" @click="setLanguage('en')">EN</button>
         </div>
@@ -159,6 +209,22 @@ onMounted(() => {
 
       <section v-else class="result" aria-live="polite">
         <button class="back-button" type="button" @click="reset">← {{ t.back }}</button>
+
+        <div class="result-tools">
+          <span v-if="isSharedView" class="shared-badge">{{ t.sharedBadge }}</span>
+          <template v-else>
+            <button class="share-button" type="button" :disabled="sharing" @click="shareReflection">
+              {{ sharing ? t.sharing : t.share }} ↗
+            </button>
+            <span class="share-privacy">{{ shareStatus || t.sharePrivacy }}</span>
+            <a v-if="shareUrl" class="share-link" :href="shareUrl">{{ shareUrl }}</a>
+          </template>
+        </div>
+
+        <section class="shared-question" aria-labelledby="shared-question-title">
+          <span id="shared-question-title">{{ isSharedView ? t.sharedQuestion : t.question }}</span>
+          <p>{{ situation }}</p>
+        </section>
 
         <div v-if="reflection.safety_message" class="safety" role="alert">
           <strong>{{ t.safetyTitle }}</strong>

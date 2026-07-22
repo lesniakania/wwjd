@@ -105,6 +105,12 @@ textarea::placeholder { color: #9a9b91; }
 
 footer { min-height: 78px; gap: 20px; color: #7e877f; border-top: 1px solid rgba(32, 54, 47, .15); font-size: 10px; }
 
+.analytics-consent { position: fixed; right: 20px; bottom: 20px; z-index: 10; width: min(430px, calc(100% - 40px)); padding: 20px; color: #f7f1e7; background: #284c40; border-radius: 4px; box-shadow: 0 14px 45px rgba(25, 43, 37, .3); }
+.analytics-consent p { margin: 0 0 16px; font-size: 13px; line-height: 1.55; }
+.analytics-consent div { display: flex; gap: 10px; }
+.analytics-consent button { padding: 9px 13px; color: #f7f1e7; background: transparent; border: 1px solid rgba(247, 241, 231, .5); border-radius: 3px; font-size: 12px; }
+.analytics-consent .consent-accept { color: #284c40; background: #f7f1e7; border-color: #f7f1e7; font-weight: 600; }
+
 @media (max-width: 680px) {
   .site-header, main, footer { width: min(100% - 28px, 1180px); }
   .header-note { display: none; }

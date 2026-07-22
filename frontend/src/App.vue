@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { requestReflection, type Reflection } from './api'
+import { analyticsIsConfigured, enableAnalytics, trackEvent } from './analytics'
 
 const maxLength = 3000
 type Language = 'pl' | 'en'
@@ -9,6 +10,9 @@ const situation = ref('')
 const reflection = ref<Reflection | null>(null)
 const loading = ref(false)
 const error = ref('')
+type AnalyticsConsent = 'accepted' | 'rejected' | null
+const analyticsConsent = ref<AnalyticsConsent>(null)
+const consentStorageKey = 'wwjd-analytics-consent'
 
 const copy = {
   pl: {
@@ -24,6 +28,8 @@ const copy = {
     originalMeaning: 'Co znaczył pierwotnie?', application: 'Jak odnosi się do Twojej sytuacji?',
     passageContext: 'Przeczytaj całą jednostkę', contextSources: 'Podstawa opracowania',
     footerPrivacy: 'Ta aplikacja nie zapisuje opisu Twojej sytuacji.',
+    analyticsText: 'Czy zgadzasz się na anonimową analitykę, która pomaga nam ulepszać aplikację? Nie wysyłamy treści Twoich pytań.',
+    analyticsAccept: 'Zgadzam się', analyticsReject: 'Nie, dziękuję',
   },
   en: {
     header: 'A Bible-grounded reflection', eyebrow: 'A moment to pause', title1: 'What would', title2: 'Jesus do?',
@@ -38,6 +44,8 @@ const copy = {
     originalMeaning: 'What did it originally mean?', application: 'How does it relate to your situation?',
     passageContext: 'Read the complete unit', contextSources: 'Editorial basis',
     footerPrivacy: 'Your situation is not stored by this application.',
+    analyticsText: 'Do you agree to anonymous analytics that helps us improve the application? We never send the content of your questions.',
+    analyticsAccept: 'Accept', analyticsReject: 'No, thanks',
   },
 } as const
 
@@ -48,11 +56,14 @@ const canSubmit = computed(() => situation.value.trim().length >= 20 && !loading
 async function submit() {
   if (!canSubmit.value) return
   loading.value = true
+  trackEvent('reflection_requested', { language: language.value })
   error.value = ''
   reflection.value = null
   try {
     reflection.value = await requestReflection(situation.value.trim(), language.value)
+    trackEvent('reflection_received', { language: language.value, source_count: reflection.value.sources.length })
   } catch (caught) {
+    trackEvent('reflection_error', { language: language.value })
     error.value = caught instanceof Error ? caught.message : t.value.fallbackError
   } finally {
     loading.value = false
@@ -63,6 +74,7 @@ function setLanguage(next: Language) {
   language.value = next
   reflection.value = null
   error.value = ''
+  trackEvent('language_changed', { language: next })
 }
 
 watch(language, (value) => document.documentElement.setAttribute('lang', value), { immediate: true })
@@ -72,6 +84,21 @@ function reset() {
   error.value = ''
   situation.value = ''
 }
+
+function setAnalyticsConsent(value: Exclude<AnalyticsConsent, null>) {
+  analyticsConsent.value = value
+  localStorage.setItem(consentStorageKey, value)
+  if (value === 'accepted') enableAnalytics()
+}
+
+onMounted(() => {
+  if (!analyticsIsConfigured()) return
+  const savedConsent = localStorage.getItem(consentStorageKey)
+  if (savedConsent === 'accepted' || savedConsent === 'rejected') {
+    analyticsConsent.value = savedConsent
+    if (savedConsent === 'accepted') enableAnalytics()
+  }
+})
 </script>
 
 <template>
@@ -178,5 +205,13 @@ function reset() {
       <span>{{ t.footerBible }}</span>
       <span>{{ t.footerPrivacy }}</span>
     </footer>
+
+    <aside v-if="analyticsIsConfigured() && analyticsConsent === null" class="analytics-consent" aria-label="Google Analytics">
+      <p>{{ t.analyticsText }}</p>
+      <div>
+        <button type="button" class="consent-accept" @click="setAnalyticsConsent('accepted')">{{ t.analyticsAccept }}</button>
+        <button type="button" @click="setAnalyticsConsent('rejected')">{{ t.analyticsReject }}</button>
+      </div>
+    </aside>
   </div>
 </template>

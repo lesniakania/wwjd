@@ -50,8 +50,11 @@ Copy `.env.example` to `.env` or export the values before starting FastAPI.
 | `HF_TIMEOUT_SECONDS` | `45` | Timeout for one remote model attempt |
 | `ALLOWED_ORIGINS` | localhost Vite URLs | Comma-separated CORS origins |
 | `MAX_SITUATION_LENGTH` | `3000` | Input limit |
+| `VITE_GA_MEASUREMENT_ID` | empty | GA4 measurement ID (`G-...`); enables consent-based frontend analytics |
 
-The application does not persist user situations. Avoid enabling request-body logging at the proxy or hosting-provider layer. A remote inference provider may have its own retention policy.
+Frontend variables belong in `frontend/.env`. Copy `frontend/.env.example` there and add your GA4 measurement ID before building or starting Vite.
+
+The application does not persist user situations. Google Analytics is loaded only after explicit consent and never receives the situation text. Avoid enabling request-body logging at the proxy or hosting-provider layer. A remote inference provider may have its own retention policy.
 
 ## Bible data, literary context, and retrieval
 

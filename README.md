@@ -8,22 +8,45 @@ The interface is bilingual. Polish is the default and users can switch to Englis
 
 - Vue 3 + TypeScript + Vite
 - FastAPI + Pydantic
+- PostgreSQL 17
 - Local hybrid retrieval (BM25-style lexical score plus deterministic semantic hashing)
 - Optional Hugging Face chat-completion generation
 - 66-book World English Bible (WEB), public domain
 
 The default development mode requires no API key. It returns an extractive reflection based on the highest-ranked passages. Set `HF_TOKEN` and `HF_MODEL` to enable generated prose.
 
-## Run locally
+## Run with Docker
+
+Docker Compose runs PostgreSQL, FastAPI, and the Vite development server. Backend and frontend
+source directories are bind-mounted, so both development servers reload after edits. Before the
+backend starts, a one-shot `build-indexes` service creates any missing semantic indexes. Existing
+model-specific indexes are reused.
+
+```bash
+cp .env.example .env
+docker compose up --build
+```
+
+Open http://localhost:5173. The API is also available directly at http://localhost:8000, and
+PostgreSQL is exposed on port 5434 by default (`POSTGRES_PORT` can override it). Data, frontend dependencies, and the Hugging Face model cache
+are kept in named Docker volumes. Stop the stack with `docker compose down`; add `--volumes` only
+when you intentionally want to delete its database and caches.
+
+To rebuild indexes after changing a verse corpus or `EMBEDDING_MODEL`, remove the corresponding
+generated `.npy` files from `backend/app/data` and run:
+
+```bash
+docker compose run --rm build-indexes
+```
+
+## Run directly
 
 Backend (Python 3.11+):
 
 ```bash
 cd backend
-python -m venv .venv
-source .venv/bin/activate
-pip install -e '.[dev]'
-uvicorn app.main:app --reload
+uv sync
+uv run uvicorn app.main:app --reload
 ```
 
 Frontend (Node 20+):
@@ -50,12 +73,12 @@ Copy `.env.example` to `.env` or export the values before starting FastAPI.
 | `HF_TIMEOUT_SECONDS` | `45` | Timeout for one remote model attempt |
 | `ALLOWED_ORIGINS` | localhost Vite URLs | Comma-separated CORS origins |
 | `MAX_SITUATION_LENGTH` | `3000` | Input limit |
-| `SHARE_DATABASE_PATH` | `shared_reflections.db` | SQLite file for reflections explicitly shared by users |
+| `DATABASE_URL` | `postgresql://wwjd:secret@localhost:5434/wwjd` | PostgreSQL connection URL for explicitly shared reflections |
 | `VITE_GA_MEASUREMENT_ID` | empty | GA4 measurement ID (`G-...`); enables consent-based frontend analytics |
 
 Frontend variables belong in `frontend/.env`. Copy `frontend/.env.example` there and add your GA4 measurement ID before building or starting Vite.
 
-The application does not persist user situations unless a user explicitly creates a share link. A shared snapshot is stored in SQLite and is readable by anyone with its unguessable link. Google Analytics is loaded only after explicit consent and never receives the situation text. Avoid enabling request-body logging at the proxy or hosting-provider layer. A remote inference provider may have its own retention policy.
+The application does not persist user situations unless a user explicitly creates a share link. A shared snapshot is stored in PostgreSQL and is readable by anyone with its unguessable link. Google Analytics is loaded only after explicit consent and never receives the situation text. Avoid enabling request-body logging at the proxy or hosting-provider layer. A remote inference provider may have its own retention policy.
 
 ## Bible data, literary context, and retrieval
 
@@ -92,7 +115,8 @@ digital-use permission for Biblia Tysiąclecia is obtained; no protected text is
 ## Verification
 
 ```bash
-cd backend && pytest
+cd backend && uv run pytest
+cd backend && uv run ruff check .
 cd frontend && npm run test && npm run build
 ```
 

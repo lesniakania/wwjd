@@ -3,11 +3,12 @@ import json
 import math
 import re
 from collections import Counter
-from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
 
+from .retrieval_models import Passage, SearchResult, Verse
+from .themes import ThemeClassifier
 
 TOKEN_RE = re.compile(r"[^\W\d_]+", re.UNICODE)
 GOSPELS = {"Matthew", "Mark", "Luke", "John"}
@@ -18,63 +19,6 @@ STOPWORDS = {
     "this", "to", "was", "we", "were", "what", "when", "with", "would", "you", "your",
     "ale", "bez", "być", "co", "czy", "dla", "do", "go", "i", "ich", "jak", "jest",
     "mi", "mnie", "na", "nie", "o", "od", "po", "się", "to", "w", "we", "z", "za",
-}
-THEMES = {
-    "anger": {
-        "en": {"angry", "anger", "furious", "revenge", "retaliate", "embarrass", "humiliate"},
-        "pl": {"złość", "zły", "wściekły", "gniew", "zemsta", "upokorzyć", "ośmieszyć"},
-    },
-    "honesty": {
-        "en": {"lie", "lied", "lying", "dishonest", "honest", "truth", "deceive", "credit"},
-        "pl": {"kłamstwo", "kłamać", "skłamał", "uczciwość", "uczciwy", "prawda", "oszukać"},
-    },
-    "forgiveness": {
-        "en": {"forgive", "forgiveness", "hurt", "offended", "betrayed", "grudge"},
-        "pl": {"przebaczyć", "wybaczyć", "przebaczenie", "skrzywdził", "zdradził", "uraza"},
-    },
-    "conflict": {
-        "en": {"conflict", "argument", "confront", "colleague", "coworker", "friend"},
-        "pl": {"konflikt", "kłótnia", "skonfrontować", "kolega", "przyjaciel", "współpracownik"},
-    },
-    "fear": {
-        "en": {"afraid", "anxious", "anxiety", "fear", "worried", "worry"},
-        "pl": {"strach", "boję", "lęk", "zmartwiony", "martwię", "niepokój"},
-    },
-    "generosity": {
-        "en": {"money", "poor", "give", "generous", "greed", "possessions"},
-        "pl": {"pieniądze", "biedny", "dać", "hojny", "chciwość", "majątek"},
-    },
-    "prejudice": {
-        "en": {"prejudice", "racism", "racist", "xenophobia", "foreigner", "immigrant", "refugee"},
-        "pl": {"uprzedzenie", "rasizm", "rasista", "ksenofobia", "obcokrajowiec", "imigrant", "uchodźca"},
-    },
-    "discernment": {
-        "en": {"rumour", "rumor", "claim", "allegation", "viral", "news", "misinformation"},
-        "pl": {"plotka", "pogłoska", "twierdzenie", "wiadomość", "dezinformacja"},
-    },
-}
-
-# Polish is highly inflected, so exact token matching misses forms such as
-# "Ukraińców", "uchodźcami" or "wiadomościach". These deliberately narrow
-# patterns supplement the exact triggers without pretending to be a full stemmer.
-THEME_PATTERNS = {
-    "prejudice": (
-        r"\bukraiń\w*", r"\bimigrant\w*", r"\buchodź\w*", r"\bobcokraj\w*",
-        r"\bksenofob\w*", r"\brasist\w*", r"\bnarodowoś\w*",
-        r"\bukrain\w*", r"\bimmigrant\w*", r"\brefugee\w*", r"\bxenophob\w*",
-        r"\bracist\w*", r"\bnationalit\w*",
-    ),
-    "discernment": (
-        r"\bmedi\w* społecznościow\w*", r"\btransmit\w*", r"\bnagran\w*",
-        r"\binformac\w*", r"\bwiadomoś\w*", r"\bplot\w*", r"\bpogłos\w*",
-        r"\bpodobno\b", r"\bszum\w*", r"\bviral\w*", r"\bsocial media\b",
-        r"\brumou?r\w*", r"\balleg\w*", r"\bmisinformation\w*",
-    ),
-    "conflict": (
-        r"\bkonflikt\w*", r"\batak\w*", r"\bprzemoc\w*", r"\bnie słuch\w*",
-        r"\bconflict\w*", r"\battack\w*", r"\bviolence\w*",
-    ),
-    "anger": (r"\bnienawi\w*", r"\bhate\w*", r"\bhatred\w*"),
 }
 THEME_ANCHORS = {
     "anger": (
@@ -119,52 +63,14 @@ def tokenize(text: str) -> list[str]:
 
 
 def query_themes(text: str) -> set[str]:
-    tokens = set(tokenize(text))
-    themes = {
-        theme
-        for theme, languages in THEMES.items()
-        if any(tokens & triggers for triggers in languages.values())
+    return set(query_theme_confidences(text))
+
+
+def query_theme_confidences(text: str) -> dict[str, float]:
+    return {
+        str(theme): confidence
+        for theme, confidence in ThemeClassifier().classify_with_confidence(text).items()
     }
-    lowered = text.lower()
-    themes.update(
-        theme
-        for theme, patterns in THEME_PATTERNS.items()
-        if any(re.search(pattern, lowered) for pattern in patterns)
-    )
-    return themes
-
-
-@dataclass(frozen=True)
-class Verse:
-    book: str
-    chapter: int
-    verse: int
-    text: str
-
-
-@dataclass(frozen=True)
-class Passage:
-    book: str
-    chapter: int
-    verse_start: int
-    verse_end: int
-    text: str
-
-    @property
-    def reference(self) -> str:
-        verses = str(self.verse_start)
-        if self.verse_end != self.verse_start:
-            verses += f"–{self.verse_end}"
-        return f"{self.book} {self.chapter}:{verses}"
-
-
-@dataclass(frozen=True)
-class SearchResult:
-    passage: Passage
-    context: Passage
-    score: float
-    confidence: float
-    themes: tuple[str, ...]
 
 
 class SemanticEncoder:
@@ -249,7 +155,8 @@ class Retriever:
         return scores
 
     def search(self, query: str, limit: int = 4) -> list[SearchResult]:
-        themes = query_themes(query)
+        theme_confidences = query_theme_confidences(query)
+        themes = set(theme_confidences)
         lexical = self._lexical_scores(query)
         semantic = np.zeros(len(self.verses), dtype=np.float32)
         if self.encoder is not None and self._embeddings is not None:
@@ -269,25 +176,25 @@ class Retriever:
         for index in candidates:
             passage = self.passages[index]
             anchor = self._is_anchor(passage, themes)
-            # Once a dilemma maps to a known ethical theme, curated teaching
-            # passages are safer than filling the list with merely similar names,
-            # places, genealogies or descriptions of hostile nations.
-            if themes and not anchor:
-                continue
             fused = 0.0
             if index in semantic_rank:
                 fused += 1 / (50 + semantic_rank[index])
             if index in lexical_rank and lexical[index] > 0:
                 fused += 0.25 / (50 + lexical_rank[index])
             if anchor:
-                fused += 0.04
+                anchor_confidence = max(
+                    confidence
+                    for theme, confidence in theme_confidences.items()
+                    if self._is_anchor(passage, {theme})
+                )
+                fused += 0.025 + 0.02 * anchor_confidence
             if passage.book in GOSPELS:
                 fused += 0.002
             confidence = float(semantic[index]) if self._embeddings is not None else 0.0
             if lexical[index] > 0:
                 confidence = max(confidence, min(0.72, 0.32 + float(lexical[index]) / 25))
             if anchor:
-                confidence = max(confidence, 0.58)
+                confidence = max(confidence, 0.5 + 0.08 * anchor_confidence)
             scored.append((index, fused, confidence))
         scored.sort(key=lambda item: item[1], reverse=True)
 

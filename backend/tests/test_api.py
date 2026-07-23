@@ -1,7 +1,11 @@
+from unittest.mock import MagicMock
+
 from fastapi.testclient import TestClient
 
+import app.main as main_module
 from app.generation import GeneratedReflection, ReflectionGenerator
 from app.main import app
+from app.models import ReflectionRequest, SharedReflectionRequest
 from app.retrieval import Retriever
 
 
@@ -89,45 +93,75 @@ def test_model_can_reduce_candidates_to_one_explained_source(monkeypatch):
     assert "limited application" in response.json()["sources"][0]["situation_application"]
 
 
-def test_shared_reflection_is_an_exact_snapshot(tmp_path):
-    from app.config import get_settings
+def test_shared_reflection_is_an_exact_snapshot(monkeypatch):
+    repository = MagicMock()
+    repository.save.return_value = "share-id"
+    repository.get.side_effect = lambda _share_id: repository.save.call_args.args[0]
+    monkeypatch.setattr(main_module, "_share_repository", lambda: repository)
 
-    original_path = get_settings().share_database_path
-    get_settings().share_database_path = str(tmp_path / "shares.db")
-    try:
-        with TestClient(app) as client:
-            reflection = client.post(
-                "/api/reflections",
-                json={
-                    "situation": "A friend hurt me and I want to respond with honesty and compassion.",
-                    "language": "en",
-                },
-            ).json()
-            created = client.post(
-                "/api/shares",
-                json={
-                    "situation": "A friend hurt me and I want to respond with honesty and compassion.",
-                    "language": "en",
-                    "reflection": reflection,
-                },
-            )
-            fetched = client.get(f"/api/shares/{created.json()['id']}")
-        assert created.status_code == 201
-        assert fetched.status_code == 200
-        assert fetched.json()["reflection"] == reflection
-        assert fetched.json()["situation"].startswith("A friend hurt me")
-    finally:
-        get_settings().share_database_path = original_path
+    with TestClient(app) as client:
+        reflection = client.post(
+            "/api/reflections",
+            json={
+                "situation": "A friend hurt me and I want to respond with honesty and compassion.",
+                "language": "en",
+            },
+        ).json()
+        created = client.post(
+            "/api/shares",
+            json={
+                "situation": "A friend hurt me and I want to respond with honesty and compassion.",
+                "language": "en",
+                "reflection": reflection,
+            },
+        )
+        fetched = client.get(f"/api/shares/{created.json()['id']}")
+
+    assert created.status_code == 201
+    assert fetched.status_code == 200
+    assert fetched.json()["reflection"] == reflection
+    assert fetched.json()["situation"].startswith("A friend hurt me")
 
 
-def test_missing_shared_reflection_returns_404(tmp_path):
-    from app.config import get_settings
+def test_missing_shared_reflection_returns_404(monkeypatch):
+    repository = MagicMock()
+    repository.get.return_value = None
+    monkeypatch.setattr(main_module, "_share_repository", lambda: repository)
 
-    original_path = get_settings().share_database_path
-    get_settings().share_database_path = str(tmp_path / "shares.db")
-    try:
-        with TestClient(app) as client:
-            response = client.get("/api/shares/not-a-real-id")
-        assert response.status_code == 404
-    finally:
-        get_settings().share_database_path = original_path
+    with TestClient(app) as client:
+        response = client.get("/api/shares/not-a-real-id")
+
+    assert response.status_code == 404
+
+
+def test_situation_requests_share_normalization() -> None:
+    situation = "A situation   with enough detail to be accepted."
+
+    reflection = ReflectionRequest(situation=situation)
+    shared = SharedReflectionRequest(
+        situation=situation,
+        reflection={
+            "summary": "Summary",
+            "suggested_actions": ["Action"],
+            "sources": [
+                {
+                    "reference": "Luke 1:1",
+                    "quotation": "Text",
+                    "literary_type": "Gospel",
+                    "origin_context": "Context",
+                    "broader_context": "Context",
+                    "original_meaning": "Meaning",
+                    "situation_application": "Application",
+                    "context_confidence": "high",
+                    "context_reviewed": True,
+                    "relevance": "Relevant",
+                    "context_reference": "Luke 1:1",
+                    "context_quotation": "Text",
+                }
+            ],
+            "limitations": "Limitations",
+            "generated_with": "test",
+        },
+    )
+
+    assert reflection.situation == shared.situation == "A situation with enough detail to be accepted."

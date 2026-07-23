@@ -4,9 +4,9 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vue-tsc -b && vite build",
-    "test": "vitest run"
+    "dev": "vite --config vite.config.ts",
+    "build": "vue-tsc -b && vite build --config vite.config.ts",
+    "test": "vitest run --config vite.config.ts"
   },
   "dependencies": {
     "@lucide/vue": "^1.25.0",

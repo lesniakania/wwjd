@@ -1,6 +1,5 @@
 import json
 import logging
-import re
 from time import perf_counter
 from dataclasses import dataclass
 
@@ -9,6 +8,7 @@ import httpx
 from .config import Settings
 from .context import ContextCard
 from .localization import Language, reference, relevance_note
+from .model_response import ModelResponseParser
 from .retrieval import Retriever, SearchResult
 
 
@@ -169,110 +169,31 @@ class ReflectionGenerator:
             )
             response.raise_for_status()
         content = str(response.json()["choices"][0]["message"]["content"])
-        data = self._parse_json_content(content)
-        summary = self._plain_text(data["summary"])
-        actions = [self._plain_text(action) for action in data["suggested_actions"]][:3]
-        valid_ids = {
-            Retriever.source_id(result.passage)
-            for result in results
-        }
-        selected_sources = data.get("selected_sources", [])
-        source_ids: tuple[str, ...] = ()
-        applications: dict[str, str] = {}
-        if isinstance(selected_sources, list):
-            pairs = []
-            for item in selected_sources[:3]:
-                if not isinstance(item, dict):
-                    continue
-                source_id = self._canonical_source_id(str(item.get("id", "")), valid_ids)
-                application = self._plain_text(item.get("situation_application", ""))
-                if language == "pl" and self._has_unnatural_polish(application):
-                    raise ValueError("Unnatural Polish application")
-                pairs.append((source_id, application))
-            source_ids = tuple(source_id for source_id, application in pairs if source_id in valid_ids and application)
-            applications = {
-                source_id: application
-                for source_id, application in pairs
-                if source_id in valid_ids and application
-            }
-        # Accept the previous shape during rolling deployments and from models
-        # that imitate an earlier response found in their context.
-        if not source_ids:
-            source_ids = tuple(
-                self._canonical_source_id(str(source_id), valid_ids)
-                for source_id in data.get("selected_source_ids", [])[:3]
-                if self._canonical_source_id(str(source_id), valid_ids)
-            )
-            raw_applications = data.get("source_explanations", {})
-            if isinstance(raw_applications, dict):
-                applications = {
-                    source_id: str(raw_applications.get(source_id, "")).strip()
-                    for source_id in source_ids
-                    if str(raw_applications.get(source_id, "")).strip()
-                }
-        if not summary or not actions or not source_ids or len(applications) != len(source_ids):
-            raise ValueError("Empty model response")
+        valid_ids = {Retriever.source_id(result.passage) for result in results}
+        parsed = ModelResponseParser(valid_ids).parse(content, language)
         return GeneratedReflection(
-            summary,
-            actions,
+            parsed.summary,
+            parsed.actions,
             f"hugging-face:{model}",
-            source_ids,
-            applications,
+            parsed.source_ids,
+            parsed.applications,
         )
 
     @staticmethod
     def _parse_json_content(content: str) -> dict:
-        stripped = content.strip()
-        if stripped.startswith("```"):
-            stripped = stripped.removeprefix("```json").removeprefix("```")
-            stripped = stripped.removesuffix("```").strip()
-        try:
-            parsed = json.loads(stripped)
-        except json.JSONDecodeError:
-            start, end = stripped.find("{"), stripped.rfind("}")
-            if start < 0 or end <= start:
-                raise
-            parsed = json.loads(stripped[start : end + 1])
-        if not isinstance(parsed, dict):
-            raise ValueError("Model response is not a JSON object")
-        return parsed
+        return ModelResponseParser._parse_json(content)
 
     @staticmethod
     def _plain_text(value: object) -> str:
-        """Defensively remove common Markdown emphasis leaked by chat providers."""
-        if isinstance(value, (list, tuple)):
-            return " ".join(
-                part
-                for item in value
-                if (part := ReflectionGenerator._plain_text(item))
-            )
-        text = str(value).strip()
-        text = re.sub(r"\*\*(.+?)\*\*|__(.+?)__", lambda match: match.group(1) or match.group(2), text)
-        return text.replace("`", "").strip()
+        return ModelResponseParser.plain_text(value)
 
     @staticmethod
     def _has_unnatural_polish(text: str) -> bool:
-        lowered = text.lower()
-        rejected = (
-            "aplikacja ma ograniczenia",
-            "powinien się wchodzić",
-            "powinna się wchodzić",
-            "powinni się wchodzić",
-            "nieprzywilejowania się",
-            "nieprzywilejować się",
-        )
-        return any(phrase in lowered for phrase in rejected)
+        return ModelResponseParser.has_unnatural_polish(text)
 
     @staticmethod
     def _canonical_source_id(source_id: str, valid_ids: set[str]) -> str:
-        if source_id in valid_ids:
-            return source_id
-        for valid_id in valid_ids:
-            final_range = valid_id.rsplit(":", 1)[1]
-            start, _, end = final_range.partition("-")
-            if start == end and source_id == valid_id.removesuffix(f"-{end}"):
-                return valid_id
-        return ""
+        return ModelResponseParser(valid_ids).canonical_source_id(source_id)
 
     @staticmethod
     def _generate_local(results: list[SearchResult], language: Language) -> GeneratedReflection:

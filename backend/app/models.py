@@ -4,7 +4,7 @@ from .config import get_settings
 from .localization import Language
 
 
-class ReflectionRequest(BaseModel):
+class SituationRequest(BaseModel):
     situation: str = Field(min_length=20)
     language: Language = "pl"
 
@@ -15,6 +15,10 @@ class ReflectionRequest(BaseModel):
         if len(cleaned) > get_settings().max_situation_length:
             raise ValueError("Situation is too long")
         return cleaned
+
+
+class ReflectionRequest(SituationRequest):
+    pass
 
 
 class Source(BaseModel):
@@ -50,18 +54,8 @@ class HealthResponse(BaseModel):
     generation_mode: str
 
 
-class SharedReflectionRequest(BaseModel):
-    situation: str = Field(min_length=20)
-    language: Language = "pl"
+class SharedReflectionRequest(SituationRequest):
     reflection: ReflectionResponse
-
-    @field_validator("situation")
-    @classmethod
-    def clean_shared_situation(cls, value: str) -> str:
-        cleaned = " ".join(value.split())
-        if len(cleaned) > get_settings().max_situation_length:
-            raise ValueError("Situation is too long")
-        return cleaned
 
 
 class SharedReflectionResponse(SharedReflectionRequest):

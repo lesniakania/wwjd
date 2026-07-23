@@ -23,14 +23,21 @@ def test_unreviewed_passage_uses_an_honest_stable_fallback():
     assert "Nie mamy jeszcze zatwierdzonej karty" in first.origin_context
 
 
-def test_draft_cards_are_not_published():
+def test_draft_cards_are_not_published(tmp_path):
     rows = json.loads(
-        (Path(__file__).parents[1] / "app" / "data" / "context_cards.json").read_text()
+        (Path(__file__).parents[1] / "app" / "data" / "context_cards.json").read_text(
+            encoding="utf-8"
+        )
     )
     assert rows
-    draft = next(row for row in rows if row.get("reviewed") is False)
-    card = ContextRegistry().for_passage(
-        Passage(draft["book"], draft["chapter_start"], draft["verse_start"], draft["verse_start"], ""),
+    draft = {**rows[0], "id": "test-draft", "reviewed": False}
+    draft_path = tmp_path / "context_cards.json"
+    draft_path.write_text(json.dumps([draft]), encoding="utf-8")
+
+    card = ContextRegistry(draft_path).for_passage(
+        Passage(
+            draft["book"], draft["chapter_start"], draft["verse_start"], draft["verse_start"], ""
+        ),
         "pl",
     )
     assert card.reviewed is False
@@ -39,8 +46,13 @@ def test_draft_cards_are_not_published():
 
 def test_cards_represent_non_narrative_and_deuterocanonical_genres():
     registry = ContextRegistry()
-    assert registry.for_passage(Passage("Psalms", 23, 4, 4, ""), "pl").literary_type == "psalm ufności"
-    assert registry.for_passage(Passage("Isaiah", 58, 6, 6, ""), "pl").literary_type == "wyrocznia prorocka"
+    assert (
+        registry.for_passage(Passage("Psalms", 23, 4, 4, ""), "pl").literary_type == "psalm ufności"
+    )
+    assert (
+        registry.for_passage(Passage("Isaiah", 58, 6, 6, ""), "pl").literary_type
+        == "wyrocznia prorocka"
+    )
     sirach = registry.for_passage(Passage("Sirach", 11, 8, 8, ""), "en")
     assert sirach.reviewed is True
     assert "not a saying of Jesus of Nazareth" in sirach.origin_context

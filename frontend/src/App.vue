@@ -12,10 +12,10 @@ import {
   enableAnalytics,
   trackEvent,
 } from "./analytics";
+import PromptForm from "./components/PromptForm.vue";
+import { copyFor, Language, languageFrom } from "./localization";
 
-const maxLength = 3000;
-type Language = "pl" | "en";
-const language = ref<Language>("pl");
+const language = ref<Language>(Language.Polish);
 const situation = ref("");
 const reflection = ref<Reflection | null>(null);
 const loading = ref(false);
@@ -28,131 +28,17 @@ type AnalyticsConsent = "accepted" | "rejected" | null;
 const analyticsConsent = ref<AnalyticsConsent>(null);
 const consentStorageKey = "wwjd-analytics-consent";
 
-const copy = {
-  pl: {
-    appTitle: "Co na to Jezus?",
-    homeLabel: "Co na to Jezus? — strona główna",
-    header: "Refleksja oparta na Biblii",
-    eyebrow: "Chwila na zatrzymanie",
-    title1: "Co na to",
-    title2: "Jezus?",
-    intro:
-      "Opisz, z czym się mierzysz. Odszukamy odpowiednie fragmenty Pisma i zaproponujemy przemyślaną, praktyczną refleksję opartą na Biblii.",
-    label: "Co na to Jezus?",
-    placeholder: "Zmagam się z trudną decyzją w pracy…",
-    privacy: "Opisz sytuację bez prywatnych danych innych osób.",
-    submit: "Znajdź drogę naprzód",
-    loading: "Szukam odpowiedzi…",
-    tipsTitle:
-      "Jaśniejszy opis sytuacji pozwala stworzyć bardziej pomocną refleksję",
-    tips: [
-      "Najpierw opisz fakty, a potem własną interpretację.",
-      "Staraj się unikać oceniających określeń i osądów.",
-      "Pomiń imiona, adresy i dane pozwalające zidentyfikować osoby.",
-    ],
-    fallbackError: "Coś poszło nie tak.",
-    back: "Zadaj inne pytanie",
-    resultEyebrow: "Refleksja oparta na źródłach",
-    result1: "Droga",
-    result2: "naprzód.",
-    safetyTitle: "Zatrzymaj się i poszukaj natychmiastowego wsparcia",
-    actions: "Rozważ te kolejne kroki",
-    read: "Przeczytaj i zobacz szersze znaczenie",
-    sources: "Fragmenty Biblii i ich kontekst",
-    footerBible:
-      "Cytaty: Uwspółcześniona Biblia Gdańska, © 2018 Fundacja Wrota Nadziei, CC BY-ND 4.0.",
-    selectedVerse: "Wybrany werset",
-    contextOrigin: "Skąd pochodzi ten fragment?",
-    broaderContext: "Szerszy kontekst",
-    originalMeaning: "Co znaczył pierwotnie?",
-    application: "Jak odnosi się do Twojej sytuacji?",
-    passageContext: "Przeczytaj całą jednostkę",
-    contextSources: "Podstawa opracowania",
-    footerPrivacy:
-      "Opis sytuacji zapisujemy tylko wtedy, gdy świadomie utworzysz link do udostępnienia.",
-    analyticsText:
-      "Czy zgadzasz się na anonimową analitykę, która pomaga nam ulepszać aplikację? Nie wysyłamy treści Twoich pytań.",
-    analyticsAccept: "Zgadzam się",
-    analyticsReject: "Nie, dziękuję",
-    question: "Twoje pytanie",
-    sharedQuestion: "Udostępnione pytanie",
-    share: "Udostępnij",
-    sharing: "Tworzę link…",
-    shared: "Link skopiowany",
-    ready: "Link jest gotowy",
-    sharePrivacy: "Każda osoba z linkiem zobaczy to pytanie i odpowiedź.",
-    sharedBadge: "Udostępniona odpowiedź",
-  },
-  en: {
-    appTitle: "What would Jesus do?",
-    homeLabel: "What would Jesus do? — home",
-    header: "A Bible-grounded reflection",
-    eyebrow: "A moment to pause",
-    title1: "What would",
-    title2: "Jesus do?",
-    intro:
-      "Describe what you are facing. We’ll look for relevant Scripture and offer a thoughtful, practical reflection based on the Bible.",
-    label: "What would Jesus do?",
-    placeholder: "I’m struggling with a decision at work...",
-    privacy: "Share the situation, not anyone’s private details.",
-    submit: "Find a way forward",
-    loading: "Reflecting…",
-    tipsTitle: "A clearer situation leads to a more useful reflection",
-    tips: [
-      "Describe the facts before your interpretation of them.",
-      "Try to avoid judgmental language and assumptions.",
-      "Leave out names, addresses, and identifying details.",
-    ],
-    fallbackError: "Something went wrong.",
-    back: "Ask another question",
-    resultEyebrow: "A grounded reflection",
-    result1: "A way",
-    result2: "forward.",
-    safetyTitle: "Pause and seek immediate support",
-    actions: "Consider these next steps",
-    read: "Read and explore the wider meaning",
-    sources: "Bible passages and their context",
-    footerBible:
-      "Scripture quotations from the public-domain World English Bible.",
-    selectedVerse: "Selected verse",
-    contextOrigin: "Where does this passage come from?",
-    broaderContext: "The wider context",
-    originalMeaning: "What did it originally mean?",
-    application: "How does it relate to your situation?",
-    passageContext: "Read the complete unit",
-    contextSources: "Editorial basis",
-    footerPrivacy:
-      "Your situation is stored only when you explicitly create a share link.",
-    analyticsText:
-      "Do you agree to anonymous analytics that helps us improve the application? We never send the content of your questions.",
-    analyticsAccept: "Accept",
-    analyticsReject: "No, thanks",
-    question: "Your question",
-    sharedQuestion: "Shared question",
-    share: "Share",
-    sharing: "Creating link…",
-    shared: "Link copied",
-    ready: "Link is ready",
-    sharePrivacy: "Anyone with the link can see this question and response.",
-    sharedBadge: "Shared response",
-  },
-} as const;
+const t = computed(() => copyFor(language.value));
 
-const t = computed(() => copy[language.value]);
-
-const canSubmit = computed(
-  () => situation.value.trim().length >= 20 && !loading.value,
-);
-
-async function submit() {
-  if (!canSubmit.value) return;
+async function submit(submittedSituation: string): Promise<void> {
+  situation.value = submittedSituation;
   loading.value = true;
   trackEvent("reflection_requested", { language: language.value });
   error.value = "";
   reflection.value = null;
   try {
     reflection.value = await requestReflection(
-      situation.value.trim(),
+      submittedSituation,
       language.value,
     );
     trackEvent("reflection_received", {
@@ -168,7 +54,7 @@ async function submit() {
   }
 }
 
-function setLanguage(next: Language) {
+function setLanguage(next: Language): void {
   language.value = next;
   reflection.value = null;
   error.value = "";
@@ -179,7 +65,7 @@ watch(
   language,
   (value) => {
     document.documentElement.setAttribute("lang", value);
-    document.title = copy[value].appTitle;
+    document.title = copyFor(value).appTitle;
   },
   { immediate: true },
 );
@@ -234,13 +120,15 @@ onMounted(async () => {
     loading.value = true;
     try {
       const shared = await getShare(match[1]);
-      language.value = shared.language;
+      language.value = languageFrom(shared.language);
       situation.value = shared.situation;
       reflection.value = shared.reflection;
       isSharedView.value = true;
     } catch (caught) {
       error.value =
-        caught instanceof Error ? caught.message : copy.pl.fallbackError;
+        caught instanceof Error
+          ? caught.message
+          : copyFor(Language.Polish).fallbackError;
     } finally {
       loading.value = false;
     }
@@ -270,17 +158,17 @@ onMounted(async () => {
         >
           <button
             type="button"
-            :class="{ active: language === 'pl' }"
-            :aria-pressed="language === 'pl'"
-            @click="setLanguage('pl')"
+            :class="{ active: language === Language.Polish }"
+            :aria-pressed="language === Language.Polish"
+            @click="setLanguage(Language.Polish)"
           >
             PL
           </button>
           <button
             type="button"
-            :class="{ active: language === 'en' }"
-            :aria-pressed="language === 'en'"
-            @click="setLanguage('en')"
+            :class="{ active: language === Language.English }"
+            :aria-pressed="language === Language.English"
+            @click="setLanguage(Language.English)"
           >
             EN
           </button>
@@ -296,28 +184,13 @@ onMounted(async () => {
         </h1>
         <p class="intro">{{ t.intro }}</p>
 
-        <form class="prompt-card" @submit.prevent="submit">
-          <label for="situation">{{ t.label }}</label>
-          <textarea
-            id="situation"
-            v-model="situation"
-            :maxlength="maxLength"
-            rows="7"
-            :placeholder="t.placeholder"
-            aria-describedby="prompt-help"
-          ></textarea>
-          <div class="field-footer">
-            <span id="prompt-help">{{ t.privacy }}</span>
-            <span>{{ situation.length }} / {{ maxLength }}</span>
-          </div>
-          <button type="submit" :disabled="!canSubmit">
-            <span v-if="loading" class="spinner" aria-hidden="true"></span>
-            {{ loading ? t.loading : t.submit }}
-            <span v-if="!loading" aria-hidden="true">→</span>
-          </button>
-        </form>
-
-        <p v-if="error" class="error" role="alert">{{ error }}</p>
+        <PromptForm
+          :key="language"
+          :copy="t"
+          :loading="loading"
+          :error="error"
+          @submit="submit"
+        />
 
         <aside class="tips" aria-labelledby="tips-title">
           <p id="tips-title">{{ t.tipsTitle }}</p>

@@ -32,37 +32,65 @@ export interface SharedReflection {
   reflection: Reflection
 }
 
+interface ApiError {
+  detail?: string
+}
+
+async function responseError(response: Response, fallbackMessage: string): Promise<Error> {
+  const body = await response.json().catch(() => null) as ApiError | null
+  return new Error(body?.detail || fallbackMessage)
+}
+
+async function requestJson<ResponseBody>(
+  url: string,
+  init: RequestInit | undefined,
+  fallbackMessage: string,
+): Promise<ResponseBody> {
+  const response = init ? await fetch(url, init) : await fetch(url)
+  if (!response.ok) {
+    throw await responseError(response, fallbackMessage)
+  }
+  return response.json() as Promise<ResponseBody>
+}
+
 export async function requestReflection(situation: string, language: 'pl' | 'en'): Promise<Reflection> {
+  const validationMessage = language === 'pl'
+    ? 'Opisz sytuację trochę dokładniej.'
+    : 'Please describe the situation in a little more detail.'
   const response = await fetch('/api/reflections', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ situation, language }),
   })
-
+  if (response.status === 422) {
+    throw new Error(validationMessage)
+  }
   if (!response.ok) {
-    if (response.status === 422) {
-      throw new Error(language === 'pl' ? 'Opisz sytuację trochę dokładniej.' : 'Please describe the situation in a little more detail.')
-    }
-    const body = await response.json().catch(() => null) as { detail?: string } | null
-    throw new Error(body?.detail || (language === 'pl' ? 'Nie udało się przygotować refleksji. Spróbuj ponownie.' : 'The reflection could not be prepared. Please try again.'))
+    const fallbackMessage = language === 'pl'
+      ? 'Nie udało się przygotować refleksji. Spróbuj ponownie.'
+      : 'The reflection could not be prepared. Please try again.'
+    throw await responseError(response, fallbackMessage)
   }
   return response.json() as Promise<Reflection>
 }
 
 
 export async function createShare(situation: string, language: 'pl' | 'en', reflection: Reflection): Promise<string> {
-  const response = await fetch('/api/shares', {
+  const fallbackMessage = language === 'pl'
+    ? 'Nie udało się utworzyć linku.'
+    : 'The share link could not be created.'
+  const body = await requestJson<{ id: string }>('/api/shares', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ situation, language, reflection }),
-  })
-  if (!response.ok) throw new Error(language === 'pl' ? 'Nie udało się utworzyć linku.' : 'The share link could not be created.')
-  const body = await response.json() as { id: string }
+  }, fallbackMessage)
   return body.id
 }
 
 export async function getShare(id: string): Promise<SharedReflection> {
-  const response = await fetch(`/api/shares/${encodeURIComponent(id)}`)
-  if (!response.ok) throw new Error('Nie znaleziono udostępnionej odpowiedzi. / Shared response not found.')
-  return response.json() as Promise<SharedReflection>
+  return requestJson<SharedReflection>(
+    `/api/shares/${encodeURIComponent(id)}`,
+    undefined,
+    'Nie znaleziono udostępnionej odpowiedzi. / Shared response not found.',
+  )
 }

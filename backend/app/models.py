@@ -21,6 +21,11 @@ class ReflectionRequest(SituationRequest):
     pass
 
 
+class ContextSource(BaseModel):
+    label: str
+    url: str
+
+
 class Source(BaseModel):
     reference: str
     quotation: str
@@ -29,7 +34,7 @@ class Source(BaseModel):
     broader_context: str
     original_meaning: str
     situation_application: str
-    context_sources: list[str] = Field(default_factory=list)
+    context_sources: list[ContextSource] = Field(default_factory=list)
     context_confidence: str
     context_reviewed: bool
     translation: str = "World English Bible (WEB)"

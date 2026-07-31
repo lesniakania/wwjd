@@ -41,7 +41,10 @@ describe('App', () => {
           broader_context: 'This forms part of the Sermon on the Mount.',
           original_meaning: 'Jesus calls his listeners to answer hostility with active goodwill.',
           situation_application: 'This challenges retaliation in the described situation.',
-          context_sources: ['Matthew 5:1–7:29'],
+          context_sources: [{
+            label: 'Matthew 5:1–7:29',
+            url: 'https://bible.usccb.org/bible/matthew/5',
+          }],
           context_confidence: 'high',
           context_reviewed: true,
           translation: 'World English Bible (WEB)',
@@ -67,6 +70,9 @@ describe('App', () => {
     expect(screen.getByText('Matthew 5:44')).toBeTruthy()
     expect(screen.getByText(/Jesus calls his listeners/i)).toBeTruthy()
     expect(screen.getByText(/read the complete unit/i)).toBeTruthy()
+    expect(screen.getByText(/human-reviewed context based on these sources/i)).toBeTruthy()
+    const sourceLink = screen.getByRole('link', { name: 'Matthew 5:1–7:29' })
+    expect(sourceLink.getAttribute('href')).toBe('https://bible.usccb.org/bible/matthew/5')
   })
 
   it('creates and copies a share link for the exact response', async () => {

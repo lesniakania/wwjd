@@ -3,6 +3,7 @@ from collections.abc import Mapping
 from time import perf_counter
 
 from .context import ContextCard, ContextRegistry
+from .context_sources import context_source
 from .generation import LIMITATIONS_EN, LIMITATIONS_PL, ReflectionGenerator
 from .localization import Language, reference, relevance_note, translation_name
 from .models import ReflectionResponse, Source
@@ -57,7 +58,7 @@ class SourceFactory:
             broader_context=context.broader_context,
             original_meaning=context.original_meaning,
             situation_application=applications[source_id],
-            context_sources=list(context.context_sources),
+            context_sources=[context_source(label) for label in context.context_sources],
             context_confidence=context.confidence,
             context_reviewed=context.reviewed,
             translation=translation_name(language),

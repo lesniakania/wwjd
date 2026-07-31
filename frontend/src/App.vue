@@ -290,8 +290,10 @@ onMounted(async () => {
                 >
                   <summary>{{ t.contextSources }}</summary>
                   <ul>
-                    <li v-for="item in source.context_sources" :key="item">
-                      {{ item }}
+                    <li v-for="item in source.context_sources" :key="item.url">
+                      <a :href="item.url" target="_blank" rel="noopener noreferrer">
+                        {{ item.label }}
+                      </a>
                     </li>
                   </ul>
                 </details>

@@ -20,6 +20,7 @@ from .models import (
 from .reflection_service import ReflectionService
 from .retrieval import Retriever, SemanticEncoder
 from .share_repository import ShareRepository
+from .themes import SemanticThemeRouter
 
 
 DATA_PATH = Path(__file__).parent / "data" / "web_verses.json"
@@ -30,16 +31,19 @@ DATA_PATH_PL = Path(__file__).parent / "data" / "polubg_verses.json"
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
     encoder = SemanticEncoder(settings.embedding_model) if settings.embedding_model else None
+    theme_router = SemanticThemeRouter(encoder) if encoder else None
     app.state.retrievers = {
         "en": Retriever(
             DATA_PATH,
             encoder,
             Retriever.cache_name(DATA_PATH, settings.embedding_model) if encoder else None,
+            theme_router,
         ),
         "pl": Retriever(
             DATA_PATH_PL,
             encoder,
             Retriever.cache_name(DATA_PATH_PL, settings.embedding_model) if encoder else None,
+            theme_router,
         ),
     }
     app.state.generator = ReflectionGenerator(settings)

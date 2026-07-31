@@ -7,6 +7,7 @@ __pycache__/
 frontend/node_modules/
 frontend/dist/
 backend/app/data/*.npy
+!backend/app/data/theme_cluster_centroids.npy
 backend/app/data/models/
 shared_reflections.db
 backend/shared_reflections.db

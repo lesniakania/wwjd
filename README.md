@@ -117,6 +117,46 @@ python backend/scripts/import_usfx.py path/to/engwebp_usfx.xml backend/app/data/
 
 Retrieval uses multilingual Sentence Transformers embeddings together with BM25 lexical ranking. It ranks individual verses, filters low-confidence results, and avoids automatically quoting unrelated neighboring verses. The default model is `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`; set `EMBEDDING_MODEL=BAAI/bge-m3` for a GPU-backed deployment. Build or refresh the local semantic indexes with:
 
+Ethical-theme routing combines high-confidence bilingual lexical rules with general bilingual
+semantic profiles. A semantic profile may add at most one concern not already detected by the
+rules. Themes act as cautious priors for reviewed passage anchors and never exclude strong direct
+retrieval results. The catalog currently covers 18 concerns, and tests require every theme to have
+rules, profiles, anchors, and Polish and English display names.
+
+Theme discovery uses licensed external scenarios as editorial evidence rather than copying isolated
+examples into production profiles. Download the MIT-licensed ETHICS archive and build the
+non-publishable 90-cluster review set with:
+
+```bash
+curl -L https://people.eecs.berkeley.edu/~hendrycks/ethics.tar -o /tmp/ethics.tar
+cd backend
+uv run python scripts/theme_discovery.py /tmp/ethics.tar
+```
+
+The script first abstracts 6,000 scenarios into general ethical principles, then clusters those
+principles and proposes bilingual labels and summaries. It caches the auditable abstractions in
+`theme_principle_cache.json`; reruns do not repeat that API work. The generated
+`theme_cluster_drafts.json` retains source record IDs, principles, coherence scores, and starts
+with every cluster unassigned and unreviewed. `theme_cluster_centroids.npy` contains the
+corresponding normalized centroids. None of these artifacts is loaded by the production router.
+Licensing decisions and excluded sources are documented in
+`backend/app/data/THEME_DATA_LICENSES.md`.
+
+Human consolidation decisions are stored separately in `theme_cluster_review.json`; generated
+clusters are never edited in place. Rebuild the deduplicated editorial queue with:
+
+```bash
+cd backend
+uv run python scripts/theme_cluster_review.py
+```
+
+The resulting `theme_candidates.json` excludes rejected broad or non-ethical clusters and applies
+approved renames and merges. `theme_candidate_alignment.json` maps every candidate exactly once:
+either to the original 18-theme catalog or to one of three approved new concerns. When the
+alignment has `status: approved`, the application loads the 42 bilingual candidate summaries as
+semantic profile enrichment for the resulting 21 production themes. Raw ETHICS scenarios and
+cluster centroids are never loaded by production routing.
+
 ```bash
 cd backend
 uv run python scripts/build_indexes.py

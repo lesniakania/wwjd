@@ -3,6 +3,7 @@ import secrets
 
 import psycopg
 
+from .context_sources import context_source
 from .models import SharedReflectionRequest
 
 
@@ -30,7 +31,16 @@ class ShareRepository:
             ).fetchone()
         if row is None:
             return None
-        return SharedReflectionRequest.model_validate(row[0])
+        return SharedReflectionRequest.model_validate(self._upgrade_legacy_sources(row[0]))
+
+    @staticmethod
+    def _upgrade_legacy_sources(payload: dict) -> dict:
+        for source in payload.get("reflection", {}).get("sources", []):
+            source["context_sources"] = [
+                context_source(item).model_dump() if isinstance(item, str) else item
+                for item in source.get("context_sources", [])
+            ]
+        return payload
 
     def _initialize_schema(self) -> None:
         with psycopg.connect(self.database_url) as connection:

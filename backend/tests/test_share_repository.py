@@ -66,6 +66,18 @@ def test_share_repository_retrieves_exact_snapshot(connection: MagicMock):
     assert repository.get("share-id") == payload
 
 
+def test_share_repository_upgrades_legacy_source_labels(connection: MagicMock):
+    legacy_payload = _shared_reflection().model_dump(mode="json")
+    legacy_payload["reflection"]["sources"][0]["context_sources"] = ["Matthew 5:1–7:29"]
+    connection.execute.return_value.fetchone.return_value = (legacy_payload,)
+    repository = ShareRepository("postgresql://wwjd:secret@db:5432/wwjd")
+
+    restored = repository.get("legacy-share-id")
+
+    assert restored is not None
+    assert restored.reflection.sources[0].context_sources[0].url.endswith("/matthew/5")
+
+
 def test_share_repository_returns_none_for_unknown_id(connection: MagicMock):
     connection.execute.return_value.fetchone.return_value = None
     repository = ShareRepository("postgresql://wwjd:secret@db:5432/wwjd")

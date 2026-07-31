@@ -1,7 +1,9 @@
 import json
 from pathlib import Path
+from urllib.parse import urlparse
 
 from app.context import ContextRegistry
+from app.context_sources import context_source
 from app.retrieval import Passage, THEME_ANCHORS
 
 
@@ -64,3 +66,23 @@ def test_every_theme_anchor_has_a_reviewed_card_or_editorial_draft():
         for book, chapter, verse_start, _ in anchors:
             point = Passage(book, chapter, verse_start, verse_start, "")
             assert any(registry._contains(row, point) for row in registry.rows), point.reference
+
+
+def test_context_sources_link_to_authoritative_material():
+    scripture = context_source("Matthew 5:1–7:29")
+    assert scripture.label == "Matthew 5:1–7:29"
+    assert scripture.url == "https://bible.usccb.org/bible/matthew/5"
+
+    catechism = context_source("Catechism of the Catholic Church 1965–1986")
+    assert catechism.url.startswith("https://www.vatican.va/")
+
+
+def test_every_reviewed_context_source_has_a_trusted_https_link():
+    trusted_hosts = {"bible.usccb.org", "www.vatican.va", "www.openbible.info", "berean.bible"}
+    registry = ContextRegistry()
+
+    for row in registry.rows:
+        for label in row["context_sources"]:
+            parsed_url = urlparse(context_source(label).url)
+            assert parsed_url.scheme == "https", label
+            assert parsed_url.hostname in trusted_hosts, label

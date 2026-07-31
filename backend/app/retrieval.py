@@ -8,7 +8,7 @@ from pathlib import Path
 import numpy as np
 
 from .retrieval_models import Passage, SearchResult, Verse
-from .themes import ThemeClassifier
+from .themes import SemanticThemeRouter, Theme, ThemeClassifier
 
 TOKEN_RE = re.compile(r"[^\W\d_]+", re.UNICODE)
 GOSPELS = {"Matthew", "Mark", "Luke", "John"}
@@ -54,6 +54,58 @@ THEME_ANCHORS = {
     "discernment": (
         ("Exodus", 23, 1, 2), ("Proverbs", 18, 13, 13),
         ("Proverbs", 18, 17, 17), ("1 Thessalonians", 5, 21, 22),
+    ),
+    "grief": (
+        ("Genesis", 50, 1, 4), ("2 Samuel", 1, 17, 27),
+        ("Psalms", 130, 1, 6), ("Romans", 12, 15, 15),
+    ),
+    "loneliness": (
+        ("Psalms", 22, 1, 2), ("Psalms", 23, 4, 4),
+        ("Lamentations", 1, 1, 2), ("Matthew", 28, 20, 20),
+    ),
+    "repentance": (
+        ("Psalms", 51, 1, 4), ("Isaiah", 1, 16, 18),
+        ("Luke", 3, 8, 14), ("Zechariah", 1, 3, 6),
+    ),
+    "hope": (
+        ("Psalms", 23, 4, 6), ("Psalms", 130, 5, 8),
+        ("Romans", 12, 12, 12), ("Philippians", 4, 6, 7),
+    ),
+    "envy": (
+        ("Matthew", 6, 24, 24), ("Romans", 12, 15, 15),
+        ("James", 3, 14, 16),
+    ),
+    "humility": (
+        ("Romans", 12, 16, 16), ("Colossians", 3, 12, 13),
+        ("James", 3, 13, 13),
+    ),
+    "self_control": (
+        ("Proverbs", 1, 10, 15), ("Mark", 9, 43, 48),
+        ("Luke", 22, 40, 46), ("James", 1, 19, 21),
+    ),
+    "justice": (
+        ("Exodus", 23, 2, 3), ("Exodus", 23, 6, 9),
+        ("Isaiah", 58, 6, 7), ("James", 2, 8, 9),
+    ),
+    "responsibility": (
+        ("Proverbs", 31, 27, 27), ("Matthew", 18, 15, 17),
+        ("Colossians", 3, 17, 17), ("James", 1, 22, 25),
+    ),
+    "compassion": (
+        ("Matthew", 14, 14, 16), ("Luke", 10, 33, 37),
+        ("Colossians", 3, 12, 13), ("1 John", 3, 17, 18),
+    ),
+    "boundaries_consent_privacy": (
+        ("Matthew", 18, 15, 17), ("Romans", 12, 10, 10),
+        ("Romans", 12, 17, 18), ("James", 2, 8, 8),
+    ),
+    "dignity_and_respect": (
+        ("Luke", 10, 27, 27), ("Romans", 12, 10, 10),
+        ("Romans", 12, 16, 16), ("James", 2, 1, 4), ("James", 2, 8, 9),
+    ),
+    "stewardship": (
+        ("Genesis", 1, 1, 2), ("Matthew", 6, 19, 21),
+        ("Proverbs", 31, 27, 27), ("James", 1, 22, 25),
     ),
 }
 
@@ -106,11 +158,13 @@ class Retriever:
         verses_path: Path,
         encoder: SemanticEncoder | None = None,
         cache_path: Path | None = None,
+        theme_router: SemanticThemeRouter | None = None,
     ):
         rows = json.loads(verses_path.read_text(encoding="utf-8"))
         self.verses = [Verse(**row) for row in rows]
         self.passages = [Passage(v.book, v.chapter, v.verse, v.verse, v.text) for v in self.verses]
         self.encoder = encoder
+        self.theme_router = theme_router
         self._tokens = [Counter(tokenize(verse.text)) for verse in self.verses]
         self._document_frequency: Counter[str] = Counter()
         for counts in self._tokens:
@@ -156,6 +210,16 @@ class Retriever:
 
     def search(self, query: str, limit: int = 4) -> list[SearchResult]:
         theme_confidences = query_theme_confidences(query)
+        if self.theme_router is not None:
+            semantic_themes = {
+                str(theme): confidence
+                for theme, confidence in self.theme_router.classify(
+                    query,
+                    excluded={Theme(theme) for theme in theme_confidences},
+                ).items()
+            }
+            for theme, confidence in semantic_themes.items():
+                theme_confidences[theme] = max(theme_confidences.get(theme, 0.0), confidence)
         themes = set(theme_confidences)
         lexical = self._lexical_scores(query)
         semantic = np.zeros(len(self.verses), dtype=np.float32)

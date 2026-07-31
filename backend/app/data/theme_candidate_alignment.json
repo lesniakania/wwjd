@@ -1,0 +1,143 @@
+{
+  "version": 1,
+  "source": "theme_candidates.json",
+  "existing_theme_count": 18,
+  "candidate_count": 42,
+  "status": "approved",
+  "covered_by_existing": [
+    {
+      "existing_themes": ["compassion", "responsibility"],
+      "candidate_ids": [
+        "child_safety",
+        "animal_welfare",
+        "ethics-principle-cluster-023",
+        "ethics-principle-cluster-071",
+        "assistance_in_emergencies",
+        "care_for_vulnerable_people",
+        "care_for_health",
+        "ethics-principle-cluster-015",
+        "ethics-principle-cluster-007"
+      ],
+      "reason_pl": "Kandydaci opisują konkretne zastosowania współczucia, praktycznej pomocy i odpowiedzialnej opieki."
+    },
+    {
+      "existing_themes": ["generosity", "compassion"],
+      "candidate_ids": ["ethics-principle-cluster-042"],
+      "reason_pl": "Wsparcie społeczności jest społecznym zastosowaniem hojności i współczucia."
+    },
+    {
+      "existing_themes": ["prejudice"],
+      "candidate_ids": ["appearance_discrimination"],
+      "reason_pl": "Dyskryminacja ze względu na wygląd jest bezpośrednim przypadkiem uprzedzenia i stronniczego traktowania."
+    },
+    {
+      "existing_themes": ["honesty", "responsibility"],
+      "candidate_ids": [
+        "ethics-principle-cluster-062",
+        "ethics-principle-cluster-012",
+        "ethics-principle-cluster-057",
+        "ethics-principle-cluster-068"
+      ],
+      "reason_pl": "Integralność, uprawniony dostęp, zobowiązania finansowe i dotrzymywanie obietnic są już objęte uczciwością i odpowiedzialnością."
+    },
+    {
+      "existing_themes": ["honesty"],
+      "candidate_ids": [
+        "truthfulness_and_trust",
+        "academic_integrity",
+        "ethics-principle-cluster-079"
+      ],
+      "reason_pl": "Kandydaci są odmianami prawdomówności i uczciwego postępowania w konkretnych warunkach."
+    },
+    {
+      "existing_themes": ["justice", "responsibility"],
+      "candidate_ids": [
+        "financial_abuse",
+        "respect_for_others_property",
+        "ethics-principle-cluster-052",
+        "ethics-principle-cluster-014",
+        "ethics-principle-cluster-053",
+        "ethics-principle-cluster-072"
+      ],
+      "reason_pl": "Nadużycia, własność, uczciwa rywalizacja i wyzysk dotyczą sprawiedliwego traktowania oraz odpowiedzialności za krzywdę."
+    },
+    {
+      "existing_themes": ["self_control", "responsibility"],
+      "candidate_ids": ["ethics-principle-cluster-069", "responsible_consumption"],
+      "reason_pl": "Używanie substancji i nadmierna konsumpcja są zastosowaniami samokontroli i odpowiedzialności."
+    },
+    {
+      "existing_themes": ["conflict", "anger", "self_control"],
+      "candidate_ids": ["violence_and_intentional_harm"],
+      "reason_pl": "Przemoc i celowe krzywdzenie są już objęte konfliktem, gniewem, odwetem i samokontrolą."
+    },
+    {
+      "existing_themes": ["responsibility"],
+      "candidate_ids": ["negligence_and_endangerment", "neglect_of_duties"],
+      "reason_pl": "Niedbalstwo i niewypełnianie obowiązków są rdzeniowymi przypadkami odpowiedzialności."
+    },
+    {
+      "existing_themes": ["envy", "generosity", "humility"],
+      "candidate_ids": ["ethics-principle-cluster-083"],
+      "reason_pl": "Uznanie i wdzięczność są już obecne jako odpowiedź na zazdrość, pychę i brak hojności."
+    },
+    {
+      "existing_themes": ["forgiveness", "honesty", "conflict"],
+      "candidate_ids": ["ethics-principle-cluster-088"],
+      "reason_pl": "Zaufanie i intymność są relacyjnym kontekstem uczciwości, zdrady, konfliktu i przebaczenia."
+    },
+    {
+      "existing_themes": ["honesty", "justice"],
+      "candidate_ids": ["ethics-principle-cluster-059"],
+      "reason_pl": "Zwrot zgubionych przedmiotów jest konkretnym zastosowaniem uczciwości i poszanowania cudzych praw."
+    }
+  ],
+  "new_theme_proposals": [
+    {
+      "id": "boundaries_consent_privacy",
+      "label_pl": "Granice, zgoda i prywatność",
+      "label_en": "Boundaries, consent, and privacy",
+      "summary_pl": "Poszanowanie osobistych granic, świadomej zgody oraz prywatnych przestrzeni i informacji.",
+      "summary_en": "Respect for personal boundaries, informed consent, and private spaces and information.",
+      "candidate_ids": [
+        "ethics-principle-cluster-077",
+        "ethics-principle-cluster-075",
+        "ethics-principle-cluster-070",
+        "privacy"
+      ],
+      "why_new_pl": "Obecne theme’y konfliktu, sprawiedliwości i odpowiedzialności częściowo dotykają tych sytuacji, ale żaden nie reprezentuje wyraźnie zgody i granic.",
+      "status": "approved",
+      "reviewed": true
+    },
+    {
+      "id": "dignity_and_respect",
+      "label_pl": "Godność i szacunek",
+      "label_en": "Dignity and respect",
+      "summary_pl": "Uznawanie godności innych osób i unikanie poniżania, wykluczania oraz lekceważenia tego, co dla nich ważne.",
+      "summary_en": "Recognizing others' dignity and avoiding humiliation, exclusion, and contempt for what they hold important.",
+      "candidate_ids": [
+        "dignity_and_inclusion",
+        "public_humiliation_and_disrespect",
+        "ethics-principle-cluster-081"
+      ],
+      "why_new_pl": "Uprzedzenie obejmuje dyskryminację, lecz nie wyczerpuje szerszego problemu poniżenia i poszanowania godności.",
+      "status": "approved",
+      "reviewed": true
+    },
+    {
+      "id": "stewardship",
+      "label_pl": "Odpowiedzialne gospodarowanie",
+      "label_en": "Stewardship",
+      "summary_pl": "Troska o środowisko, wspólne zasoby i przestrzenie powierzone wspólnej odpowiedzialności.",
+      "summary_en": "Care for the environment, shared resources, and spaces entrusted to common responsibility.",
+      "candidate_ids": [
+        "responsible_resource_management",
+        "environmental_stewardship",
+        "respect_for_shared_spaces"
+      ],
+      "why_new_pl": "Ogólna odpowiedzialność nie zapewnia wystarczająco wyraźnego profilu dla troski o stworzenie i dobra wspólne.",
+      "status": "approved",
+      "reviewed": true
+    }
+  ]
+}

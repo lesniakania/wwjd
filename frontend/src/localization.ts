@@ -38,7 +38,7 @@ const localizedCopy = {
     originalMeaning: "Co znaczył pierwotnie?",
     application: "Jak odnosi się do Twojej sytuacji?",
     passageContext: "Przeczytaj całą jednostkę",
-    contextSources: "Podstawa opracowania",
+    contextSources: "Kontekst zweryfikowany przez człowieka na podstawie tych źródeł",
     footerPrivacy:
       "Opis sytuacji zapisujemy tylko wtedy, gdy świadomie utworzysz link do udostępnienia.",
     analyticsText:
@@ -87,7 +87,7 @@ const localizedCopy = {
     originalMeaning: "What did it originally mean?",
     application: "How does it relate to your situation?",
     passageContext: "Read the complete unit",
-    contextSources: "Editorial basis",
+    contextSources: "Human-reviewed context based on these sources",
     footerPrivacy:
       "Your situation is stored only when you explicitly create a share link.",
     analyticsText:

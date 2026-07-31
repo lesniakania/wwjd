@@ -6,7 +6,7 @@ export interface Source {
   broader_context: string
   original_meaning: string
   situation_application: string
-  context_sources: string[]
+  context_sources: ContextSource[]
   context_confidence: string
   context_reviewed: boolean
   translation: string
@@ -14,6 +14,11 @@ export interface Source {
   relevance: string
   context_reference: string
   context_quotation: string
+}
+
+export interface ContextSource {
+  label: string
+  url: string
 }
 
 export interface Reflection {

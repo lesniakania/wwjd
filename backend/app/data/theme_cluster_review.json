@@ -1,0 +1,220 @@
+{
+  "version": 1,
+  "source": "theme_cluster_drafts.json",
+  "default_action": "keep",
+  "review_status": "editorial_draft",
+  "decisions": [
+    {
+      "action": "merge",
+      "cluster_ids": ["ethics-principle-cluster-001", "ethics-principle-cluster-030", "ethics-principle-cluster-044", "ethics-principle-cluster-073"],
+      "candidate_id": "animal_welfare",
+      "label_pl": "Dobrostan zwierząt",
+      "label_en": "Animal welfare",
+      "summary_pl": "Odpowiedzialna opieka nad zwierzętami, właściwe żywienie i unikanie niepotrzebnej krzywdy.",
+      "summary_en": "Responsible animal care, appropriate feeding, and avoidance of unnecessary harm.",
+      "reason_pl": "Cztery klastry opisują różne strony tego samego problemu etycznego."
+    },
+    {
+      "action": "merge",
+      "cluster_ids": ["ethics-principle-cluster-048", "ethics-principle-cluster-051"],
+      "candidate_id": "academic_integrity",
+      "label_pl": "Uczciwość akademicka",
+      "label_en": "Academic integrity",
+      "summary_pl": "Uczciwe postępowanie w nauce, ocenianiu i udzielaniu pomocy akademickiej.",
+      "summary_en": "Honest conduct in study, assessment, and academic assistance.",
+      "reason_pl": "Oba klastry dotyczą uczciwości i niedozwolonej przewagi w edukacji."
+    },
+    {
+      "action": "merge",
+      "cluster_ids": ["ethics-principle-cluster-006", "ethics-principle-cluster-078", "ethics-principle-cluster-086"],
+      "candidate_id": "respect_for_shared_spaces",
+      "label_pl": "Szacunek dla przestrzeni wspólnych",
+      "label_en": "Respect for shared spaces",
+      "summary_pl": "Odpowiedzialne korzystanie z miejsc współdzielonych i dbanie o nie.",
+      "summary_en": "Responsible use and care of shared spaces.",
+      "reason_pl": "Klastry opisują odpowiedzialne korzystanie z miejsc wspólnych i publicznych."
+    },
+    {
+      "action": "merge",
+      "cluster_ids": ["ethics-principle-cluster-020", "ethics-principle-cluster-031"],
+      "candidate_id": "care_for_vulnerable_people",
+      "label_pl": "Troska o osoby szczególnie narażone",
+      "label_en": "Care for vulnerable people",
+      "summary_pl": "Ochrona i wspieranie osób szczególnie narażonych na zaniedbanie, krzywdę lub niesprawiedliwość.",
+      "summary_en": "Protecting and supporting people especially exposed to neglect, harm, or injustice.",
+      "reason_pl": "Zaniedbanie i troska są przeciwnymi stronami tego samego zagadnienia."
+    },
+    {
+      "action": "merge",
+      "cluster_ids": ["ethics-principle-cluster-005", "ethics-principle-cluster-032", "ethics-principle-cluster-056"],
+      "candidate_id": "privacy",
+      "label_pl": "Prywatność",
+      "label_en": "Privacy",
+      "summary_pl": "Poszanowanie prywatnych przestrzeni i informacji oraz unikanie dostępu bez zgody.",
+      "summary_en": "Respecting private spaces and information and avoiding access without consent.",
+      "reason_pl": "Prywatna przestrzeń, informacje i prawo do odpoczynku są aspektami jednego tematu."
+    },
+    {
+      "action": "merge",
+      "cluster_ids": ["ethics-principle-cluster-010", "ethics-principle-cluster-021", "ethics-principle-cluster-033", "ethics-principle-cluster-084"],
+      "candidate_id": "responsible_resource_management",
+      "label_pl": "Odpowiedzialne zarządzanie zasobami",
+      "label_en": "Responsible resource management",
+      "summary_pl": "Sprawiedliwe, oszczędne i uprawnione korzystanie ze wspólnych zasobów.",
+      "summary_en": "Fair, restrained, and authorized use of shared resources.",
+      "reason_pl": "Klastry powielają ogólny temat gospodarowania wspólnymi zasobami."
+    },
+    {
+      "action": "merge",
+      "cluster_ids": ["ethics-principle-cluster-002", "ethics-principle-cluster-061"],
+      "candidate_id": "truthfulness_and_trust",
+      "label_pl": "Prawdomówność i zaufanie",
+      "label_en": "Truthfulness and trust",
+      "summary_pl": "Przekazywanie prawdziwych informacji i niewykorzystywanie zaufania przez oszustwo.",
+      "summary_en": "Communicating truthful information and not exploiting trust through deception.",
+      "reason_pl": "Oba klastry dotyczą prawdy, wprowadzania w błąd i skutków dla zaufania."
+    },
+    {
+      "action": "merge",
+      "cluster_ids": ["ethics-principle-cluster-016", "ethics-principle-cluster-039", "ethics-principle-cluster-063"],
+      "candidate_id": "child_safety",
+      "label_pl": "Bezpieczeństwo dzieci",
+      "label_en": "Child safety",
+      "summary_pl": "Ochrona dzieci przed krzywdą, wykorzystaniem i niebezpiecznymi warunkami.",
+      "summary_en": "Protecting children from harm, exploitation, and unsafe conditions.",
+      "reason_pl": "Narażenie na substancje i krzywda są konkretnymi przypadkami bezpieczeństwa dzieci."
+    },
+    {
+      "action": "merge",
+      "cluster_ids": ["ethics-principle-cluster-054", "ethics-principle-cluster-066", "ethics-principle-cluster-076", "ethics-principle-cluster-090"],
+      "candidate_id": "assistance_in_emergencies",
+      "label_pl": "Pomoc w sytuacji zagrożenia",
+      "label_en": "Assistance in emergencies",
+      "summary_pl": "Terminowe i proporcjonalne udzielanie pomocy osobom w nagłej potrzebie.",
+      "summary_en": "Timely and proportionate assistance to people in urgent need.",
+      "reason_pl": "Klastry opisują zapobieganie krzywdzie i reagowanie w nagłej potrzebie."
+    },
+    {
+      "action": "merge",
+      "cluster_ids": ["ethics-principle-cluster-008", "ethics-principle-cluster-027", "ethics-principle-cluster-060"],
+      "candidate_id": "respect_for_others_property",
+      "label_pl": "Poszanowanie cudzej własności",
+      "label_en": "Respect for others' property",
+      "summary_pl": "Szanowanie prawa własności i niekorzystanie z cudzych rzeczy bez pozwolenia.",
+      "summary_en": "Respecting ownership and not using another person's belongings without permission.",
+      "reason_pl": "Klastry opisują tę samą zasadę w odniesieniu do własności i rzeczy osobistych."
+    },
+    {
+      "action": "merge",
+      "cluster_ids": ["ethics-principle-cluster-035", "ethics-principle-cluster-041", "ethics-principle-cluster-055"],
+      "candidate_id": "environmental_stewardship",
+      "label_pl": "Troska o środowisko",
+      "label_en": "Environmental stewardship",
+      "summary_pl": "Ograniczanie szkód dla środowiska oraz odpowiedzialne gospodarowanie zasobami naturalnymi i odpadami.",
+      "summary_en": "Limiting environmental harm and responsibly managing natural resources and waste.",
+      "reason_pl": "Zasoby naturalne i odpady są konkretnymi aspektami odpowiedzialności środowiskowej."
+    },
+    {
+      "action": "merge",
+      "cluster_ids": ["ethics-principle-cluster-009", "ethics-principle-cluster-050"],
+      "candidate_id": "violence_and_intentional_harm",
+      "label_pl": "Przemoc i celowe krzywdzenie",
+      "label_en": "Violence and intentional harm",
+      "summary_pl": "Unikanie przemocy i świadomego wyrządzania krzywdy innym osobom.",
+      "summary_en": "Avoiding violence and the intentional infliction of harm on others.",
+      "reason_pl": "Agresja fizyczna jest podstawową postacią celowego krzywdzenia."
+    },
+    {
+      "action": "merge",
+      "cluster_ids": ["ethics-principle-cluster-003", "ethics-principle-cluster-004", "ethics-principle-cluster-036", "ethics-principle-cluster-040", "ethics-principle-cluster-045"],
+      "candidate_id": "negligence_and_endangerment",
+      "label_pl": "Niedbalstwo i narażanie na niebezpieczeństwo",
+      "label_en": "Negligence and endangerment",
+      "summary_pl": "Unikanie lekkomyślnych zaniedbań i działań, które stwarzają zagrożenie dla innych.",
+      "summary_en": "Avoiding reckless omissions and actions that put others in danger.",
+      "reason_pl": "Klastry różnią się kontekstem, ale opisują odpowiedzialność za przewidywalne ryzyko i niezamierzoną krzywdę."
+    },
+    {
+      "action": "rename",
+      "cluster_ids": ["ethics-principle-cluster-089"],
+      "candidate_id": "financial_abuse",
+      "label_pl": "Nadużycia finansowe",
+      "label_en": "Financial abuse",
+      "summary_pl": "Wykorzystywanie powierzonych lub wspólnych środków finansowych dla osobistej korzyści.",
+      "summary_en": "Using entrusted or shared funds for personal gain.",
+      "reason_pl": "Klaster dotyczy nadużywania środków, a nie całej etyki finansowej."
+    },
+    {
+      "action": "rename",
+      "cluster_ids": ["ethics-principle-cluster-013"],
+      "candidate_id": "responsible_consumption",
+      "label_pl": "Umiar i odpowiedzialna konsumpcja",
+      "label_en": "Moderation and responsible consumption",
+      "summary_pl": "Unikanie nadmiernej konsumpcji i odpowiedzialne korzystanie z dóbr.",
+      "summary_en": "Avoiding excessive consumption and using goods responsibly.",
+      "reason_pl": "Konkretna zasada jest czytelniejsza niż szeroka nazwa domeny."
+    },
+    {
+      "action": "rename",
+      "cluster_ids": ["ethics-principle-cluster-019"],
+      "candidate_id": "public_humiliation_and_disrespect",
+      "label_pl": "Publiczne upokarzanie i brak szacunku",
+      "label_en": "Public humiliation and disrespect",
+      "summary_pl": "Unikanie publicznego poniżania i lekceważenia godności innych osób.",
+      "summary_en": "Avoiding public humiliation and disregard for another person's dignity.",
+      "reason_pl": "Nowa nazwa precyzyjnie opisuje negatywne zachowania z przykładów."
+    },
+    {
+      "action": "rename",
+      "cluster_ids": ["ethics-principle-cluster-022"],
+      "candidate_id": "appearance_discrimination",
+      "label_pl": "Dyskryminacja ze względu na wygląd",
+      "label_en": "Appearance discrimination",
+      "summary_pl": "Niesprawiedliwe traktowanie osób ze względu na wygląd, kolor skóry lub inne cechy fizyczne.",
+      "summary_en": "Unfair treatment based on appearance, skin color, or other physical traits.",
+      "reason_pl": "Poprzedni opis błędnie sugerował obowiązek respektowania norm wyglądu.",
+      "excluded_record_ids": ["ethics:commonsense:train:13382"]
+    },
+    {
+      "action": "rename",
+      "cluster_ids": ["ethics-principle-cluster-026"],
+      "candidate_id": "dignity_and_inclusion",
+      "label_pl": "Godność i inkluzja",
+      "label_en": "Dignity and inclusion",
+      "summary_pl": "Okazywanie szacunku, solidarności i akceptacji osobom marginalizowanym lub wykluczanym.",
+      "summary_en": "Showing respect, solidarity, and acceptance to marginalized or excluded people.",
+      "reason_pl": "Zachowano spójny rdzeń klastra i usunięto przykład dotyczący szkodliwej grupy.",
+      "excluded_record_ids": ["ethics:commonsense:train:6095"]
+    },
+    {
+      "action": "rename",
+      "cluster_ids": ["ethics-principle-cluster-029"],
+      "candidate_id": "neglect_of_duties",
+      "label_pl": "Zaniedbanie obowiązków",
+      "label_en": "Neglect of duties",
+      "summary_pl": "Unikanie lub niewypełnianie obowiązków wobec innych osób i powierzonych spraw.",
+      "summary_en": "Avoiding or failing to fulfill duties toward others and entrusted matters.",
+      "reason_pl": "Nazwa odróżnia niewypełnianie obowiązku od szkody wynikającej z niedbalstwa."
+    },
+    {
+      "action": "rename",
+      "cluster_ids": ["ethics-principle-cluster-043"],
+      "candidate_id": "care_for_health",
+      "label_pl": "Troska o zdrowie swoje i innych",
+      "label_en": "Care for one's own and others' health",
+      "summary_pl": "Odpowiedzialne dbanie o własne zdrowie i reagowanie na potrzeby zdrowotne innych.",
+      "summary_en": "Responsibly caring for one's own health and responding to others' health needs.",
+      "reason_pl": "Nazwa ujawnia dwa kierunki troski obecne w przykładach."
+    },
+    {
+      "action": "reject",
+      "cluster_ids": ["ethics-principle-cluster-011", "ethics-principle-cluster-017", "ethics-principle-cluster-024", "ethics-principle-cluster-025", "ethics-principle-cluster-037", "ethics-principle-cluster-038", "ethics-principle-cluster-049", "ethics-principle-cluster-064", "ethics-principle-cluster-074", "ethics-principle-cluster-080", "ethics-principle-cluster-082", "ethics-principle-cluster-087"],
+      "reason_pl": "Klaster jest zbyt szeroki, łączy odmienne zasady albo zawiera sprzeczne przykłady."
+    },
+    {
+      "action": "reject",
+      "cluster_ids": ["ethics-principle-cluster-018", "ethics-principle-cluster-028", "ethics-principle-cluster-034", "ethics-principle-cluster-046", "ethics-principle-cluster-047", "ethics-principle-cluster-058", "ethics-principle-cluster-065"],
+      "reason_pl": "Klaster opisuje głównie czynność lub domenę, bez wystarczająco wyraźnego problemu etycznego."
+    }
+  ]
+}

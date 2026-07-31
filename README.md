@@ -144,8 +144,12 @@ digital-use permission for Biblia Tysiąclecia is obtained; no protected text is
 ```bash
 cd backend && uv run pytest
 cd backend && uv run ruff check .
-cd frontend && npm run test && npm run build
+cd backend && uv run bandit -r app
+cd frontend && npm run lint && npm run test && npm run build
 ```
+
+The same checks run on every push and pull request in GitHub Actions. Trivy additionally scans
+the locked backend and frontend dependencies for known high and critical vulnerabilities.
 
 ## Product boundary
 

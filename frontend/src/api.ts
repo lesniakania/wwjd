@@ -36,6 +36,12 @@ interface ApiError {
   detail?: string
 }
 
+const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? '').trim().replace(/\/$/, '')
+
+function apiUrl(path: string): string {
+  return `${apiBaseUrl}${path}`
+}
+
 async function responseError(response: Response, fallbackMessage: string): Promise<Error> {
   const body = await response.json().catch(() => null) as ApiError | null
   return new Error(body?.detail || fallbackMessage)
@@ -57,7 +63,7 @@ export async function requestReflection(situation: string, language: 'pl' | 'en'
   const validationMessage = language === 'pl'
     ? 'Opisz sytuację trochę dokładniej.'
     : 'Please describe the situation in a little more detail.'
-  const response = await fetch('/api/reflections', {
+  const response = await fetch(apiUrl('/api/reflections'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ situation, language }),
@@ -79,7 +85,7 @@ export async function createShare(situation: string, language: 'pl' | 'en', refl
   const fallbackMessage = language === 'pl'
     ? 'Nie udało się utworzyć linku.'
     : 'The share link could not be created.'
-  const body = await requestJson<{ id: string }>('/api/shares', {
+  const body = await requestJson<{ id: string }>(apiUrl('/api/shares'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ situation, language, reflection }),
@@ -89,7 +95,7 @@ export async function createShare(situation: string, language: 'pl' | 'en', refl
 
 export async function getShare(id: string): Promise<SharedReflection> {
   return requestJson<SharedReflection>(
-    `/api/shares/${encodeURIComponent(id)}`,
+    apiUrl(`/api/shares/${encodeURIComponent(id)}`),
     undefined,
     'Nie znaleziono udostępnionej odpowiedzi. / Shared response not found.',
   )

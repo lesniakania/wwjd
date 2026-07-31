@@ -41,4 +41,23 @@ describe("API client", () => {
 
     expect(fetchMock).toHaveBeenCalledWith("/api/shares/a%2Fb");
   });
+
+  it("uses the configured API base URL without duplicating slashes", async () => {
+    vi.stubEnv("VITE_API_BASE_URL", "https://wwjd-api.onrender.com/");
+    vi.resetModules();
+    const { requestReflection: requestConfiguredReflection } = await import("./api");
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({}),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await requestConfiguredReflection("A sufficiently detailed situation.", "en");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://wwjd-api.onrender.com/api/reflections",
+      expect.any(Object),
+    );
+  });
 });

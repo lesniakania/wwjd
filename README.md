@@ -59,6 +59,33 @@ npm run dev
 
 Open http://localhost:5173. Vite proxies `/api` to FastAPI on port 8000.
 
+## Deploy with Render, Neon, and Cloudflare Pages
+
+The committed `render.yaml` creates a Standard Render web service for the FastAPI backend. Connect
+the repository as a Render Blueprint and provide these secret values when prompted:
+
+- `DATABASE_URL`: the pooled Neon PostgreSQL connection string, including `sslmode=require`
+- `ALLOWED_ORIGINS`: the Cloudflare Pages production origin, for example
+  `https://wwjd.pages.dev` (multiple origins are comma-separated)
+- `HF_TOKEN`: optional; leave empty to use local extractive generation
+
+Render installs the default sentence-transformer and builds the verse indexes during its build
+phase. The resulting files are part of the deployed artifact, so the service does not require a
+persistent disk and does not download the model on every start. Changing `EMBEDDING_MODEL` triggers
+a new build with matching indexes.
+
+Create a Cloudflare Pages project with the following settings:
+
+```text
+Root directory: frontend
+Build command: npm run build
+Build output directory: dist
+```
+
+Set `VITE_API_BASE_URL` to the Render service origin without an `/api` suffix, for example
+`https://wwjd-api.onrender.com`. Optionally set `VITE_GA_MEASUREMENT_ID`. Local development leaves
+`VITE_API_BASE_URL` empty and continues to use Vite's `/api` proxy.
+
 ## Configuration
 
 Copy `.env.example` to `.env` or export the values before starting FastAPI.

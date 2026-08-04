@@ -16,6 +16,9 @@ describe('App', () => {
     expect(screen.getByLabelText('Co na to Jezus?')).toBeTruthy()
     expect(document.title).toBe('Co na to Jezus?')
     expect(screen.getByText(/najpierw opisz fakty/i)).toBeTruthy()
+    expect(screen.getByRole('heading', { name: /jak powstaje refleksja/i })).toBeTruthy()
+    expect(screen.getByText(/21 obszarów etycznych/i)).toBeTruthy()
+    expect(screen.getByText(/model językowy nie wybiera dowolnych cytatów/i)).toBeTruthy()
   })
 
   it('switches between Polish and English', async () => {
@@ -25,6 +28,8 @@ describe('App', () => {
     expect(screen.getByRole('heading', { name: /what would jesus do/i })).toBeTruthy()
     expect(screen.getByLabelText('What would Jesus do?')).toBeTruthy()
     expect(document.title).toBe('What would Jesus do?')
+    expect(screen.getByRole('heading', { name: /how the reflection is created/i })).toBeTruthy()
+    expect(screen.getByText(/21 ethical themes/i)).toBeTruthy()
   })
 
   it('renders a grounded response', async () => {

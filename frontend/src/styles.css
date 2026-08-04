@@ -65,6 +65,18 @@ textarea::placeholder { color: #9a9b91; }
 .tips li { position: relative; padding-left: 18px; line-height: 1.45; }
 .tips li::before { position: absolute; left: 0; content: '—'; color: #b1684d; }
 
+.algorithm { padding: 80px 0 100px; border-top: 1px solid rgba(32, 54, 47, .15); }
+.algorithm-heading { width: min(720px, 100%); margin: 0 auto 52px; text-align: center; }
+.algorithm-heading h2 { margin: 18px 0 20px; color: #243f35; font-family: 'Libre Caslon Display', Georgia, serif; font-size: clamp(40px, 6vw, 64px); font-weight: 400; line-height: 1; letter-spacing: -.025em; }
+.algorithm-heading p { margin: 0; color: #65756e; font-size: 15px; line-height: 1.75; }
+.algorithm-steps { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(3, auto); grid-auto-flow: column; margin: 0; padding: 0; border-top: 1px solid rgba(32, 54, 47, .15); list-style: none; }
+.algorithm-steps li { display: grid; grid-template-columns: 42px 1fr; gap: 18px; padding: 34px 36px; border-bottom: 1px solid rgba(32, 54, 47, .15); }
+.algorithm-steps li:nth-child(-n+3) { border-right: 1px solid rgba(32, 54, 47, .15); }
+.algorithm-number { padding-top: 2px; color: #9c5138; font-family: 'Libre Caslon Display', Georgia, serif; font-size: 22px; }
+.algorithm-steps h3 { margin: 0 0 11px; color: #2c4b40; font-size: 15px; font-weight: 600; }
+.algorithm-steps p { margin: 0; color: #687872; font-size: 13px; line-height: 1.7; }
+.algorithm-safeguard { width: min(820px, 100%); margin: 38px auto 0; padding: 24px 28px; color: #3f5b51; background: rgba(255, 253, 247, .66); border-left: 3px solid #9c5138; font-size: 13px; line-height: 1.7; }
+
 .result { padding: 60px 0 90px; }
 .back-button { padding: 8px 0; color: #667970; background: none; border: 0; font-size: 13px; }
 .result-tools { display: flex; align-items: flex-start; justify-content: flex-end; margin-top: -32px; }
@@ -136,6 +148,12 @@ footer { min-height: 78px; gap: 20px; color: #7e877f; border-top: 1px solid rgba
   .prompt-card { padding: 18px; }
   .tips ul, .source-grid { grid-template-columns: 1fr; }
   .tips { padding-inline: 8px; }
+  .algorithm { padding: 62px 0 72px; }
+  .algorithm-heading { margin-bottom: 38px; }
+  .algorithm-steps { grid-template-columns: 1fr; grid-template-rows: none; grid-auto-flow: row; }
+  .algorithm-steps li { grid-template-columns: 34px 1fr; padding: 27px 8px; }
+  .algorithm-steps li:nth-child(-n+3) { border-right: 0; }
+  .algorithm-safeguard { margin-top: 28px; padding: 20px; }
   .result { padding-top: 35px; }
   .result-tools { margin-top: 10px; }
   .share-controls { width: 100%; }

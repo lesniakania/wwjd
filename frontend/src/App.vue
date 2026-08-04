@@ -177,7 +177,8 @@ onMounted(async () => {
     </header>
 
     <main>
-      <section v-if="!reflection" class="hero" aria-labelledby="page-title">
+      <template v-if="!reflection">
+      <section class="hero" aria-labelledby="page-title">
         <div class="eyebrow"><span></span> {{ t.eyebrow }}</div>
         <h1 id="page-title">
           {{ t.title1 }}<br /><em>{{ t.title2 }}</em>
@@ -199,6 +200,25 @@ onMounted(async () => {
           </ul>
         </aside>
       </section>
+
+      <section class="algorithm" aria-labelledby="algorithm-title">
+        <div class="algorithm-heading">
+          <div class="eyebrow"><span></span> {{ t.algorithmEyebrow }}</div>
+          <h2 id="algorithm-title">{{ t.algorithmTitle }}</h2>
+          <p>{{ t.algorithmIntro }}</p>
+        </div>
+        <ol class="algorithm-steps">
+          <li v-for="(step, index) in t.algorithmSteps" :key="step.title">
+            <span class="algorithm-number">{{ String(index + 1).padStart(2, "0") }}</span>
+            <div>
+              <h3>{{ step.title }}</h3>
+              <p>{{ step.body }}</p>
+            </div>
+          </li>
+        </ol>
+        <p class="algorithm-safeguard">{{ t.algorithmSafeguard }}</p>
+      </section>
+      </template>
 
       <section v-else class="result" aria-live="polite">
         <button class="back-button" type="button" @click="reset">

@@ -8,15 +8,15 @@ const localizedCopy = {
     appTitle: "Co na to Jezus?",
     homeLabel: "Co na to Jezus? — strona główna",
     header: "Refleksja oparta na Biblii",
-    eyebrow: "Chwila na zatrzymanie",
+    eyebrow: "Hm, a ciekawe",
     title1: "Co na to",
     title2: "Jezus?",
     intro:
-      "Opisz, z czym się mierzysz. Odszukamy odpowiednie fragmenty Pisma i zaproponujemy przemyślaną, praktyczną refleksję opartą na Biblii.",
+      "Napisz, co Cię martwi. Poszukamy pomocnych fragmentów Biblii i podpowiemy, jak możesz spojrzeć na tę sytuację.",
     label: "Co na to Jezus?",
     placeholder: "Zmagam się z trudną decyzją w pracy…",
     privacy: "Opisz sytuację bez prywatnych danych innych osób.",
-    submit: "Znajdź drogę naprzód",
+    submit: "Zobacz",
     loading: "Szukam odpowiedzi…",
     tipsTitle:
       "Jaśniejszy opis sytuacji pozwala stworzyć bardziej pomocną refleksję",
@@ -70,7 +70,7 @@ const localizedCopy = {
     originalMeaning: "Co znaczył pierwotnie?",
     application: "Jak odnosi się do Twojej sytuacji?",
     passageContext: "Przeczytaj całą jednostkę",
-    contextSources: "Kontekst zweryfikowany przez człowieka na podstawie tych źródeł",
+    contextSources: "Kontekst na podstawie tych źródeł",
     footerPrivacy:
       "Opis sytuacji zapisujemy tylko wtedy, gdy świadomie utworzysz link do udostępnienia.",
     analyticsText:
@@ -90,15 +90,15 @@ const localizedCopy = {
     appTitle: "What would Jesus do?",
     homeLabel: "What would Jesus do? — home",
     header: "A Bible-grounded reflection",
-    eyebrow: "A moment to pause",
+    eyebrow: "Hmm, interesting",
     title1: "What would",
     title2: "Jesus do?",
     intro:
-      "Describe what you are facing. We’ll look for relevant Scripture and offer a thoughtful, practical reflection based on the Bible.",
+      "Tell us what’s worrying you. We’ll find helpful Bible passages and suggest a way to look at the situation.",
     label: "What would Jesus do?",
     placeholder: "I’m struggling with a decision at work...",
     privacy: "Share the situation, not anyone’s private details.",
-    submit: "Find a way forward",
+    submit: "See",
     loading: "Reflecting…",
     tipsTitle: "A clearer situation leads to a more useful reflection",
     tips: [

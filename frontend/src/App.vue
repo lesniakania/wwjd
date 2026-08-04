@@ -146,7 +146,9 @@ onMounted(async () => {
   <div class="page-shell">
     <header class="site-header">
       <a class="wordmark" href="#" :aria-label="t.homeLabel">
-        <span class="wordmark-mark">J</span>
+        <span class="wordmark-mark" aria-hidden="true">
+          <span class="wordmark-mark-glyph">J</span>
+        </span>
         <span>{{ t.appTitle }}</span>
       </a>
       <div class="header-actions">

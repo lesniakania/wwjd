@@ -31,7 +31,8 @@ button { cursor: pointer; }
 
 .site-header { height: 92px; border-bottom: 1px solid rgba(32, 54, 47, .15); }
 .wordmark { display: flex; gap: 12px; align-items: center; color: inherit; text-decoration: none; font-weight: 600; letter-spacing: .08em; }
-.wordmark-mark { display: grid; place-items: center; width: 34px; height: 34px; color: #f2eee4; background: #9c5138; border-radius: 50% 50% 45% 55%; font-family: 'Libre Caslon Display', serif; font-size: 20px; }
+.wordmark-mark { display: grid; place-items: center; width: 34px; height: 34px; color: #f2eee4; background: #9c5138; border-radius: 63% 37% 58% 42% / 39% 61% 44% 56%; font-family: 'Libre Caslon Display', serif; font-size: 20px; }
+.wordmark-mark-glyph { display: block; line-height: 1; transform: translateX(1px); }
 .header-note { color: #687a72; font-size: 13px; }
 .header-actions { display: flex; align-items: center; gap: 22px; }
 .language-switch { display: flex; padding: 3px; border: 1px solid rgba(32, 54, 47, .2); border-radius: 3px; }

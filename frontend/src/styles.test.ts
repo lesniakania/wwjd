@@ -4,6 +4,16 @@ import { describe, expect, it } from "vitest";
 const styles = readFileSync("src/styles.css", "utf8");
 
 describe("responsive styles", () => {
+  it("gives the wordmark an intentionally organic shape", () => {
+    expect(styles).toMatch(
+      /\.wordmark-mark\s*\{[^}]*border-radius:\s*[^;]*%[^;]*%[^;]*%[^;]*%/s,
+    );
+    expect(styles).toMatch(
+      /\.wordmark-mark-glyph\s*\{[^}]*transform:\s*translateX\(1px\)/s,
+    );
+    expect(styles).not.toMatch(/\.wordmark-mark-glyph\s*\{[^}]*rotate\(/s);
+  });
+
   it("provides compact tablet and phone layouts", () => {
     expect(styles).toContain("@media (max-width: 820px)");
     expect(styles).toContain("@media (max-width: 480px)");

@@ -69,7 +69,7 @@ describe('App', () => {
       screen.getByLabelText('What would Jesus do?'),
       'My friend hurt me and I am unsure how to respond with kindness.',
     )
-    await fireEvent.click(screen.getByRole('button', { name: /find a way forward/i }))
+    await fireEvent.click(screen.getByRole('button', { name: /^see$/i }))
     expect(await screen.findByRole('heading', { name: /Bible passages and their context/i })).toBeTruthy()
     expect(screen.queryByText('Choose honesty with compassion.')).toBeNull()
     expect(screen.getByText('Matthew 5:44')).toBeTruthy()
@@ -99,7 +99,7 @@ describe('App', () => {
       .mockResolvedValueOnce({ ok: true, json: async () => ({ id: 'safe-share-id' }) }))
     render(App)
     await fireEvent.update(screen.getByLabelText('Co na to Jezus?'), 'Przyjaciel mnie zranił i nie wiem, jak odpowiedzieć z miłością.')
-    await fireEvent.click(screen.getByRole('button', { name: /znajdź drogę naprzód/i }))
+    await fireEvent.click(screen.getByRole('button', { name: /^zobacz$/i }))
     await screen.findByText('Matthew 5:44')
     await fireEvent.click(screen.getByRole('button', { name: /^udostępnij/i }))
     expect(await screen.findByText('Link skopiowany')).toBeTruthy()

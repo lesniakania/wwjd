@@ -35,9 +35,10 @@ class ShareRepository:
 
     @staticmethod
     def _upgrade_legacy_sources(payload: dict) -> dict:
+        language = payload.get("language", "pl")
         for source in payload.get("reflection", {}).get("sources", []):
             source["context_sources"] = [
-                context_source(item).model_dump() if isinstance(item, str) else item
+                context_source(item, language).model_dump() if isinstance(item, str) else item
                 for item in source.get("context_sources", [])
             ]
         return payload

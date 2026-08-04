@@ -18,7 +18,7 @@ describe("PromptForm", () => {
       "  I need help responding patiently to a difficult friend.  ",
     );
     await fireEvent.click(
-      screen.getByRole("button", { name: /find a way forward/i }),
+      screen.getByRole("button", { name: /^see$/i }),
     );
 
     expect(emitted().submit).toEqual([

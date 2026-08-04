@@ -69,12 +69,26 @@ def test_every_theme_anchor_has_a_reviewed_card_or_editorial_draft():
 
 
 def test_context_sources_link_to_authoritative_material():
-    scripture = context_source("Matthew 5:1–7:29")
+    scripture = context_source("Matthew 5:1–7:29", "en")
     assert scripture.label == "Matthew 5:1–7:29"
     assert scripture.url == "https://bible.usccb.org/bible/matthew/5"
 
-    catechism = context_source("Catechism of the Catholic Church 1965–1986")
+    catechism = context_source("Catechism of the Catholic Church 1965–1986", "en")
     assert catechism.url.startswith("https://www.vatican.va/")
+
+
+def test_context_sources_are_localized_for_polish_responses():
+    scripture = context_source("Matthew 5:1–7:29", "pl")
+    assert scripture.label == "Mateusza 5:1–7:29 (UBG)"
+    assert scripture.url == "https://www.bible.com/pl/bible/138/MAT.5.UBG"
+
+    notes = context_source("USCCB, Matthew 5 notes", "pl")
+    assert notes.label == "Mateusza 5 — tekst biblijny (UBG)"
+    assert notes.url == "https://www.bible.com/pl/bible/138/MAT.5.UBG"
+
+    catechism = context_source("Catechism of the Catholic Church 1965–1986", "pl")
+    assert catechism.label == "Katechizm Kościoła Katolickiego 1965–1986"
+    assert catechism.url == "https://www.katechizm.opoka.org.pl/"
 
 
 def test_every_reviewed_context_source_has_a_trusted_https_link():
@@ -83,6 +97,6 @@ def test_every_reviewed_context_source_has_a_trusted_https_link():
 
     for row in registry.rows:
         for label in row["context_sources"]:
-            parsed_url = urlparse(context_source(label).url)
+            parsed_url = urlparse(context_source(label, "en").url)
             assert parsed_url.scheme == "https", label
             assert parsed_url.hostname in trusted_hosts, label

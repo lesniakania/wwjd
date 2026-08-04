@@ -58,7 +58,9 @@ class SourceFactory:
             broader_context=context.broader_context,
             original_meaning=context.original_meaning,
             situation_application=applications[source_id],
-            context_sources=[context_source(label) for label in context.context_sources],
+            context_sources=[
+                context_source(label, language) for label in context.context_sources
+            ],
             context_confidence=context.confidence,
             context_reviewed=context.reviewed,
             translation=translation_name(language),

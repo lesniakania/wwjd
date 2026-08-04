@@ -219,6 +219,14 @@ onMounted(async () => {
           </li>
         </ol>
         <p class="algorithm-safeguard">{{ t.algorithmSafeguard }}</p>
+        <a
+          class="algorithm-technical-link"
+          href="https://github.com/lesniakania/wwjd/blob/main/ALGORITHM.md#reflection-algorithm"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {{ t.algorithmTechnicalDescription }} <span aria-hidden="true">→</span>
+        </a>
       </section>
       </template>
 

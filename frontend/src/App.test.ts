@@ -32,6 +32,21 @@ describe('App', () => {
     expect(screen.getByText(/21 ethical themes/i)).toBeTruthy()
   })
 
+  it('links to the technical reflection algorithm description', async () => {
+    render(App)
+    const polishLink = screen.getByRole('link', { name: 'Bardziej techniczny opis' })
+    expect(polishLink.getAttribute('href')).toBe(
+      'https://github.com/lesniakania/wwjd/blob/main/ALGORITHM.md#reflection-algorithm',
+    )
+    expect(polishLink.getAttribute('target')).toBe('_blank')
+    expect(polishLink.getAttribute('rel')).toBe('noopener noreferrer')
+
+    await fireEvent.click(screen.getByRole('button', { name: 'EN' }))
+    expect(screen.getByRole('link', { name: 'More technical description' }).getAttribute('href')).toBe(
+      'https://github.com/lesniakania/wwjd/blob/main/ALGORITHM.md#reflection-algorithm',
+    )
+  })
+
   it('renders a grounded response', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
       ok: true,

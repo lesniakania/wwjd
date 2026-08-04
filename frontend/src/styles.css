@@ -77,6 +77,8 @@ textarea::placeholder { color: #9a9b91; }
 .algorithm-steps h3 { margin: 0 0 11px; color: #2c4b40; font-size: 15px; font-weight: 600; }
 .algorithm-steps p { margin: 0; color: #687872; font-size: 13px; line-height: 1.7; }
 .algorithm-safeguard { width: min(820px, 100%); margin: 38px auto 0; padding: 24px 28px; color: #3f5b51; background: rgba(255, 253, 247, .66); border-left: 3px solid #9c5138; font-size: 13px; line-height: 1.7; }
+.algorithm-technical-link { display: block; width: fit-content; margin: 22px auto 0; color: #88452f; font-size: 13px; font-weight: 700; text-underline-offset: 4px; }
+.algorithm-technical-link:hover { color: #5f2f21; }
 
 .result { padding: 60px 0 90px; }
 .back-button { padding: 8px 0; color: #667970; background: none; border: 0; font-size: 13px; }

@@ -57,6 +57,7 @@ const localizedCopy = {
     ],
     algorithmSafeguard:
       "Model językowy nie wybiera dowolnych cytatów i nie dopisuje własnych źródeł. Może pracować wyłącznie na fragmentach i kontekście przekazanych przez system wyszukiwania.",
+    algorithmTechnicalDescription: "Bardziej techniczny opis",
     fallbackError: "Coś poszło nie tak.",
     back: "Zadaj inne pytanie",
     safetyTitle: "Zatrzymaj się i poszukaj natychmiastowego wsparcia",
@@ -138,6 +139,7 @@ const localizedCopy = {
     ],
     algorithmSafeguard:
       "The language model cannot choose arbitrary quotations or introduce its own sources. It can work only with the passages and context supplied by the retrieval system.",
+    algorithmTechnicalDescription: "More technical description",
     fallbackError: "Something went wrong.",
     back: "Ask another question",
     safetyTitle: "Pause and seek immediate support",

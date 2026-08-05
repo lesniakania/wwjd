@@ -12,6 +12,7 @@ import {
   enableAnalytics,
   trackEvent,
 } from "./analytics";
+import AlgorithmExplanation from "./components/AlgorithmExplanation.vue";
 import PromptForm from "./components/PromptForm.vue";
 import { copyFor, Language, languageFrom } from "./localization";
 
@@ -145,7 +146,7 @@ onMounted(async () => {
 <template>
   <div class="page-shell">
     <header class="site-header">
-      <a class="wordmark" href="#" :aria-label="t.homeLabel">
+      <a class="wordmark" href="/" :aria-label="t.homeLabel">
         <span class="wordmark-mark" aria-hidden="true">
           <span class="wordmark-mark-glyph">J</span>
         </span>
@@ -203,31 +204,6 @@ onMounted(async () => {
         </aside>
       </section>
 
-      <section class="algorithm" aria-labelledby="algorithm-title">
-        <div class="algorithm-heading">
-          <div class="eyebrow"><span></span> {{ t.algorithmEyebrow }}</div>
-          <h2 id="algorithm-title">{{ t.algorithmTitle }}</h2>
-          <p>{{ t.algorithmIntro }}</p>
-        </div>
-        <ol class="algorithm-steps">
-          <li v-for="(step, index) in t.algorithmSteps" :key="step.title">
-            <span class="algorithm-number">{{ String(index + 1).padStart(2, "0") }}</span>
-            <div>
-              <h3>{{ step.title }}</h3>
-              <p>{{ step.body }}</p>
-            </div>
-          </li>
-        </ol>
-        <p class="algorithm-safeguard">{{ t.algorithmSafeguard }}</p>
-        <a
-          class="algorithm-technical-link"
-          href="https://github.com/lesniakania/wwjd/blob/main/ALGORITHM.md#reflection-algorithm"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {{ t.algorithmTechnicalDescription }} <span aria-hidden="true">→</span>
-        </a>
-      </section>
       </template>
 
       <section v-else class="result" aria-live="polite">
@@ -338,6 +314,8 @@ onMounted(async () => {
 
         <p class="limitations">{{ reflection.limitations }}</p>
       </section>
+
+      <AlgorithmExplanation :copy="t" />
     </main>
 
     <footer>

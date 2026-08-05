@@ -14,6 +14,9 @@ describe("localization", () => {
     expect(copyFor(Language.Polish).contextSources).toBe(
       "Kontekst na podstawie tych źródeł",
     );
+    expect(copyFor(Language.English).contextSources).toBe(
+      "Context based on these sources",
+    );
     expect(copyFor(Language.English).eyebrow).toBe("Hmm, interesting");
     expect(copyFor(Language.English).submit).toBe("See");
   });

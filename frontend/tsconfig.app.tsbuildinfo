@@ -1,1 +1,1 @@
-{"root":["./src/analytics.ts","./src/api.ts","./src/env.d.ts","./src/localization.ts","./src/main.ts","./src/app.vue","./src/components/promptform.vue"],"version":"5.8.3"}
+{"root":["./src/analytics.ts","./src/api.ts","./src/env.d.ts","./src/localization.ts","./src/main.ts","./src/app.vue","./src/components/algorithmexplanation.vue","./src/components/promptform.vue"],"version":"5.8.3"}

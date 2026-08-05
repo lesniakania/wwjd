@@ -153,7 +153,7 @@ const localizedCopy = {
     originalMeaning: "What did it originally mean?",
     application: "How does it relate to your situation?",
     passageContext: "Read the complete unit",
-    contextSources: "Human-reviewed context based on these sources",
+    contextSources: "Context based on these sources",
     footerPrivacy:
       "Your situation is stored only when you explicitly create a share link.",
     analyticsText:

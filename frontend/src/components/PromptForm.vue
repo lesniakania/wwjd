@@ -26,6 +26,7 @@ function submit(): void {
   }
   emit("submit", situation.value.trim());
 }
+
 </script>
 
 <template>
@@ -38,6 +39,8 @@ function submit(): void {
       rows="7"
       :placeholder="copy.placeholder"
       aria-describedby="prompt-help"
+      @keydown.ctrl.enter.prevent="submit"
+      @keydown.meta.enter.prevent="submit"
     ></textarea>
     <div class="field-footer">
       <span id="prompt-help">{{ copy.privacy }}</span>

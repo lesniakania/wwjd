@@ -11,7 +11,9 @@ afterEach(() => {
 describe('App', () => {
   it('guides the user before submission', () => {
     render(App)
-    expect(screen.getByRole('link', { name: /Co na to Jezus.*strona główna/ })).toBeTruthy()
+    const logo = screen.getByRole('link', { name: /Co na to Jezus.*strona główna/ })
+    expect(logo).toBeTruthy()
+    expect(logo.getAttribute('href')).toBe('/')
     expect(screen.getByRole('heading', { name: /co na to jezus/i })).toBeTruthy()
     expect(screen.getByLabelText('Co na to Jezus?')).toBeTruthy()
     expect(document.title).toBe('Co na to Jezus?')
@@ -90,9 +92,10 @@ describe('App', () => {
     expect(screen.getByText('Matthew 5:44')).toBeTruthy()
     expect(screen.getByText(/Jesus calls his listeners/i)).toBeTruthy()
     expect(screen.getByText(/read the complete unit/i)).toBeTruthy()
-    expect(screen.getByText(/human-reviewed context based on these sources/i)).toBeTruthy()
+    expect(screen.getByText(/context based on these sources/i)).toBeTruthy()
     const sourceLink = screen.getByRole('link', { name: 'Matthew 5:1–7:29' })
     expect(sourceLink.getAttribute('href')).toBe('https://bible.usccb.org/bible/matthew/5')
+    expect(screen.getAllByRole('heading', { name: /how the reflection is created/i })).toHaveLength(1)
   })
 
   it('creates and copies a share link for the exact response', async () => {

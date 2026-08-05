@@ -1,5 +1,7 @@
 # What Would Jesus Do?
 
+Deployed to: https://conatojezus.info
+
 A privacy-conscious, source-grounded Bible reflection app. Users describe a situation, the backend retrieves relevant passages from the public-domain World English Bible, and an optional language model turns those passages into a short, cautious reflection. Scripture quotations always come from the local corpus, never from the language model.
 
 The interface is bilingual. Polish is the default and users can switch to English at any time. Polish quotations use the Updated Gdansk Bible under CC BY-ND 4.0; English quotations use the public-domain World English Bible.

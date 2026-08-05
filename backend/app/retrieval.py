@@ -2,15 +2,18 @@ import hashlib
 import json
 import math
 import re
+import warnings
 from collections import Counter
 from pathlib import Path
 
 import numpy as np
+from fastembed import TextEmbedding
 
 from .retrieval_models import Passage, SearchResult, Verse
 from .themes import SemanticThemeRouter, Theme, ThemeClassifier
 
 TOKEN_RE = re.compile(r"[^\W\d_]+", re.UNICODE)
+MODEL_CACHE = Path(__file__).parent / "data" / "models"
 GOSPELS = {"Matthew", "Mark", "Luke", "John"}
 STOPWORDS = {
     "a", "an", "and", "are", "as", "at", "be", "been", "but", "by", "for", "from",
@@ -126,28 +129,23 @@ def query_theme_confidences(text: str) -> dict[str, float]:
 
 
 class SemanticEncoder:
-    def __init__(self, model_name: str):
-        from sentence_transformers import SentenceTransformer
-
+    def __init__(self, model_name: str) -> None:
         self.model_name = model_name
-        model_cache = Path(__file__).parent / "data" / "models"
-        try:
-            self.model = SentenceTransformer(
-                model_name, cache_folder=str(model_cache), local_files_only=True
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore",
+                message=r"The model .* now uses mean pooling instead of CLS embedding\..*",
+                category=UserWarning,
             )
-        except OSError:
-            self.model = SentenceTransformer(model_name, cache_folder=str(model_cache))
+            self.model = TextEmbedding(model_name=model_name, cache_dir=str(MODEL_CACHE))
 
     def encode(self, texts: str | list[str]) -> np.ndarray:
-        return np.asarray(
-            self.model.encode(
-                texts,
-                batch_size=256,
-                show_progress_bar=isinstance(texts, list) and len(texts) > 100,
-                normalize_embeddings=True,
-            ),
-            dtype=np.float32,
-        )
+        single_text = isinstance(texts, str)
+        documents = [texts] if single_text else texts
+        embeddings = np.asarray(list(self.model.embed(documents, batch_size=256)), dtype=np.float32)
+        norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
+        normalized = np.divide(embeddings, norms, out=np.zeros_like(embeddings), where=norms != 0)
+        return normalized[0] if single_text else normalized
 
 
 class Retriever:

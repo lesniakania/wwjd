@@ -115,7 +115,7 @@ The committed English and Polish corpora were generated from eBible.org's offici
 python backend/scripts/import_usfx.py path/to/engwebp_usfx.xml backend/app/data/web_verses.json
 ```
 
-Retrieval uses multilingual Sentence Transformers embeddings together with BM25 lexical ranking. It ranks individual verses, filters low-confidence results, and avoids automatically quoting unrelated neighboring verses. The default model is `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`; set `EMBEDDING_MODEL=BAAI/bge-m3` for a GPU-backed deployment. Build or refresh the local semantic indexes with:
+Retrieval uses multilingual embeddings executed with ONNX Runtime together with BM25 lexical ranking. It ranks individual verses, filters low-confidence results, and avoids automatically quoting unrelated neighboring verses. The default model is `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`. `EMBEDDING_MODEL` can be set to another model supported by FastEmbed. Build or refresh the local semantic indexes with:
 
 Ethical-theme routing combines high-confidence bilingual lexical rules with general bilingual
 semantic profiles. A semantic profile may add at most one concern not already detected by the

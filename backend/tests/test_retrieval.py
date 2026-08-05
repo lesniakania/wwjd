@@ -1,13 +1,78 @@
 import json
+import warnings
 from pathlib import Path
 
 import numpy as np
 
-from app.retrieval import THEME_ANCHORS, Retriever
+from app import retrieval
+from app.retrieval import THEME_ANCHORS, Retriever, SemanticEncoder
 from app.themes import Theme
 
 
 DATA = Path(__file__).parents[1] / "app" / "data" / "web_verses.json"
+
+
+class FakeOnnxTextEmbedding:
+    init_arguments: dict[str, object] = {}
+    encoded_batches: list[list[str]] = []
+
+    def __init__(self, model_name: str, **kwargs: object) -> None:
+        self.init_arguments = {"model_name": model_name, **kwargs}
+        FakeOnnxTextEmbedding.init_arguments = self.init_arguments
+
+    def embed(self, texts: list[str], batch_size: int) -> object:
+        FakeOnnxTextEmbedding.encoded_batches.append(texts)
+        return iter(np.asarray([index + 1.0, 2.0]) for index, _ in enumerate(texts))
+
+
+class WarningOnnxTextEmbedding(FakeOnnxTextEmbedding):
+    def __init__(self, model_name: str, **kwargs: object) -> None:
+        warnings.warn(
+            f"The model {model_name} now uses mean pooling instead of CLS embedding. "
+            "In order to preserve the previous behaviour, consider either pinning fastembed "
+            "version to 0.5.1 or using `add_custom_model` functionality.",
+            UserWarning,
+            stacklevel=2,
+        )
+        super().__init__(model_name, **kwargs)
+
+
+def test_semantic_encoder_uses_onnx_runtime(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setattr(retrieval, "TextEmbedding", FakeOnnxTextEmbedding)
+    monkeypatch.setattr(retrieval, "MODEL_CACHE", tmp_path)
+
+    encoder = SemanticEncoder("example/onnx-model")
+    embeddings = encoder.encode(["first", "second"])
+
+    assert FakeOnnxTextEmbedding.init_arguments == {
+        "model_name": "example/onnx-model",
+        "cache_dir": str(tmp_path),
+    }
+    assert FakeOnnxTextEmbedding.encoded_batches[-1] == ["first", "second"]
+    assert embeddings.dtype == np.float32
+    np.testing.assert_allclose(np.linalg.norm(embeddings, axis=1), [1.0, 1.0])
+
+
+def test_semantic_encoder_returns_one_vector_for_one_text(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setattr(retrieval, "TextEmbedding", FakeOnnxTextEmbedding)
+    monkeypatch.setattr(retrieval, "MODEL_CACHE", tmp_path)
+
+    embedding = SemanticEncoder("example/onnx-model").encode("only")
+
+    assert embedding.shape == (2,)
+
+
+def test_semantic_encoder_suppresses_fastembed_pooling_warning(
+    monkeypatch, tmp_path: Path
+) -> None:
+    monkeypatch.setattr(retrieval, "TextEmbedding", WarningOnnxTextEmbedding)
+    monkeypatch.setattr(retrieval, "MODEL_CACHE", tmp_path)
+
+    with warnings.catch_warnings(record=True) as caught_warnings:
+        warnings.simplefilter("always")
+        SemanticEncoder("sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
+
+    assert caught_warnings == []
 
 
 def test_every_theme_anchor_exists_in_both_corpora() -> None:

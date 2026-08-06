@@ -14,7 +14,11 @@ export function enableAnalytics() {
 
   initialized = true
   window.dataLayer = window.dataLayer || []
-  window.gtag = (...args: unknown[]) => window.dataLayer.push(args)
+  window.gtag = function () {
+    // Google Tag expects the array-like Arguments object, not a rest-parameter array.
+    // eslint-disable-next-line prefer-rest-params
+    window.dataLayer.push(arguments)
+  }
   window.gtag('js', new Date())
   window.gtag('config', measurementId, {
     anonymize_ip: true,

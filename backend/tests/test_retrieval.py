@@ -1,11 +1,13 @@
 import json
+import sys
 import warnings
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 
 from app import retrieval
-from app.retrieval import THEME_ANCHORS, Retriever, SemanticEncoder
+from app.retrieval import BgeReranker, THEME_ANCHORS, Passage, Retriever, SemanticEncoder
 from app.themes import Theme
 
 
@@ -142,6 +144,85 @@ class PrejudiceThemeRouter:
         excluded: set[Theme] | None = None,
     ) -> dict[Theme, float]:
         return {Theme.PREJUDICE: 0.7}
+
+
+class ControlledReranker:
+    def rerank(self, query: str, passages: list[Passage]) -> np.ndarray:
+        assert query == "Which passage best addresses fear?"
+        assert [passage.reference for passage in passages] == [
+            "Matthew 6:25",
+            "Philippians 4:6",
+            "John 14:27",
+        ]
+        return np.asarray([0.2, 0.9, 0.5], dtype=np.float32)
+
+
+def test_reranker_reorders_only_the_configured_candidate_window(tmp_path: Path) -> None:
+    verses_path = tmp_path / "verses.json"
+    verses_path.write_text(
+        json.dumps(
+            [
+                {
+                    "book": "Matthew",
+                    "chapter": 6,
+                    "verse": 25,
+                    "text": "Do not be anxious about your life.",
+                },
+                {
+                    "book": "Philippians",
+                    "chapter": 4,
+                    "verse": 6,
+                    "text": "Do not be anxious about anything, but pray.",
+                },
+                {
+                    "book": "John",
+                    "chapter": 14,
+                    "verse": 27,
+                    "text": "Let not your hearts be troubled, neither let them be afraid.",
+                },
+            ]
+        ),
+        encoding="utf-8",
+    )
+    retriever = Retriever(verses_path, reranker=ControlledReranker(), reranker_candidates=3)
+    candidates = [
+        (0, 0.9, 0.9),
+        (1, 0.8, 0.8),
+        (2, 0.7, 0.7),
+    ]
+
+    reranked = retriever._rerank("Which passage best addresses fear?", candidates)
+
+    assert [index for index, _, _ in reranked] == [1, 2, 0]
+
+
+def test_bge_reranker_scores_query_passage_pairs(monkeypatch, tmp_path: Path) -> None:
+    initialized_with: dict[str, str] = {}
+
+    class FakeCrossEncoder:
+        def __init__(self, model_name: str, cache_folder: str) -> None:
+            initialized_with.update(model_name=model_name, cache_folder=cache_folder)
+
+        def predict(self, pairs: list[tuple[str, str]]) -> list[float]:
+            assert pairs == [("query", "First text"), ("query", "Second text")]
+            return [0.2, 0.9]
+
+    monkeypatch.setattr(retrieval, "MODEL_CACHE", tmp_path)
+    monkeypatch.setitem(sys.modules, "sentence_transformers", SimpleNamespace(CrossEncoder=FakeCrossEncoder))
+
+    scores = BgeReranker("BAAI/bge-reranker-v2-m3").rerank(
+        "query",
+        [
+            Passage("Matthew", 1, 1, 1, "First text"),
+            Passage("Mark", 1, 1, 1, "Second text"),
+        ],
+    )
+
+    assert initialized_with == {
+        "model_name": "BAAI/bge-reranker-v2-m3",
+        "cache_folder": str(tmp_path),
+    }
+    np.testing.assert_allclose(scores, [0.2, 0.9])
 
 
 def test_theme_anchors_do_not_hide_strong_semantic_results(tmp_path: Path) -> None:

@@ -15,6 +15,7 @@ dependencies = [
   "pydantic-settings>=2.6,<3",
   "psycopg[binary]>=3.2,<4",
   "scikit-learn>=1.7,<2",
+  "sentence-transformers>=5.0,<6",
   "uvicorn[standard]>=0.32,<1",
 ]
 

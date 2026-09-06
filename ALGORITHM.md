@@ -49,7 +49,7 @@ The selected local Bible corpus is searched using:
    - embedding similarity, when configured;
    - a cautious boost for reviewed theme anchors and a small Gospel preference.
 
-The ranker merges these signals, rejects low-confidence and near-duplicate results, limits repetition from one book, and keeps up to six candidates. If none qualify, it retries with a language-specific general wisdom query.
+The ranker merges these signals and sends its top 50 candidates to the local `BAAI/bge-reranker-v2-m3` cross-encoder. It then rejects low-confidence and near-duplicate results, limits repetition from one book, and keeps up to six candidates. If none qualify, it retries with a language-specific general wisdom query. Setting `RERANKER_MODEL` to an empty value disables this step for baseline comparison.
 
 ### Attach context
 

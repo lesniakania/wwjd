@@ -11,7 +11,7 @@ The interface is bilingual. Polish is the default and users can switch to Englis
 - Vue 3 + TypeScript + Vite
 - FastAPI + Pydantic
 - PostgreSQL 17
-- Local hybrid retrieval (BM25-style lexical score plus deterministic semantic hashing)
+- Local hybrid retrieval (BM25 plus multilingual MiniLM embeddings, then BGE reranking)
 - Optional Hugging Face chat-completion generation
 - 66-book World English Bible (WEB), public domain
 
@@ -102,6 +102,9 @@ Copy `.env.example` to `.env` or export the values before starting FastAPI.
 | `HF_TIMEOUT_SECONDS` | `45` | Timeout for one remote model attempt |
 | `ALLOWED_ORIGINS` | localhost Vite URLs | Comma-separated CORS origins |
 | `MAX_SITUATION_LENGTH` | `3000` | Input limit |
+| `EMBEDDING_MODEL` | `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` | FastEmbed model for semantic candidate retrieval; empty disables it |
+| `RERANKER_MODEL` | `BAAI/bge-reranker-v2-m3` | Cross-encoder reranker; empty disables it |
+| `RERANKER_CANDIDATES` | `50` | Number of BM25 + MiniLM candidates BGE scores per query |
 | `DATABASE_URL` | `postgresql://wwjd:secret@localhost:5434/wwjd` | PostgreSQL connection URL for explicitly shared reflections |
 | `VITE_GA_MEASUREMENT_ID` | empty | GA4 measurement ID (`G-...`); enables consent-based frontend analytics |
 
@@ -117,7 +120,7 @@ The committed English and Polish corpora were generated from eBible.org's offici
 python backend/scripts/import_usfx.py path/to/engwebp_usfx.xml backend/app/data/web_verses.json
 ```
 
-Retrieval uses multilingual embeddings executed with ONNX Runtime together with BM25 lexical ranking. It ranks individual verses, filters low-confidence results, and avoids automatically quoting unrelated neighboring verses. The default model is `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`. `EMBEDDING_MODEL` can be set to another model supported by FastEmbed. Build or refresh the local semantic indexes with:
+Retrieval uses multilingual embeddings executed with ONNX Runtime together with BM25 lexical ranking. It passes the top 50 fused candidates to the Apache-2.0 `BAAI/bge-reranker-v2-m3` cross-encoder before applying confidence, diversity, and context rules. It ranks individual verses, filters low-confidence results, and avoids automatically quoting unrelated neighboring verses. The default embedding model is `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`; `EMBEDDING_MODEL` can be set to another model supported by FastEmbed. Set `RERANKER_MODEL` to an empty value to retain the pre-reranker baseline.
 
 Ethical-theme routing combines high-confidence bilingual lexical rules with general bilingual
 semantic profiles. A semantic profile may add at most one concern not already detected by the

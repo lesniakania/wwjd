@@ -5,6 +5,7 @@ import re
 import warnings
 from collections import Counter
 from pathlib import Path
+from typing import Protocol
 
 import numpy as np
 from fastembed import TextEmbedding
@@ -148,6 +149,23 @@ class SemanticEncoder:
         return normalized[0] if single_text else normalized
 
 
+class Reranker(Protocol):
+    def rerank(self, query: str, passages: list[Passage]) -> np.ndarray: ...
+
+
+class BgeReranker:
+    """Scores query-passage pairs with a BGE cross-encoder."""
+
+    def __init__(self, model_name: str) -> None:
+        from sentence_transformers import CrossEncoder
+
+        self.model = CrossEncoder(model_name, cache_folder=str(MODEL_CACHE))
+
+    def rerank(self, query: str, passages: list[Passage]) -> np.ndarray:
+        pairs = [(query, passage.text) for passage in passages]
+        return np.asarray(self.model.predict(pairs), dtype=np.float32)
+
+
 class Retriever:
     """Hybrid verse retriever: semantic similarity + BM25 + cautious thematic priors."""
 
@@ -157,12 +175,16 @@ class Retriever:
         encoder: SemanticEncoder | None = None,
         cache_path: Path | None = None,
         theme_router: SemanticThemeRouter | None = None,
+        reranker: Reranker | None = None,
+        reranker_candidates: int = 50,
     ):
         rows = json.loads(verses_path.read_text(encoding="utf-8"))
         self.verses = [Verse(**row) for row in rows]
         self.passages = [Passage(v.book, v.chapter, v.verse, v.verse, v.text) for v in self.verses]
         self.encoder = encoder
         self.theme_router = theme_router
+        self.reranker = reranker
+        self.reranker_candidates = reranker_candidates
         self._tokens = [Counter(tokenize(verse.text)) for verse in self.verses]
         self._document_frequency: Counter[str] = Counter()
         for counts in self._tokens:
@@ -259,6 +281,7 @@ class Retriever:
                 confidence = max(confidence, 0.5 + 0.08 * anchor_confidence)
             scored.append((index, fused, confidence))
         scored.sort(key=lambda item: item[1], reverse=True)
+        scored = self._rerank(query, scored)
 
         # Give each detected concern a chance to contribute evidence. Without
         # this, four passages about one strong theme can crowd out an equally
@@ -311,6 +334,27 @@ class Retriever:
             if len(selected) == limit:
                 break
         return selected
+
+    def _rerank(
+        self,
+        query: str,
+        candidates: list[tuple[int, float, float]],
+    ) -> list[tuple[int, float, float]]:
+        if self.reranker is None or not candidates:
+            return candidates
+        reranked_candidates = candidates[: self.reranker_candidates]
+        scores = self.reranker.rerank(
+            query,
+            [self.passages[index] for index, _, _ in reranked_candidates],
+        )
+        if len(scores) != len(reranked_candidates):
+            raise ValueError("Reranker returned an unexpected number of scores")
+        ranked = sorted(
+            zip(reranked_candidates, scores, strict=True),
+            key=lambda item: item[1],
+            reverse=True,
+        )
+        return [candidate for candidate, _ in ranked] + candidates[self.reranker_candidates :]
 
     def context_for(self, passage: Passage, radius: int = 2) -> Passage:
         focus_index = next(

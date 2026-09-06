@@ -18,7 +18,7 @@ from .models import (
     SharedReflectionResponse,
 )
 from .reflection_service import ReflectionService
-from .retrieval import Retriever, SemanticEncoder
+from .retrieval import BgeReranker, Retriever, SemanticEncoder
 from .share_repository import ShareRepository
 from .themes import SemanticThemeRouter
 
@@ -31,6 +31,7 @@ DATA_PATH_PL = Path(__file__).parent / "data" / "polubg_verses.json"
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
     encoder = SemanticEncoder(settings.embedding_model) if settings.embedding_model else None
+    reranker = BgeReranker(settings.reranker_model) if settings.reranker_model else None
     theme_router = SemanticThemeRouter(encoder) if encoder else None
     app.state.retrievers = {
         "en": Retriever(
@@ -38,12 +39,16 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             encoder,
             Retriever.cache_name(DATA_PATH, settings.embedding_model) if encoder else None,
             theme_router,
+            reranker,
+            settings.reranker_candidates,
         ),
         "pl": Retriever(
             DATA_PATH_PL,
             encoder,
             Retriever.cache_name(DATA_PATH_PL, settings.embedding_model) if encoder else None,
             theme_router,
+            reranker,
+            settings.reranker_candidates,
         ),
     }
     app.state.generator = ReflectionGenerator(settings)

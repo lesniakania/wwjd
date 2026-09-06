@@ -13,6 +13,8 @@ services:
       HF_MAX_TOKENS: ${HF_MAX_TOKENS:-1200}
       HF_TIMEOUT_SECONDS: ${HF_TIMEOUT_SECONDS:-45}
       EMBEDDING_MODEL: ${EMBEDDING_MODEL:-sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2}
+      RERANKER_MODEL: ${RERANKER_MODEL:-BAAI/bge-reranker-v2-m3}
+      RERANKER_CANDIDATES: ${RERANKER_CANDIDATES:-50}
     depends_on:
       build-indexes:
         condition: service_completed_successfully

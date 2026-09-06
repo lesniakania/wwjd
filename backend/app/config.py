@@ -15,6 +15,8 @@ class Settings(BaseSettings):
     allowed_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
     max_situation_length: int = 3000
     embedding_model: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+    reranker_model: str = "BAAI/bge-reranker-v2-m3"
+    reranker_candidates: int = 50
     database_url: str = "postgresql://wwjd:secret@localhost:5434/wwjd"
 
     @property

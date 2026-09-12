@@ -196,3 +196,11 @@ the locked backend and frontend dependencies for known high and critical vulnera
 ## Product boundary
 
 The result is described as an AI-generated, Bible-grounded reflection—not a certain declaration of what Jesus would do. Emergency, self-harm, and abuse-related language receives an immediate safety message, and the app explicitly does not replace emergency, medical, legal, mental-health, or pastoral help.
+
+## Verse selection evaluation
+
+A draft Polish evaluation set contains 100 synthetic situations (50 about prejudice,
+50 covering other concerns), with suggested scripture references and rationales for
+human review. See [the review document](backend/evaluation/review.pl.md) and
+[the evaluation instructions](backend/evaluation/README.md) for editing the dataset,
+running the API benchmark, and comparing architecture variants.

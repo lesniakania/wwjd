@@ -33,8 +33,8 @@ they measured the same output.
 
 ## Next steps
 
-- Compare application prompts on identical situations, sources, and context: remove the mandatory
-  qualification sentence and distinguish passage meaning from practical inference. **Not run yet.**
+- Review the completed fixed-source application prompt comparison described below before choosing
+  a production prompt.
 - Then return to actual literary-unit retrieval and measure both unit coverage and precise verse
   selection. Revisit reranking after candidate quality improves.
 - Preserve exact-reference metrics, add calibrated human relevance/application metrics, and prepare
@@ -49,5 +49,14 @@ they measured the same output.
 - [Human calibration](calibration-v1/findings.md)
 - [Application adjudication](calibration-v1/adjudication-findings.md)
 
-No production deployment was performed. Latest implementation checks: 151 backend tests,
+No production deployment was performed. Latest implementation checks: 154 backend tests,
 20 frontend tests, Ruff, Bandit, ESLint, and frontend build passed.
+
+## Update: fixed-source prompt comparison completed
+
+The previously pending application experiment has now run: 32 Bielik calls on eight adjudicated
+cases (two variants × two repetitions), producing 16 distinct normalized applications. Both
+variants were accepted by the production parser in every request. The candidate avoids mandatory
+qualifications, but still makes some strained connections; human quality comparison is pending.
+Production is unchanged. See [prompt experiment](application-prompts-v1/findings.md) and
+[anonymous review](application-prompts-v1/review.pl.md).

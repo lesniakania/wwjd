@@ -1,0 +1,12 @@
+{
+  "grounded": {
+    "requests": 16,
+    "strict_format_errors": 0,
+    "usable": 16
+  },
+  "control": {
+    "requests": 16,
+    "strict_format_errors": 16,
+    "usable": 16
+  }
+}

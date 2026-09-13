@@ -1,0 +1,162 @@
+{
+  "pl-066-a02-v1": [
+    {
+      "variant": "grounded",
+      "repeat": 2
+    },
+    {
+      "variant": "grounded",
+      "repeat": 1
+    }
+  ],
+  "pl-066-a02-v2": [
+    {
+      "variant": "control",
+      "repeat": 1
+    },
+    {
+      "variant": "control",
+      "repeat": 2
+    }
+  ],
+  "pl-028-a02-v1": [
+    {
+      "variant": "control",
+      "repeat": 2
+    },
+    {
+      "variant": "control",
+      "repeat": 1
+    }
+  ],
+  "pl-028-a02-v2": [
+    {
+      "variant": "grounded",
+      "repeat": 2
+    },
+    {
+      "variant": "grounded",
+      "repeat": 1
+    }
+  ],
+  "pl-092-a02-v1": [
+    {
+      "variant": "control",
+      "repeat": 1
+    },
+    {
+      "variant": "control",
+      "repeat": 2
+    }
+  ],
+  "pl-092-a02-v2": [
+    {
+      "variant": "grounded",
+      "repeat": 1
+    },
+    {
+      "variant": "grounded",
+      "repeat": 2
+    }
+  ],
+  "pl-037-a04-v1": [
+    {
+      "variant": "control",
+      "repeat": 2
+    },
+    {
+      "variant": "control",
+      "repeat": 1
+    }
+  ],
+  "pl-037-a04-v2": [
+    {
+      "variant": "grounded",
+      "repeat": 2
+    },
+    {
+      "variant": "grounded",
+      "repeat": 1
+    }
+  ],
+  "pl-039-a01-v1": [
+    {
+      "variant": "control",
+      "repeat": 1
+    },
+    {
+      "variant": "control",
+      "repeat": 2
+    }
+  ],
+  "pl-039-a01-v2": [
+    {
+      "variant": "grounded",
+      "repeat": 1
+    },
+    {
+      "variant": "grounded",
+      "repeat": 2
+    }
+  ],
+  "pl-085-a03-v1": [
+    {
+      "variant": "control",
+      "repeat": 1
+    },
+    {
+      "variant": "control",
+      "repeat": 2
+    }
+  ],
+  "pl-085-a03-v2": [
+    {
+      "variant": "grounded",
+      "repeat": 1
+    },
+    {
+      "variant": "grounded",
+      "repeat": 2
+    }
+  ],
+  "pl-064-a01-v1": [
+    {
+      "variant": "control",
+      "repeat": 1
+    },
+    {
+      "variant": "control",
+      "repeat": 2
+    }
+  ],
+  "pl-064-a01-v2": [
+    {
+      "variant": "grounded",
+      "repeat": 1
+    },
+    {
+      "variant": "grounded",
+      "repeat": 2
+    }
+  ],
+  "pl-096-a01-v1": [
+    {
+      "variant": "grounded",
+      "repeat": 1
+    },
+    {
+      "variant": "grounded",
+      "repeat": 2
+    }
+  ],
+  "pl-096-a01-v2": [
+    {
+      "variant": "control",
+      "repeat": 2
+    },
+    {
+      "variant": "control",
+      "repeat": 1
+    }
+  ]
+}

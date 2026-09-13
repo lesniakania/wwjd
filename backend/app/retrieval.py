@@ -10,7 +10,9 @@ from typing import Protocol
 import numpy as np
 from fastembed import TextEmbedding
 
-from .retrieval_models import Passage, SearchResult, Verse
+from .localization import THEME_LABELS
+from .retrieval_diagnostics import RankedCandidate, RetrievalTrace
+from .retrieval_models import Passage, RerankerStrategy, SearchResult, Verse
 from .themes import SemanticThemeRouter, Theme, ThemeClassifier
 
 TOKEN_RE = re.compile(r"[^\W\d_]+", re.UNICODE)
@@ -177,6 +179,7 @@ class Retriever:
         theme_router: SemanticThemeRouter | None = None,
         reranker: Reranker | None = None,
         reranker_candidates: int = 50,
+        reranker_strategy: RerankerStrategy = RerankerStrategy.RAW,
     ):
         rows = json.loads(verses_path.read_text(encoding="utf-8"))
         self.verses = [Verse(**row) for row in rows]
@@ -185,6 +188,7 @@ class Retriever:
         self.theme_router = theme_router
         self.reranker = reranker
         self.reranker_candidates = reranker_candidates
+        self.reranker_strategy = RerankerStrategy(reranker_strategy)
         self._tokens = [Counter(tokenize(verse.text)) for verse in self.verses]
         self._document_frequency: Counter[str] = Counter()
         for counts in self._tokens:
@@ -228,9 +232,14 @@ class Retriever:
                 scores[index] += inverse_frequency * normalized * min(query_count, 2)
         return scores
 
-    def search(self, query: str, limit: int = 4) -> list[SearchResult]:
-        theme_confidences = query_theme_confidences(query)
-        if self.theme_router is not None:
+    def search(
+        self, query: str, limit: int = 4, trace: RetrievalTrace | None = None,
+        theme_override: dict[str, float] | None = None,
+    ) -> list[SearchResult]:
+        theme_confidences = (
+            dict(theme_override) if theme_override is not None else query_theme_confidences(query)
+        )
+        if self.theme_router is not None and theme_override is None:
             semantic_themes = {
                 str(theme): confidence
                 for theme, confidence in self.theme_router.classify(
@@ -281,7 +290,22 @@ class Retriever:
                 confidence = max(confidence, 0.5 + 0.08 * anchor_confidence)
             scored.append((index, fused, confidence))
         scored.sort(key=lambda item: item[1], reverse=True)
-        scored = self._rerank(query, scored)
+        if trace is not None:
+            trace.query = query
+            trace.themes = theme_confidences
+            trace.before_rerank = self._trace_candidates(scored[:self.reranker_candidates])
+        rerank_query = query
+        if self.reranker_strategy == RerankerStrategy.THEMATIC_FUSED:
+            concerns = "; ".join(THEME_LABELS["pl"][theme] for theme in sorted(themes))
+            rerank_query = (
+                "Nauczanie biblijne pomagające odpowiedzieć mądrze i etycznie na sytuację. "
+                f"Zagadnienia: {concerns or 'mądrość i odpowiedzialność'}. Sytuacja: {query}"
+            )
+        if trace is not None:
+            trace.rerank_query = rerank_query
+        scored = self._rerank(rerank_query, scored)
+        if trace is not None:
+            trace.after_rerank = self._trace_candidates(scored[:self.reranker_candidates])
 
         # Give each detected concern a chance to contribute evidence. Without
         # this, four passages about one strong theme can crowd out an equally
@@ -308,7 +332,7 @@ class Retriever:
         seen_books: Counter[str] = Counter()
         per_book_limit = 1 if themes else 2
         for index, score, confidence in scored:
-            passage = self.passages[index]
+            passage = self._complete_anchor(self.passages[index], themes)
             if confidence < 0.36 or seen_books[passage.book] >= per_book_limit:
                 continue
             if any(
@@ -333,7 +357,35 @@ class Retriever:
             seen_books[passage.book] += 1
             if len(selected) == limit:
                 break
+        if trace is not None:
+            trace.selected = [result.passage.reference for result in selected]
         return selected
+
+    def _complete_anchor(self, passage: Passage, themes: set[str]) -> Passage:
+        anchors = {
+            (book, chapter, start, end)
+            for theme in themes
+            for book, chapter, start, end in THEME_ANCHORS[theme]
+            if book == passage.book and chapter == passage.chapter
+            and start <= passage.verse_start <= end and end - start <= 3
+        }
+        if not anchors:
+            return passage
+        book, chapter, start, end = min(anchors, key=lambda anchor: (anchor[3] - anchor[2], anchor))
+        return self.passage_range(book, chapter, start, end)
+
+    def _trace_candidates(
+        self, candidates: list[tuple[int, float, float]],
+    ) -> list[RankedCandidate]:
+        return [
+            RankedCandidate(
+                reference=self.passages[index].reference,
+                quotation=self.passages[index].text,
+                retrieval_score=score,
+                confidence=confidence,
+            )
+            for index, score, confidence in candidates
+        ]
 
     def _rerank(
         self,
@@ -347,13 +399,26 @@ class Retriever:
             query,
             [self.passages[index] for index, _, _ in reranked_candidates],
         )
-        if len(scores) != len(reranked_candidates):
+        if len(scores) != len(reranked_candidates) or not np.isfinite(scores).all():
             raise ValueError("Reranker returned an unexpected number of scores")
         ranked = sorted(
             zip(reranked_candidates, scores, strict=True),
             key=lambda item: item[1],
             reverse=True,
         )
+        if self.reranker_strategy != RerankerStrategy.RAW:
+            initial_ranks = {candidate[0]: rank for rank, candidate in enumerate(
+                reranked_candidates, 1
+            )}
+            model_ranks = {candidate[0]: rank for rank, (candidate, _) in enumerate(ranked, 1)}
+            return sorted(
+                reranked_candidates,
+                key=lambda candidate: (
+                    0.5 / (50 + initial_ranks[candidate[0]])
+                    + 0.5 / (50 + model_ranks[candidate[0]])
+                ),
+                reverse=True,
+            ) + candidates[self.reranker_candidates :]
         return [candidate for candidate, _ in ranked] + candidates[self.reranker_candidates :]
 
     def context_for(self, passage: Passage, radius: int = 2) -> Passage:

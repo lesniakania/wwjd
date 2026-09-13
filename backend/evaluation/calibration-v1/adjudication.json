@@ -1,0 +1,149 @@
+{
+  "status": "discussion_not_blind",
+  "items": [
+    {
+      "id": "pl-066-a02",
+      "situation": "Przyjaciółka dostała awans i zamiast się cieszyć szukam powodów, żeby umniejszyć jej sukces.",
+      "reference": "1 Peter 1:6",
+      "quotation": "Z tego się radujecie, choć teraz na krótko, jeśli trzeba, zasmuceni jesteście z powodu rozmaitych prób;",
+      "surrounding_text": "[3] Błogosławiony niech będzie Bóg i Ojciec naszego Pana Jezusa Chrystusa, który według swego wielkiego miłosierdzia zrodził nas na nowo do żywej nadziei przez wskrzeszenie Jezusa Chrystusa z martwych; [4] Do dziedzictwa niezniszczalnego i nieskalanego, i niewiędnącego, zachowanego w niebie dla was; [5] Którzy jesteście strzeżeni mocą Boga przez wiarę ku zbawieniu, przygotowanemu do objawienia się w czasie ostatecznym. [6] Z tego się radujecie, choć teraz na krótko, jeśli trzeba, zasmuceni jesteście z powodu rozmaitych prób; [7] Aby doświadczenie waszej wiary, o wiele cenniejszej od zniszczalnego złota, które jednak próbuje się w ogniu, okazało się ku chwale, czci i sławie przy objawieniu Jezusa Chrystusa; [8] A choć go nie widzieliście, miłujecie; i w niego, choć teraz go nie widzicie, wierzycie; i cieszycie się radością niewysłowioną i pełną chwały; [9] Otrzymując koniec waszej wiary – zbawienie dusz.",
+      "application": "Fragment zachęca do radości z sukcesów innych, nawet jeśli własne życie jest trudne. Nie oznacza to jednak, że należy ignorować własne uczucia, ale szukać źródła radości w Bogu.",
+      "original_human_rating": "appropriate",
+      "assistant_analysis": {
+        "text_says": "Tekst mówi o radości pośród prób.",
+        "application_adds": "Komentarz przypisuje mu radość z sukcesów innych.",
+        "discussion": "To sensowna rada do sytuacji, ale nie znaczenie tego cytatu. Propozycja: niezgodność z tekstem."
+      },
+      "text_faithfulness": "unsupported",
+      "situation_fit": "off_target",
+      "harm_risk": "no_identified_risk",
+      "notes": ""
+    },
+    {
+      "id": "pl-028-a02",
+      "situation": "Wolę, żeby dziecko z zespołem Downa nie uczestniczyło w klasowej wycieczce. Boję się, że będzie kłopot.",
+      "reference": "Matthew 6:34",
+      "quotation": "Dlatego nie troszczcie się o dzień jutrzejszy, gdyż dzień jutrzejszy sam się zatroszczy o swoje potrzeby. Dosyć ma dzień swego utrapienia.",
+      "surrounding_text": "[31] Nie troszczcie się więc, mówiąc: Cóż będziemy jeść? albo: Co będziemy pić? albo: W co się ubierzemy? [32] Bo o to wszystko poganie zabiegają. Wie bowiem wasz Ojciec niebieski, że tego wszystkiego potrzebujecie. [33] Ale szukajcie najpierw królestwa Bożego i jego sprawiedliwości, a to wszystko będzie wam dodane. [34] Dlatego nie troszczcie się o dzień jutrzejszy, gdyż dzień jutrzejszy sam się zatroszczy o swoje potrzeby. Dosyć ma dzień swego utrapienia.",
+      "application": "Jezus zachęca do zaufania Bogu w codziennych troskach, co może pomóc w przezwyciężeniu lęku przed wyzwaniami związanymi z udziałem dziecka w wycieczce. Nie oznacza to jednak, że należy ignorować realne trudności lub zaniedbywać przygotowanie do nich.",
+      "original_human_rating": "problematic",
+      "assistant_analysis": {
+        "text_says": "Jezus mówi o zamartwianiu się jutrem.",
+        "application_adds": "Komentarz odpowiada na lęk przed udziałem dziecka w wycieczce.",
+        "discussion": "Możliwa zgodność z ogólnym tematem cytatu, ale ominięcie głównego problemu: wykluczania dziecka. Rozdzielmy te dwie oceny."
+      },
+      "text_faithfulness": "unsupported",
+      "situation_fit": "off_target",
+      "harm_risk": "no_identified_risk",
+      "notes": ""
+    },
+    {
+      "id": "pl-092-a02",
+      "situation": "Koleżanka powiedziała mi coś osobistego. Chcę opowiedzieć to grupie jako zabawną historię.",
+      "reference": "Luke 10:27",
+      "quotation": "A on odpowiedział: Będziesz miłował Pana, swego Boga, całym swym sercem, całą swą duszą, z całej swojej siły i całym swym umysłem, a swego bliźniego jak samego siebie.",
+      "surrounding_text": "[24] Bo mówię wam, że wielu proroków i królów pragnęło widzieć to, co wy widzicie, a nie zobaczyli, i słyszeć to, co wy słyszycie, a nie usłyszeli. [25] A oto powstał pewien znawca prawa i wystawiając go na próbę, zapytał: Nauczycielu, co mam czynić, aby odziedziczyć życie wieczne? [26] A on powiedział do niego: Co jest napisane w Prawie? Jak czytasz? [27] A on odpowiedział: Będziesz miłował Pana, swego Boga, całym swym sercem, całą swą duszą, z całej swojej siły i całym swym umysłem, a swego bliźniego jak samego siebie. [28] I powiedział mu: Dobrze odpowiedziałeś. Czyń to, a będziesz żył. [29] On zaś, chcąc się usprawiedliwić, powiedział do Jezusa: A kto jest moim bliźnim? [30] Lecz Jezus odpowiedział: Pewien człowiek schodził z Jerozolimy do Jerycha i wpadł w ręce bandytów, którzy go obrabowali, poranili i odeszli, zostawiając na pół umarłego.",
+      "application": "Miłość bliźniego wymaga szacunku dla jego prywatności i godności. Nie oznacza to jednak, że każda osobista historia musi być traktowana jako poufna, ale należy zawsze brać pod uwagę uczucia drugiej osoby.",
+      "original_human_rating": "appropriate",
+      "assistant_analysis": {
+        "text_says": "Przykazanie miłości bliźniego jest zasadą ogólną.",
+        "application_adds": "Komentarz stosuje ją do prywatności, ale dodaje, że nie każda historia jest poufna.",
+        "discussion": "Pierwsze zdanie jest obronną analogią; drugie osłabia ochronę osoby, która się zwierzyła, bez wskazania potrzeby jej zgody."
+      },
+      "text_faithfulness": "unsupported",
+      "situation_fit": "supporting",
+      "harm_risk": "no_identified_risk",
+      "notes": ""
+    },
+    {
+      "id": "pl-037-a04",
+      "situation": "Przesyłam rodzinie memy o Żydach kontrolujących świat. Nie sprawdzam źródeł, bo to pasuje do moich podejrzeń.",
+      "reference": "Nehemiah 1:2",
+      "quotation": "Przyszedł Chanani, jeden z moich braci, a wraz z nim niektórzy mężczyźni z Judy. Zapytałem ich o ocalałych Żydów, którzy przeżyli niewolę, i o Jerozolimę.",
+      "surrounding_text": "[1] Słowa Nehemiasza, syna Chakaliasza. Oto w miesiącu Kislew, dwudziestego roku, gdy przebywałem w pałacu Suza; [2] Przyszedł Chanani, jeden z moich braci, a wraz z nim niektórzy mężczyźni z Judy. Zapytałem ich o ocalałych Żydów, którzy przeżyli niewolę, i o Jerozolimę. [3] I odpowiedzieli mi: Ostatki spośród tych, którzy w tamtej prowincji przeżyli niewolę, są w wielkim utrapieniu i pohańbieniu; ponadto mur Jerozolimy jest zburzony i jej bramy zostały spalone ogniem. [4] A gdy usłyszałem te słowa, usiadłem, płakałem i smuciłem się przez kilka dni, pościłem i modliłem się przed Bogiem niebios. [5] I powiedziałem: Ach PANIE, Boże niebios, Boże wielki i straszny, który zachowujesz przymierze i okazujesz miłosierdzie tym, którzy cię miłują i przestrzegają twoich przykazań.",
+      "application": "Fragment pokazuje troskę o Żydów w niewoli i Jerozolimę, co przypomina o potrzebie szacunku i weryfikacji faktów. Nie oznacza to jednak, że można bezkrytycznie przyjmować wszystkie informacje o Żydach.",
+      "original_human_rating": "uncertain",
+      "assistant_analysis": {
+        "text_says": "Nehemiasz pyta przybyłych o ocalałych i Jerozolimę.",
+        "application_adds": "Komentarz wyprowadza z narracji naukę o weryfikowaniu informacji o Żydach.",
+        "discussion": "Pytanie o los ludzi nie jest jeszcze nauką o sprawdzaniu spiskowych memów. Propozycja: analogia zbyt odległa."
+      },
+      "text_faithfulness": "unsupported",
+      "situation_fit": "off_target",
+      "harm_risk": "no_identified_risk",
+      "notes": ""
+    },
+    {
+      "id": "pl-039-a01",
+      "situation": "Ktoś napisał, że uchodźcy dostają więcej pieniędzy niż emeryci. Chcę to udostępnić, choć nie wiem, czy to prawda.",
+      "reference": "Exodus 30:15",
+      "quotation": "Bogaty nie da więcej, a ubogi nie da mniej niż pół sykla, gdy będą dawać PANU ofiarę na przebłaganie za swoje dusze.",
+      "surrounding_text": "[12] Gdy przeliczysz synów Izraela podlegających spisowi, każdy da PANU okup za swą duszę podczas spisu, aby nie dotknęła ich plaga, gdy będą zliczeni. [13] To będzie dawać każdy, kto podlega spisowi: pół sykla według sykla świątynnego – sykl to dwadzieścia ger. Pół sykla wyniesie więc ofiara dla PANA. [14] Każdy podległy spisowi, od dwudziestego roku życia wzwyż, odda PANU ofiarę. [15] Bogaty nie da więcej, a ubogi nie da mniej niż pół sykla, gdy będą dawać PANU ofiarę na przebłaganie za swoje dusze. [16] A weźmiesz pieniądze przebłagania od synów Izraela i dasz je na służbę Namiotu Zgromadzenia. Będzie to dla synów Izraela pamiątką przed PANEM, na przebłaganie za wasze dusze. [17] Potem PAN powiedział do Mojżesza: [18] Uczynisz też miedzianą kadź do obmywania i do niej miedzianą podstawę i postawisz ją między Namiotem Zgromadzenia a ołtarzem, i nalejesz do niej wody.",
+      "application": "Biblia naucza, że wszyscy ludzie są równi wobec Boga i powinni być traktowani sprawiedliwie. Nie oznacza to jednak, że w praktyce społecznej lub politycznej wszyscy powinni otrzymywać dokładnie tyle samo.",
+      "original_human_rating": "appropriate",
+      "assistant_analysis": {
+        "text_says": "Przepis określa jednakową opłatę kultową dla bogatego i ubogiego.",
+        "application_adds": "Komentarz przechodzi do ogólnej równości i współczesnej polityki społecznej.",
+        "discussion": "Potrzebne jawne oznaczenie analogii. Główny problem sytuacji to sprawdzanie wiadomości, nie ustalenie wysokości świadczeń."
+      },
+      "text_faithfulness": "faithful",
+      "situation_fit": "off_target",
+      "harm_risk": "no_identified_risk",
+      "notes": ""
+    },
+    {
+      "id": "pl-085-a03",
+      "situation": "Minął rok od śmierci męża, a ja nadal tęsknię. Wstydzę się, że nie umiem wrócić do dawnego życia.",
+      "reference": "2 Samuel 1:23",
+      "quotation": "Saul i Jonatan, ukochani i mili za życia, a w śmierci nie byli rozdzieleni, szybsi od orłów, silniejsi od lwów.",
+      "surrounding_text": "[20] Nie opowiadajcie o tym w Gat ani nie rozgłaszajcie tego po ulicach w Aszkelonie, aby się nie cieszyły córki Filistynów, by się nie radowały córki nieobrzezanych. [21] O góry Gilboa! Niech nie pada na was ani rosa, ani deszcz i niech tam nie będzie pól żyznych. Tam bowiem została skalana tarcza mocarzy, tarcza Saula, jakby nie była namaszczona oliwą. [22] Od krwi zabitych, od tłuszczu mocarzy nie cofał się łuk Jonatana, a miecz Saula nie wracał daremnie. [23] Saul i Jonatan, ukochani i mili za życia, a w śmierci nie byli rozdzieleni, szybsi od orłów, silniejsi od lwów. [24] Córki Izraela, płaczcie nad Saulem, który was przyodziewał w piękny szkarłat i który włożył złote klejnoty na wasze szaty. [25] Jakże padli mocarze pośród bitwy! Jonatanie, na twych wzgórzach zostałeś zabity. [26] Żal mi ciebie, mój bracie, Jonatanie. Byłeś mi bardzo miły. Twoja miłość była dla mnie cenniejsza niż miłość kobiety.",
+      "application": "Pieśń Dawida opłakująca śmierć Saula i Jonatana przypomina, że żałoba jest naturalnym procesem i można otwarcie wyrażać swój smutek. Nie oznacza to jednak, że żałoba powinna trwać w nieskończoność; z czasem można znaleźć sposób, by żyć dalej, pamiętając o zmarłym.",
+      "original_human_rating": "appropriate",
+      "assistant_analysis": {
+        "text_says": "Lament wspomina zmarłych Saula i Jonatana.",
+        "application_adds": "Komentarz dodaje, że żałoba nie powinna trwać w nieskończoność.",
+        "discussion": "Tekst nie wyznacza takiej granicy. Przy osobie zawstydzonej tęsknotą dopisek może nasilać presję."
+      },
+      "text_faithfulness": "faithful",
+      "situation_fit": "off_target",
+      "harm_risk": "no_identified_risk",
+      "notes": ""
+    },
+    {
+      "id": "pl-064-a01",
+      "situation": "Partner przeprosił za kłamstwo. Czy przebaczenie musi oznaczać, że od razu wszystko będzie jak dawniej?",
+      "reference": "Matthew 18:33",
+      "quotation": "Czyż i ty nie powinieneś był zmiłować się nad swoim współsługą, jak ja zmiłowałem się nad tobą?",
+      "surrounding_text": "[30] On jednak nie chciał, ale poszedł i wtrącił go do więzienia, dopóki nie odda długu. [31] A jego współsłudzy, widząc, co się stało, zasmucili się bardzo i poszedłszy, oznajmili swemu panu wszystko, co zaszło. [32] Wtedy jego pan wezwał go i powiedział: Zły sługo, darowałem ci cały ten dług, ponieważ mnie prosiłeś. [33] Czyż i ty nie powinieneś był zmiłować się nad swoim współsługą, jak ja zmiłowałem się nad tobą? [34] I jego pan, rozgniewany, wydał go katom, dopóki nie odda wszystkiego, co był mu winien. [35] Tak i wam uczyni mój Ojciec niebieski, jeśli każdy z was nie przebaczy z serca swemu bratu jego przewinień.",
+      "application": "Przebaczenie w relacji partnerskiej powinno być oparte na wzajemności i gotowości do okazania miłosierdzia, podobnie jak w przypowieści o nielitościwym dłużniku. Nie oznacza to jednak, że należy ignorować krzywdę - ważne jest nazwanie problemu i stopniowa praca nad jego rozwiązaniem.",
+      "original_human_rating": "appropriate",
+      "assistant_analysis": {
+        "text_says": "Pan oczekuje miłosierdzia wobec współsługi po okazaniu miłosierdzia dłużnikowi.",
+        "application_adds": "Komentarz określa wzajemność jako podstawę przebaczenia w związku.",
+        "discussion": "To inna zależność niż wzajemność pomiędzy partnerami. Propozycja: niezgodność z tekstem mimo rozsądnego zdania o odbudowie relacji."
+      },
+      "text_faithfulness": "faithful",
+      "situation_fit": "direct",
+      "harm_risk": "no_identified_risk",
+      "notes": ""
+    },
+    {
+      "id": "pl-096-a01",
+      "situation": "Modlę się, ale nie czuję obecności Boga. Boję się przyznać, że mam wątpliwości.",
+      "reference": "John 14:27",
+      "quotation": "Pokój zostawiam wam, mój pokój daję wam; daję wam nie tak, jak daje świat. Niech się nie trwoży wasze serce ani się nie lęka.",
+      "surrounding_text": "[24] Kto mnie nie miłuje, nie zachowuje moich słów. A słowo, które słyszycie, nie jest moje, ale tego, który mnie posłał, Ojca. [25] To wam powiedziałem, przebywając z wami. [26] Lecz Pocieszyciel, Duch Święty, którego Ojciec pośle w moim imieniu, on nauczy was wszystkiego i przypomni wam wszystko, co wam powiedziałem. [27] Pokój zostawiam wam, mój pokój daję wam; daję wam nie tak, jak daje świat. Niech się nie trwoży wasze serce ani się nie lęka. [28] Słyszeliście, że wam powiedziałem: Odchodzę i znowu przyjdę do was. Gdybyście mnie miłowali, radowalibyście się, ponieważ powiedziałem: Idę do Ojca. Mój Ojciec bowiem jest większy niż ja. [29] I teraz wam powiedziałem, zanim to się stanie, żebyście uwierzyli, gdy to się stanie. [30] Już nie będę z wami wiele mówił, nadchodzi bowiem władca tego świata, a on we mnie nic nie ma.",
+      "application": "Jezus obiecuje pokój, który nie zależy od braku zagrożenia, lecz od Jego obecności. Nie oznacza to jednak, że lęk całkowicie zniknie, lecz że Bóg daje siłę, by go przetrwać.",
+      "original_human_rating": "problematic",
+      "assistant_analysis": {
+        "text_says": "Jezus daje uczniom pokój i wzywa, by się nie lękali.",
+        "application_adds": "Komentarz mówi o przetrwaniu lęku.",
+        "discussion": "Może być zgodny z cytatem, lecz słabo odpowiadać na wątpliwość co do obecności Boga. Nie każda nietrafność sytuacyjna jest zniekształceniem tekstu."
+      },
+      "text_faithfulness": "faithful",
+      "situation_fit": "off_target",
+      "harm_risk": "no_identified_risk",
+      "notes": ""
+    }
+  ]
+}

@@ -1,5 +1,9 @@
 from functools import lru_cache
 
+from pydantic import Field
+
+from .retrieval_models import RerankerStrategy
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -16,7 +20,11 @@ class Settings(BaseSettings):
     max_situation_length: int = 3000
     embedding_model: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
     reranker_model: str = "BAAI/bge-reranker-v2-m3"
-    reranker_candidates: int = 50
+    reranker_candidates: int = Field(default=50, ge=6, le=500)
+    reranker_strategy: RerankerStrategy = RerankerStrategy.RAW
+    situation_analysis: bool = False
+    analysis_timeout_seconds: float = Field(default=20, gt=0, le=120)
+    evaluation_diagnostics: bool = False
     database_url: str = "postgresql://wwjd:secret@localhost:5434/wwjd"
 
     @property

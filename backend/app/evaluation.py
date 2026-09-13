@@ -2,6 +2,7 @@
 
 import json
 import re
+from collections.abc import Callable
 from pathlib import Path
 from time import perf_counter
 
@@ -75,7 +76,10 @@ def score_sources(actual: list[str], expected: list[str]) -> dict[str, float]:
     }
 
 
-async def evaluate(cases: list[EvaluationCase], client: httpx.AsyncClient) -> dict:
+async def evaluate(
+    cases: list[EvaluationCase], client: httpx.AsyncClient, diagnostics: bool = False,
+    progress: Callable[[int, int], None] | None = None,
+) -> dict:
     results = []
     for case in cases:
         started = perf_counter()
@@ -84,7 +88,7 @@ async def evaluate(cases: list[EvaluationCase], client: httpx.AsyncClient) -> di
         row["expected"] = expected
         try:
             response = await client.post(
-                "/api/reflections", json={"situation": case.situation, "language": "pl"}
+                "/api/reflections", json={"situation": case.situation, "language": "pl", "diagnostics": diagnostics}
             )
             response.raise_for_status()
             body = response.json()
@@ -93,11 +97,17 @@ async def evaluate(cases: list[EvaluationCase], client: httpx.AsyncClient) -> di
             if not 1 <= len(actual) <= 3:
                 raise ValueError("Expected between one and three sources")
             row["scores"] = score_sources(actual, expected)
+            if diagnostics:
+                if not body.get("diagnostics"):
+                    raise ValueError("Server did not return requested diagnostics")
+                row["stage_scores"] = stage_scores(body, expected)
         except (httpx.HTTPError, ValueError, KeyError, TypeError) as error:
             row["error"] = str(error)
             row["scores"] = score_sources([], expected)
         row["seconds"] = round(perf_counter() - started, 3)
         results.append(row)
+        if progress is not None:
+            progress(len(results), len(cases))
     return {"summary": summarize(results), "results": results}
 
 
@@ -106,6 +116,10 @@ def summarize(results: list[dict]) -> dict:
     return {
         "count": count,
         "errors": sum("error" in row for row in results),
+        "local_extractive": sum(
+            row.get("response", {}).get("generated_with") == "local-extractive"
+            for row in results
+        ),
         **{
             metric: sum(row["scores"][metric] for row in results) / count if count else 0.0
             for metric in ("hit", "precision", "recall", "mrr")
@@ -171,3 +185,30 @@ def render_review(cases: list[EvaluationCase]) -> str:
             ])
         lines.extend([f"Uwagi: {case.review_notes or '—'}", ""])
     return "\n".join(lines)
+
+
+def stage_scores(body: dict, expected: list[str]) -> dict[str, dict[str, float]]:
+    searches = body.get("diagnostics", {}).get("searches", [])
+    if not searches:
+        return {}
+    selected_search = searches[-1]
+    stages = {
+        "initial_before_rerank": [
+            item["reference"] for item in searches[0]["before_rerank"]
+        ],
+        "before_rerank": [item["reference"] for item in selected_search["before_rerank"]],
+        "after_rerank_top6": [
+            item["reference"] for item in selected_search["after_rerank"][:6]
+        ],
+        "selected": selected_search["selected"],
+        "final": [source["reference"] for source in body.get("sources", [])],
+    }
+    expected_verses = set().union(*(parse_reference(value) for value in expected))
+    scores = {}
+    for stage, references in stages.items():
+        actual_verses = set().union(*(parse_reference(value) for value in references))
+        scores[stage] = {
+            **score_sources(references, expected),
+            "verse_coverage": len(actual_verses & expected_verses) / len(expected_verses),
+        }
+    return scores

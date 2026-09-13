@@ -515,9 +515,11 @@ class SemanticThemeRouter:
         self,
         encoder: ThemeEncoder,
         threshold: float = SEMANTIC_THEME_THRESHOLD,
+        minimum_margin: float = 0.05,
     ):
         self.encoder = encoder
         self.threshold = threshold
+        self.minimum_margin = minimum_margin
         profiles = [
             (theme, profile)
             for theme, theme_profiles in THEME_PROFILES.items()
@@ -539,9 +541,15 @@ class SemanticThemeRouter:
             return {}
         best_index = max(eligible_indexes, key=lambda index: float(similarities[index]))
         confidence = float(similarities[best_index])
-        if confidence < self.threshold:
+        winning_theme = self._profile_themes[best_index]
+        runner_up = max(
+            (float(similarities[index]) for index in eligible_indexes
+             if self._profile_themes[index] != winning_theme),
+            default=-1.0,
+        )
+        if confidence < self.threshold or confidence - runner_up < self.minimum_margin:
             return {}
-        return {self._profile_themes[best_index]: confidence}
+        return {winning_theme: confidence}
 
 
 class ThemeClassifier:

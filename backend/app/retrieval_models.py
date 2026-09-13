@@ -1,4 +1,11 @@
 from dataclasses import dataclass
+from enum import StrEnum
+
+
+class RerankerStrategy(StrEnum):
+    RAW = "raw"
+    FUSED = "fused"
+    THEMATIC_FUSED = "thematic_fused"
 
 
 @dataclass(frozen=True)

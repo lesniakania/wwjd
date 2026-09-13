@@ -1,0 +1,66 @@
+[
+  {
+    "case_id": "pl-002",
+    "reference": "James 2:8",
+    "quotation": "A jeśli wypełniacie królewskie prawo zgodnie z Pismem: Będziesz miłował swego bliźniego jak samego siebie, dobrze czynicie.",
+    "rationale": "Miłość bliźniego podważa odmawianie nowym współpracownikom uczciwego traktowania ze względu na narodowość. Werset dotyczy uprzedzonego nastawienia autora, a nie sugerowanego przez niego oszustwa kolegów.",
+    "observed_in": "baseline",
+    "approved": false
+  },
+  {
+    "case_id": "pl-003",
+    "reference": "James 3:17",
+    "quotation": "Mądrość zaś, która jest z góry, jest przede wszystkim czysta, następnie pokojowo usposobiona, łagodna, ustępliwa, pełna miłosierdzia i dobrych owoców, bezstronna i nieobłudna.",
+    "rationale": "Bezstronność i miłosierdzie przeciwstawiają się przenoszeniu krzywd historycznych na każdą współczesną osobę mówiącą po ukraińsku.",
+    "observed_in": "baseline",
+    "approved": false
+  },
+  {
+    "case_id": "pl-005",
+    "reference": "Exodus 23:9",
+    "quotation": "Nie uciskaj również przybysza, bo sami wiecie, jak się czuje przybysz, gdyż byliście przybyszami w ziemi Egiptu.",
+    "rationale": "Zakaz uciskania przybysza jest bezpośrednią alternatywą dla Kapłańskiej 19:33. Wzywa do uwzględnienia doświadczenia osoby przyjezdnej.",
+    "observed_in": "baseline",
+    "approved": false
+  },
+  {
+    "case_id": "pl-053",
+    "reference": "Romans 12:17",
+    "quotation": "Nikomu złem za zło nie odpłacajcie; starajcie się o to, co uczciwe wobec wszystkich ludzi.",
+    "rationale": "Werset wprost odrzuca odwet. Trafia w zamiar napisania wiadomości mającej zranić siostrę w odpowiedzi na własny ból.",
+    "observed_in": "baseline",
+    "approved": false
+  },
+  {
+    "case_id": "pl-061",
+    "reference": "Luke 17:3",
+    "quotation": "Miejcie się na baczności. Jeśli twój brat zgrzeszy przeciwko tobie, strofuj go, a jeśli żałuje, przebacz mu.",
+    "rationale": "Sam werset 3 zawiera upomnienie, skruchę i przebaczenie, więc może być wystarczającym odpowiednikiem obecnego celu Łukasza 17:3–4. Nie oznacza obowiązku natychmiastowego przywrócenia zaufania.",
+    "observed_in": "baseline",
+    "approved": false
+  },
+  {
+    "case_id": "pl-061",
+    "reference": "Colossians 3:13",
+    "quotation": "Znosząc jedni drugich i przebaczając sobie nawzajem, jeśli ktoś ma skargę przeciw drugiemu: jak i Chrystus przebaczył wam, tak i wy.",
+    "rationale": "Jest bezpośrednim wezwaniem do przebaczenia w relacji. W zastosowaniu należy oddzielić przebaczenie od natychmiastowego odzyskania zaufania po ujawnieniu sekretu.",
+    "observed_in": "baseline",
+    "approved": false
+  },
+  {
+    "case_id": "pl-083",
+    "reference": "Job 6:14",
+    "quotation": "Strapionemu należy się litość od przyjaciela, ale on opuścił bojaźń Wszechmogącego.",
+    "rationale": "Pierwsza część mówi wprost o współczuciu przyjaciela dla strapionego. Wymaga szczególnej oceny kontekstu: druga część UBG może brzmieć oskarżycielsko i nie wolno jej odnosić do żałoby jako zarzutu niewiary.",
+    "observed_in": "reranker",
+    "approved": false
+  },
+  {
+    "case_id": "pl-099",
+    "reference": "John 7:17",
+    "quotation": "Jeśli ktoś chce wypełniać jego wolę, ten będzie umiał rozeznać, czy ta nauka jest od Boga, czy ja mówię sam od siebie.",
+    "rationale": "Jezus mówi o rozeznawaniu pochodzenia swojego nauczania. Fragment można zastosować do badania religijnych roszczeń, ale nie jako obietnicę automatycznej pewności przy każdej osobistej decyzji.",
+    "observed_in": "reranker",
+    "approved": false
+  }
+]

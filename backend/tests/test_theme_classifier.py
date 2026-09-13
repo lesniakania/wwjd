@@ -150,3 +150,15 @@ def test_semantic_router_can_skip_a_theme_already_found_by_rules() -> None:
     matches = router.classify("Opis ma dwa wymiary.", excluded={Theme.DISCERNMENT})
 
     assert matches == {Theme.PREJUDICE: pytest.approx(0.8)}
+
+
+class AmbiguousThemeEncoder:
+    def encode(self, texts: str | list[str]) -> np.ndarray:
+        if isinstance(texts, str):
+            return np.asarray([1.0, 0.0])
+        return np.asarray([[0.6, 0.0] for text in texts])
+
+
+def test_semantic_router_abstains_when_themes_are_indistinguishable() -> None:
+    router = SemanticThemeRouter(AmbiguousThemeEncoder())
+    assert router.classify("A description with no clear ethical concern.") == {}

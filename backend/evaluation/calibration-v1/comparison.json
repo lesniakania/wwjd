@@ -1,0 +1,517 @@
+{
+  "human_review_sha256": "794e721d5bb9ff84f9d891d75f59332908c2286599aac6b464adcd1460d8c88d",
+  "kind": "human-calibration-comparison",
+  "systems": {
+    "baseline": {
+      "passages": {
+        "total": 51,
+        "judged": 51,
+        "uncertain": 0,
+        "unreviewed": 0,
+        "strict_precision": 0.35294117647058826,
+        "inclusive_precision": 0.6078431372549019,
+        "counts": {
+          "direct": 18,
+          "supporting": 13,
+          "irrelevant": 20
+        }
+      },
+      "cases": 20,
+      "confirmed_inclusive_hits": 17,
+      "unresolved_hit_cases": 0,
+      "applications": {
+        "appropriate": 24,
+        "problematic": 15,
+        "uncertain": 12,
+        "unreviewed": 0,
+        "problematic_rate_judged": 0.38461538461538464
+      },
+      "results": [
+        {
+          "id": "pl-079",
+          "passage_ratings": [
+            "direct",
+            "irrelevant",
+            "irrelevant"
+          ],
+          "application_ratings": [
+            "uncertain",
+            "uncertain",
+            "problematic"
+          ]
+        },
+        {
+          "id": "pl-066",
+          "passage_ratings": [
+            "direct",
+            "direct"
+          ],
+          "application_ratings": [
+            "appropriate",
+            "appropriate"
+          ]
+        },
+        {
+          "id": "pl-002",
+          "passage_ratings": [
+            "supporting",
+            "direct",
+            "irrelevant"
+          ],
+          "application_ratings": [
+            "problematic",
+            "problematic",
+            "appropriate"
+          ]
+        },
+        {
+          "id": "pl-040",
+          "passage_ratings": [
+            "direct",
+            "direct"
+          ],
+          "application_ratings": [
+            "appropriate",
+            "appropriate"
+          ]
+        },
+        {
+          "id": "pl-004",
+          "passage_ratings": [
+            "direct",
+            "irrelevant"
+          ],
+          "application_ratings": [
+            "appropriate",
+            "uncertain"
+          ]
+        },
+        {
+          "id": "pl-008",
+          "passage_ratings": [
+            "supporting",
+            "irrelevant",
+            "irrelevant"
+          ],
+          "application_ratings": [
+            "uncertain",
+            "problematic",
+            "problematic"
+          ]
+        },
+        {
+          "id": "pl-031",
+          "passage_ratings": [
+            "irrelevant",
+            "irrelevant",
+            "irrelevant"
+          ],
+          "application_ratings": [
+            "problematic",
+            "problematic",
+            "problematic"
+          ]
+        },
+        {
+          "id": "pl-014",
+          "passage_ratings": [
+            "direct",
+            "direct",
+            "irrelevant"
+          ],
+          "application_ratings": [
+            "appropriate",
+            "uncertain",
+            "appropriate"
+          ]
+        },
+        {
+          "id": "pl-028",
+          "passage_ratings": [
+            "irrelevant",
+            "irrelevant"
+          ],
+          "application_ratings": [
+            "problematic",
+            "problematic"
+          ]
+        },
+        {
+          "id": "pl-071",
+          "passage_ratings": [
+            "irrelevant",
+            "supporting"
+          ],
+          "application_ratings": [
+            "uncertain",
+            "problematic"
+          ]
+        },
+        {
+          "id": "pl-092",
+          "passage_ratings": [
+            "irrelevant",
+            "supporting"
+          ],
+          "application_ratings": [
+            "appropriate",
+            "uncertain"
+          ]
+        },
+        {
+          "id": "pl-037",
+          "passage_ratings": [
+            "direct",
+            "direct",
+            "supporting"
+          ],
+          "application_ratings": [
+            "uncertain",
+            "appropriate",
+            "appropriate"
+          ]
+        },
+        {
+          "id": "pl-060",
+          "passage_ratings": [
+            "supporting",
+            "irrelevant",
+            "direct"
+          ],
+          "application_ratings": [
+            "appropriate",
+            "appropriate",
+            "problematic"
+          ]
+        },
+        {
+          "id": "pl-039",
+          "passage_ratings": [
+            "supporting",
+            "supporting"
+          ],
+          "application_ratings": [
+            "appropriate",
+            "problematic"
+          ]
+        },
+        {
+          "id": "pl-085",
+          "passage_ratings": [
+            "direct",
+            "direct",
+            "irrelevant"
+          ],
+          "application_ratings": [
+            "appropriate",
+            "appropriate",
+            "appropriate"
+          ]
+        },
+        {
+          "id": "pl-064",
+          "passage_ratings": [
+            "irrelevant",
+            "supporting",
+            "direct"
+          ],
+          "application_ratings": [
+            "appropriate",
+            "appropriate",
+            "appropriate"
+          ]
+        },
+        {
+          "id": "pl-044",
+          "passage_ratings": [
+            "direct",
+            "irrelevant",
+            "direct"
+          ],
+          "application_ratings": [
+            "appropriate",
+            "appropriate",
+            "uncertain"
+          ]
+        },
+        {
+          "id": "pl-090",
+          "passage_ratings": [
+            "irrelevant"
+          ],
+          "application_ratings": [
+            "uncertain"
+          ]
+        },
+        {
+          "id": "pl-096",
+          "passage_ratings": [
+            "supporting",
+            "supporting",
+            "supporting"
+          ],
+          "application_ratings": [
+            "problematic",
+            "uncertain",
+            "uncertain"
+          ]
+        },
+        {
+          "id": "pl-051",
+          "passage_ratings": [
+            "irrelevant",
+            "direct",
+            "supporting"
+          ],
+          "application_ratings": [
+            "appropriate",
+            "problematic",
+            "appropriate"
+          ]
+        }
+      ]
+    },
+    "reranker": {
+      "passages": {
+        "total": 37,
+        "judged": 32,
+        "uncertain": 5,
+        "unreviewed": 0,
+        "strict_precision": 0.1875,
+        "inclusive_precision": 0.375,
+        "counts": {
+          "direct": 6,
+          "supporting": 6,
+          "irrelevant": 20
+        }
+      },
+      "cases": 20,
+      "confirmed_inclusive_hits": 9,
+      "unresolved_hit_cases": 3,
+      "applications": {
+        "appropriate": 16,
+        "problematic": 13,
+        "uncertain": 8,
+        "unreviewed": 0,
+        "problematic_rate_judged": 0.4482758620689655
+      },
+      "results": [
+        {
+          "id": "pl-079",
+          "passage_ratings": [
+            "irrelevant"
+          ],
+          "application_ratings": [
+            "problematic"
+          ]
+        },
+        {
+          "id": "pl-066",
+          "passage_ratings": [
+            "irrelevant",
+            "direct"
+          ],
+          "application_ratings": [
+            "appropriate",
+            "appropriate"
+          ]
+        },
+        {
+          "id": "pl-002",
+          "passage_ratings": [
+            "irrelevant",
+            "supporting"
+          ],
+          "application_ratings": [
+            "appropriate",
+            "problematic"
+          ]
+        },
+        {
+          "id": "pl-040",
+          "passage_ratings": [
+            "direct",
+            "uncertain"
+          ],
+          "application_ratings": [
+            "problematic",
+            "appropriate"
+          ]
+        },
+        {
+          "id": "pl-004",
+          "passage_ratings": [
+            "irrelevant",
+            "irrelevant",
+            "uncertain"
+          ],
+          "application_ratings": [
+            "problematic",
+            "problematic",
+            "problematic"
+          ]
+        },
+        {
+          "id": "pl-008",
+          "passage_ratings": [
+            "irrelevant",
+            "irrelevant"
+          ],
+          "application_ratings": [
+            "problematic",
+            "problematic"
+          ]
+        },
+        {
+          "id": "pl-031",
+          "passage_ratings": [
+            "irrelevant"
+          ],
+          "application_ratings": [
+            "problematic"
+          ]
+        },
+        {
+          "id": "pl-014",
+          "passage_ratings": [
+            "direct",
+            "uncertain"
+          ],
+          "application_ratings": [
+            "uncertain",
+            "appropriate"
+          ]
+        },
+        {
+          "id": "pl-028",
+          "passage_ratings": [
+            "irrelevant",
+            "irrelevant",
+            "irrelevant"
+          ],
+          "application_ratings": [
+            "problematic",
+            "uncertain",
+            "uncertain"
+          ]
+        },
+        {
+          "id": "pl-071",
+          "passage_ratings": [
+            "irrelevant"
+          ],
+          "application_ratings": [
+            "problematic"
+          ]
+        },
+        {
+          "id": "pl-092",
+          "passage_ratings": [
+            "irrelevant",
+            "uncertain"
+          ],
+          "application_ratings": [
+            "problematic",
+            "problematic"
+          ]
+        },
+        {
+          "id": "pl-037",
+          "passage_ratings": [
+            "direct",
+            "irrelevant"
+          ],
+          "application_ratings": [
+            "appropriate",
+            "uncertain"
+          ]
+        },
+        {
+          "id": "pl-060",
+          "passage_ratings": [
+            "irrelevant"
+          ],
+          "application_ratings": [
+            "appropriate"
+          ]
+        },
+        {
+          "id": "pl-039",
+          "passage_ratings": [
+            "irrelevant"
+          ],
+          "application_ratings": [
+            "appropriate"
+          ]
+        },
+        {
+          "id": "pl-085",
+          "passage_ratings": [
+            "supporting",
+            "direct"
+          ],
+          "application_ratings": [
+            "appropriate",
+            "appropriate"
+          ]
+        },
+        {
+          "id": "pl-064",
+          "passage_ratings": [
+            "irrelevant",
+            "supporting",
+            "direct"
+          ],
+          "application_ratings": [
+            "appropriate",
+            "appropriate",
+            "appropriate"
+          ]
+        },
+        {
+          "id": "pl-044",
+          "passage_ratings": [
+            "uncertain",
+            "irrelevant"
+          ],
+          "application_ratings": [
+            "appropriate",
+            "uncertain"
+          ]
+        },
+        {
+          "id": "pl-090",
+          "passage_ratings": [
+            "irrelevant",
+            "irrelevant"
+          ],
+          "application_ratings": [
+            "appropriate",
+            "uncertain"
+          ]
+        },
+        {
+          "id": "pl-096",
+          "passage_ratings": [
+            "supporting",
+            "supporting"
+          ],
+          "application_ratings": [
+            "uncertain",
+            "uncertain"
+          ]
+        },
+        {
+          "id": "pl-051",
+          "passage_ratings": [
+            "supporting"
+          ],
+          "application_ratings": [
+            "appropriate"
+          ]
+        }
+      ]
+    }
+  },
+  "limitations": "20 development cases; micro precision on decided unique case/reference pairs; uncertain excluded. Applications are separate judgments. Not full recall or a causal reranker-only experiment."
+}

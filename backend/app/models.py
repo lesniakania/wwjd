@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field, field_validator
 
 from .config import get_settings
 from .localization import Language
+from .retrieval_diagnostics import ReflectionDiagnostics
 
 
 class SituationRequest(BaseModel):
@@ -18,7 +19,7 @@ class SituationRequest(BaseModel):
 
 
 class ReflectionRequest(SituationRequest):
-    pass
+    diagnostics: bool = False
 
 
 class ContextSource(BaseModel):
@@ -51,6 +52,7 @@ class ReflectionResponse(BaseModel):
     safety_message: str | None = None
     limitations: str
     generated_with: str
+    diagnostics: ReflectionDiagnostics | None = None
 
 
 class HealthResponse(BaseModel):

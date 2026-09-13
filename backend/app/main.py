@@ -19,7 +19,9 @@ from .models import (
 )
 from .reflection_service import ReflectionService
 from .retrieval import BgeReranker, Retriever, SemanticEncoder
+from .retrieval_diagnostics import ReflectionDiagnostics, evaluation_configuration
 from .share_repository import ShareRepository
+from .situation_analysis import SituationAnalyzer
 from .themes import SemanticThemeRouter
 
 
@@ -41,6 +43,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             theme_router,
             reranker,
             settings.reranker_candidates,
+            settings.reranker_strategy,
         ),
         "pl": Retriever(
             DATA_PATH_PL,
@@ -49,9 +52,11 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             theme_router,
             reranker,
             settings.reranker_candidates,
+            settings.reranker_strategy,
         ),
     }
     app.state.generator = ReflectionGenerator(settings)
+    app.state.analyzer = SituationAnalyzer(settings)
     app.state.contexts = ContextRegistry()
     yield
 
@@ -82,12 +87,20 @@ async def health(request: Request) -> HealthResponse:
 
 @app.post("/api/reflections", response_model=ReflectionResponse)
 async def create_reflection(payload: ReflectionRequest, request: Request) -> ReflectionResponse:
+    diagnostics = None
+    if payload.diagnostics:
+        if not get_settings().evaluation_diagnostics:
+            raise HTTPException(status_code=403, detail="Evaluation diagnostics are disabled")
+        diagnostics = ReflectionDiagnostics(
+            configuration=evaluation_configuration(request.app.state.generator.settings)
+        )
     service = ReflectionService(
         request.app.state.retrievers[payload.language],
         request.app.state.generator,
         request.app.state.contexts,
+        request.app.state.analyzer,
     )
-    return await service.create(payload.situation, payload.language)
+    return await service.create(payload.situation, payload.language, diagnostics)
 
 
 @lru_cache

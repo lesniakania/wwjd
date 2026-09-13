@@ -1,0 +1,802 @@
+{
+  "pl-079": {
+    "passages": {
+      "pl-079-p01": [
+        "gold"
+      ],
+      "pl-079-p02": [
+        "baseline"
+      ],
+      "pl-079-p03": [
+        "gold"
+      ],
+      "pl-079-p04": [
+        "baseline"
+      ],
+      "pl-079-p05": [
+        "gold"
+      ],
+      "pl-079-p06": [
+        "baseline",
+        "reranker"
+      ]
+    },
+    "applications": {
+      "pl-079-a01": [
+        "baseline"
+      ],
+      "pl-079-a02": [
+        "baseline"
+      ],
+      "pl-079-a03": [
+        "baseline"
+      ],
+      "pl-079-a04": [
+        "reranker"
+      ]
+    }
+  },
+  "pl-066": {
+    "passages": {
+      "pl-066-p01": [
+        "reranker"
+      ],
+      "pl-066-p02": [
+        "baseline",
+        "gold"
+      ],
+      "pl-066-p03": [
+        "baseline",
+        "gold",
+        "reranker"
+      ],
+      "pl-066-p04": [
+        "gold"
+      ]
+    },
+    "applications": {
+      "pl-066-a01": [
+        "baseline"
+      ],
+      "pl-066-a02": [
+        "reranker"
+      ],
+      "pl-066-a03": [
+        "reranker"
+      ],
+      "pl-066-a04": [
+        "baseline"
+      ]
+    }
+  },
+  "pl-002": {
+    "passages": {
+      "pl-002-p01": [
+        "baseline"
+      ],
+      "pl-002-p02": [
+        "reranker"
+      ],
+      "pl-002-p03": [
+        "reranker"
+      ],
+      "pl-002-p04": [
+        "gold"
+      ],
+      "pl-002-p05": [
+        "gold"
+      ],
+      "pl-002-p06": [
+        "baseline"
+      ],
+      "pl-002-p07": [
+        "gold"
+      ],
+      "pl-002-p08": [
+        "baseline"
+      ]
+    },
+    "applications": {
+      "pl-002-a01": [
+        "reranker"
+      ],
+      "pl-002-a02": [
+        "reranker"
+      ],
+      "pl-002-a03": [
+        "baseline"
+      ],
+      "pl-002-a04": [
+        "baseline"
+      ],
+      "pl-002-a05": [
+        "baseline"
+      ]
+    }
+  },
+  "pl-040": {
+    "passages": {
+      "pl-040-p01": [
+        "gold"
+      ],
+      "pl-040-p02": [
+        "gold"
+      ],
+      "pl-040-p03": [
+        "reranker"
+      ],
+      "pl-040-p04": [
+        "baseline"
+      ],
+      "pl-040-p05": [
+        "gold"
+      ],
+      "pl-040-p06": [
+        "reranker"
+      ],
+      "pl-040-p07": [
+        "baseline"
+      ]
+    },
+    "applications": {
+      "pl-040-a01": [
+        "baseline"
+      ],
+      "pl-040-a02": [
+        "reranker"
+      ],
+      "pl-040-a03": [
+        "reranker"
+      ],
+      "pl-040-a04": [
+        "baseline"
+      ]
+    }
+  },
+  "pl-004": {
+    "passages": {
+      "pl-004-p01": [
+        "reranker"
+      ],
+      "pl-004-p02": [
+        "gold"
+      ],
+      "pl-004-p03": [
+        "gold"
+      ],
+      "pl-004-p04": [
+        "gold"
+      ],
+      "pl-004-p05": [
+        "reranker"
+      ],
+      "pl-004-p06": [
+        "baseline"
+      ],
+      "pl-004-p07": [
+        "baseline"
+      ],
+      "pl-004-p08": [
+        "reranker"
+      ]
+    },
+    "applications": {
+      "pl-004-a01": [
+        "reranker"
+      ],
+      "pl-004-a02": [
+        "baseline"
+      ],
+      "pl-004-a03": [
+        "baseline"
+      ],
+      "pl-004-a04": [
+        "reranker"
+      ],
+      "pl-004-a05": [
+        "reranker"
+      ]
+    }
+  },
+  "pl-008": {
+    "passages": {
+      "pl-008-p01": [
+        "gold"
+      ],
+      "pl-008-p02": [
+        "baseline"
+      ],
+      "pl-008-p03": [
+        "baseline"
+      ],
+      "pl-008-p04": [
+        "gold"
+      ],
+      "pl-008-p05": [
+        "gold"
+      ],
+      "pl-008-p06": [
+        "reranker"
+      ],
+      "pl-008-p07": [
+        "reranker"
+      ],
+      "pl-008-p08": [
+        "baseline"
+      ]
+    },
+    "applications": {
+      "pl-008-a01": [
+        "baseline"
+      ],
+      "pl-008-a02": [
+        "baseline"
+      ],
+      "pl-008-a03": [
+        "reranker"
+      ],
+      "pl-008-a04": [
+        "baseline"
+      ],
+      "pl-008-a05": [
+        "reranker"
+      ]
+    }
+  },
+  "pl-031": {
+    "passages": {
+      "pl-031-p01": [
+        "baseline"
+      ],
+      "pl-031-p02": [
+        "gold"
+      ],
+      "pl-031-p03": [
+        "gold"
+      ],
+      "pl-031-p04": [
+        "gold"
+      ],
+      "pl-031-p05": [
+        "baseline",
+        "reranker"
+      ],
+      "pl-031-p06": [
+        "baseline"
+      ]
+    },
+    "applications": {
+      "pl-031-a01": [
+        "reranker"
+      ],
+      "pl-031-a02": [
+        "baseline"
+      ],
+      "pl-031-a03": [
+        "baseline"
+      ],
+      "pl-031-a04": [
+        "baseline"
+      ]
+    }
+  },
+  "pl-014": {
+    "passages": {
+      "pl-014-p01": [
+        "baseline",
+        "reranker"
+      ],
+      "pl-014-p02": [
+        "baseline"
+      ],
+      "pl-014-p03": [
+        "gold"
+      ],
+      "pl-014-p04": [
+        "gold"
+      ],
+      "pl-014-p05": [
+        "reranker"
+      ],
+      "pl-014-p06": [
+        "baseline"
+      ],
+      "pl-014-p07": [
+        "gold"
+      ]
+    },
+    "applications": {
+      "pl-014-a01": [
+        "baseline"
+      ],
+      "pl-014-a02": [
+        "reranker"
+      ],
+      "pl-014-a03": [
+        "baseline"
+      ],
+      "pl-014-a04": [
+        "reranker"
+      ],
+      "pl-014-a05": [
+        "baseline"
+      ]
+    }
+  },
+  "pl-028": {
+    "passages": {
+      "pl-028-p01": [
+        "gold"
+      ],
+      "pl-028-p02": [
+        "reranker"
+      ],
+      "pl-028-p03": [
+        "gold"
+      ],
+      "pl-028-p04": [
+        "baseline"
+      ],
+      "pl-028-p05": [
+        "reranker"
+      ],
+      "pl-028-p06": [
+        "reranker"
+      ],
+      "pl-028-p07": [
+        "gold"
+      ],
+      "pl-028-p08": [
+        "baseline"
+      ]
+    },
+    "applications": {
+      "pl-028-a01": [
+        "baseline"
+      ],
+      "pl-028-a02": [
+        "reranker"
+      ],
+      "pl-028-a03": [
+        "reranker"
+      ],
+      "pl-028-a04": [
+        "reranker"
+      ],
+      "pl-028-a05": [
+        "baseline"
+      ]
+    }
+  },
+  "pl-071": {
+    "passages": {
+      "pl-071-p01": [
+        "baseline"
+      ],
+      "pl-071-p02": [
+        "gold"
+      ],
+      "pl-071-p03": [
+        "gold"
+      ],
+      "pl-071-p04": [
+        "baseline"
+      ],
+      "pl-071-p05": [
+        "reranker"
+      ],
+      "pl-071-p06": [
+        "gold"
+      ]
+    },
+    "applications": {
+      "pl-071-a01": [
+        "baseline"
+      ],
+      "pl-071-a02": [
+        "baseline"
+      ],
+      "pl-071-a03": [
+        "reranker"
+      ]
+    }
+  },
+  "pl-092": {
+    "passages": {
+      "pl-092-p01": [
+        "baseline"
+      ],
+      "pl-092-p02": [
+        "gold"
+      ],
+      "pl-092-p03": [
+        "reranker"
+      ],
+      "pl-092-p04": [
+        "reranker"
+      ],
+      "pl-092-p05": [
+        "gold"
+      ],
+      "pl-092-p06": [
+        "gold"
+      ],
+      "pl-092-p07": [
+        "baseline"
+      ]
+    },
+    "applications": {
+      "pl-092-a01": [
+        "reranker"
+      ],
+      "pl-092-a02": [
+        "baseline"
+      ],
+      "pl-092-a03": [
+        "baseline"
+      ],
+      "pl-092-a04": [
+        "reranker"
+      ]
+    }
+  },
+  "pl-037": {
+    "passages": {
+      "pl-037-p01": [
+        "gold"
+      ],
+      "pl-037-p02": [
+        "baseline",
+        "gold",
+        "reranker"
+      ],
+      "pl-037-p03": [
+        "baseline"
+      ],
+      "pl-037-p04": [
+        "reranker"
+      ],
+      "pl-037-p05": [
+        "baseline",
+        "gold"
+      ]
+    },
+    "applications": {
+      "pl-037-a01": [
+        "reranker"
+      ],
+      "pl-037-a02": [
+        "baseline"
+      ],
+      "pl-037-a03": [
+        "baseline"
+      ],
+      "pl-037-a04": [
+        "reranker"
+      ],
+      "pl-037-a05": [
+        "baseline"
+      ]
+    }
+  },
+  "pl-060": {
+    "passages": {
+      "pl-060-p01": [
+        "reranker"
+      ],
+      "pl-060-p02": [
+        "gold"
+      ],
+      "pl-060-p03": [
+        "gold"
+      ],
+      "pl-060-p04": [
+        "baseline"
+      ],
+      "pl-060-p05": [
+        "baseline"
+      ],
+      "pl-060-p06": [
+        "gold"
+      ],
+      "pl-060-p07": [
+        "baseline"
+      ]
+    },
+    "applications": {
+      "pl-060-a01": [
+        "baseline"
+      ],
+      "pl-060-a02": [
+        "reranker"
+      ],
+      "pl-060-a03": [
+        "baseline"
+      ],
+      "pl-060-a04": [
+        "baseline"
+      ]
+    }
+  },
+  "pl-039": {
+    "passages": {
+      "pl-039-p01": [
+        "gold"
+      ],
+      "pl-039-p02": [
+        "gold"
+      ],
+      "pl-039-p03": [
+        "baseline"
+      ],
+      "pl-039-p04": [
+        "baseline"
+      ],
+      "pl-039-p05": [
+        "gold"
+      ],
+      "pl-039-p06": [
+        "reranker"
+      ]
+    },
+    "applications": {
+      "pl-039-a01": [
+        "reranker"
+      ],
+      "pl-039-a02": [
+        "baseline"
+      ],
+      "pl-039-a03": [
+        "baseline"
+      ]
+    }
+  },
+  "pl-085": {
+    "passages": {
+      "pl-085-p01": [
+        "gold"
+      ],
+      "pl-085-p02": [
+        "gold"
+      ],
+      "pl-085-p03": [
+        "reranker"
+      ],
+      "pl-085-p04": [
+        "baseline"
+      ],
+      "pl-085-p05": [
+        "reranker"
+      ],
+      "pl-085-p06": [
+        "baseline",
+        "gold"
+      ],
+      "pl-085-p07": [
+        "baseline"
+      ]
+    },
+    "applications": {
+      "pl-085-a01": [
+        "reranker"
+      ],
+      "pl-085-a02": [
+        "baseline"
+      ],
+      "pl-085-a03": [
+        "baseline"
+      ],
+      "pl-085-a04": [
+        "baseline"
+      ],
+      "pl-085-a05": [
+        "reranker"
+      ]
+    }
+  },
+  "pl-064": {
+    "passages": {
+      "pl-064-p01": [
+        "reranker"
+      ],
+      "pl-064-p02": [
+        "gold"
+      ],
+      "pl-064-p03": [
+        "gold"
+      ],
+      "pl-064-p04": [
+        "baseline"
+      ],
+      "pl-064-p05": [
+        "baseline"
+      ],
+      "pl-064-p06": [
+        "reranker"
+      ],
+      "pl-064-p07": [
+        "baseline",
+        "reranker"
+      ],
+      "pl-064-p08": [
+        "gold"
+      ]
+    },
+    "applications": {
+      "pl-064-a01": [
+        "baseline"
+      ],
+      "pl-064-a02": [
+        "baseline"
+      ],
+      "pl-064-a03": [
+        "reranker"
+      ],
+      "pl-064-a04": [
+        "reranker"
+      ],
+      "pl-064-a05": [
+        "reranker"
+      ],
+      "pl-064-a06": [
+        "baseline"
+      ]
+    }
+  },
+  "pl-044": {
+    "passages": {
+      "pl-044-p01": [
+        "gold"
+      ],
+      "pl-044-p02": [
+        "reranker"
+      ],
+      "pl-044-p03": [
+        "gold"
+      ],
+      "pl-044-p04": [
+        "baseline"
+      ],
+      "pl-044-p05": [
+        "baseline",
+        "reranker"
+      ],
+      "pl-044-p06": [
+        "gold"
+      ],
+      "pl-044-p07": [
+        "baseline"
+      ]
+    },
+    "applications": {
+      "pl-044-a01": [
+        "reranker"
+      ],
+      "pl-044-a02": [
+        "baseline"
+      ],
+      "pl-044-a03": [
+        "baseline"
+      ],
+      "pl-044-a04": [
+        "reranker"
+      ],
+      "pl-044-a05": [
+        "baseline"
+      ]
+    }
+  },
+  "pl-090": {
+    "passages": {
+      "pl-090-p01": [
+        "gold"
+      ],
+      "pl-090-p02": [
+        "reranker"
+      ],
+      "pl-090-p03": [
+        "baseline"
+      ],
+      "pl-090-p04": [
+        "gold"
+      ],
+      "pl-090-p05": [
+        "gold"
+      ],
+      "pl-090-p06": [
+        "reranker"
+      ]
+    },
+    "applications": {
+      "pl-090-a01": [
+        "reranker"
+      ],
+      "pl-090-a02": [
+        "reranker"
+      ],
+      "pl-090-a03": [
+        "baseline"
+      ]
+    }
+  },
+  "pl-096": {
+    "passages": {
+      "pl-096-p01": [
+        "gold"
+      ],
+      "pl-096-p02": [
+        "gold"
+      ],
+      "pl-096-p03": [
+        "baseline"
+      ],
+      "pl-096-p04": [
+        "baseline"
+      ],
+      "pl-096-p05": [
+        "reranker"
+      ],
+      "pl-096-p06": [
+        "baseline",
+        "reranker"
+      ],
+      "pl-096-p07": [
+        "gold"
+      ]
+    },
+    "applications": {
+      "pl-096-a01": [
+        "baseline"
+      ],
+      "pl-096-a02": [
+        "baseline"
+      ],
+      "pl-096-a03": [
+        "baseline"
+      ],
+      "pl-096-a04": [
+        "reranker"
+      ],
+      "pl-096-a05": [
+        "reranker"
+      ]
+    }
+  },
+  "pl-051": {
+    "passages": {
+      "pl-051-p01": [
+        "gold"
+      ],
+      "pl-051-p02": [
+        "baseline"
+      ],
+      "pl-051-p03": [
+        "baseline"
+      ],
+      "pl-051-p04": [
+        "gold"
+      ],
+      "pl-051-p05": [
+        "baseline",
+        "reranker"
+      ],
+      "pl-051-p06": [
+        "gold"
+      ]
+    },
+    "applications": {
+      "pl-051-a01": [
+        "reranker"
+      ],
+      "pl-051-a02": [
+        "baseline"
+      ],
+      "pl-051-a03": [
+        "baseline"
+      ],
+      "pl-051-a04": [
+        "baseline"
+      ]
+    }
+  }
+}
